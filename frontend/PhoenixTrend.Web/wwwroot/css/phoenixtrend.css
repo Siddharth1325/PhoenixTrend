@@ -5091,3 +5091,71 @@ table{max-width:100%}
   .pt-nav-item{flex-basis:54px!important;width:54px!important}
   .pt-nav-item .nav-icon{font-size:21px!important}
 }
+
+
+/* ============================================================
+   LOCKED PHOENIXTREND V1 GLASS BASELINE — 2026-09-28
+   Approved visual: black-center sidebar, orange left / blue right,
+   restrained lower feather light, translucent blurred page panels.
+   ============================================================ */
+:root{
+ --pt-v1-orange:#ff9418;
+ --pt-v1-blue:#159cff;
+ --pt-v1-glass:rgba(3,12,22,.58);
+ --pt-v1-border:rgba(103,174,225,.22);
+}
+.pt-sidebar{
+ background:
+   radial-gradient(ellipse at 0% 96%,rgba(255,112,0,.20),transparent 24%),
+   radial-gradient(ellipse at 100% 94%,rgba(0,128,255,.22),transparent 27%),
+   linear-gradient(180deg,rgba(1,7,13,.94),rgba(0,4,9,.96) 20%,rgba(0,4,9,.97) 72%,rgba(1,9,17,.92))!important;
+ border-left:1px solid rgba(255,139,23,.66)!important;
+ border-right:1px solid rgba(34,153,255,.72)!important;
+ box-shadow:inset 2px 0 14px rgba(255,120,0,.10),inset -2px 0 14px rgba(0,132,255,.13),8px 0 30px rgba(0,0,0,.30)!important;
+}
+.pt-sidebar::before{
+ display:block!important;content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+ background:
+   linear-gradient(180deg,rgba(255,133,16,.85),transparent 14%,transparent 82%,rgba(255,121,5,.62)) left/2px 100% no-repeat,
+   linear-gradient(180deg,rgba(25,155,255,.85),rgba(25,155,255,.18) 55%,rgba(25,155,255,.88)) right/2px 100% no-repeat;
+}
+.pt-sidebar::after{
+ display:block!important;content:"";position:absolute;left:0;right:0;bottom:0;height:235px;pointer-events:none;z-index:0;
+ background:
+  radial-gradient(ellipse at 12% 105%,rgba(255,109,0,.25),transparent 45%),
+  radial-gradient(ellipse at 90% 105%,rgba(0,124,255,.28),transparent 47%),
+  repeating-radial-gradient(ellipse at 60% 125%,transparent 0 27px,rgba(255,116,7,.10) 29px 31px,transparent 33px 49px,rgba(21,133,255,.10) 51px 53px,transparent 55px 74px);
+ opacity:.85;
+}
+.sidebar-overlay{background:transparent!important}
+.pt-nav-item{background:transparent!important;border-color:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.pt-nav-item:hover{background:rgba(11,30,47,.35)!important;border-color:rgba(89,171,229,.18)!important}
+.pt-nav-item.active{
+ background:linear-gradient(100deg,rgba(113,43,4,.52),rgba(7,19,32,.60) 53%,rgba(3,78,150,.52))!important;
+ border:1px solid rgba(255,151,23,.92)!important;
+ backdrop-filter:blur(14px) saturate(135%)!important;-webkit-backdrop-filter:blur(14px) saturate(135%)!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.08),0 0 13px rgba(255,119,0,.15),0 0 12px rgba(16,133,255,.12)!important;
+}
+.pt-main :is(.card,.panel,.widget,.surface,.tile,.stat-card,.metric-card,.kpi-card,.section-card,.content-card,.summary-card,.account-card,.engine-card,.portfolio-card,.risk-card,.market-card,.strategy-card,.automation-card,.hero-copy,.hero-panel,.toolbar,.table-wrap,.chart-card){
+ background:linear-gradient(145deg,rgba(4,15,27,.58),rgba(2,10,19,.46))!important;
+ border-color:var(--pt-v1-border)!important;
+ backdrop-filter:blur(18px) saturate(125%)!important;-webkit-backdrop-filter:blur(18px) saturate(125%)!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.045),0 12px 30px rgba(0,0,0,.17)!important;
+}
+
+/* tablet */
+@media(max-width:820px) and (min-width:601px){
+ .pt-sidebar{background:linear-gradient(180deg,rgba(1,7,13,.94),rgba(0,5,10,.96))!important}
+}
+/* mobile */
+@media(max-width:600px){
+ .pt-sidebar{
+  background:rgba(1,8,15,.78)!important;
+  border:1px solid rgba(66,162,230,.26)!important;
+  backdrop-filter:blur(22px) saturate(140%)!important;-webkit-backdrop-filter:blur(22px) saturate(140%)!important;
+ }
+ .pt-sidebar::before,.pt-sidebar::after{display:none!important}
+ .pt-main :is(.card,.panel,.widget,.surface,.tile,.stat-card,.metric-card,.kpi-card,.section-card,.content-card,.summary-card,.account-card,.engine-card,.portfolio-card,.risk-card,.market-card,.strategy-card,.automation-card,.hero-copy,.hero-panel,.toolbar,.table-wrap,.chart-card){
+   backdrop-filter:blur(14px) saturate(120%)!important;-webkit-backdrop-filter:blur(14px) saturate(120%)!important;
+ }
+}

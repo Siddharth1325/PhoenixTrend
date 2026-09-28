@@ -1371,3 +1371,45 @@
     font-size:13px!important;
   }
 }
+
+
+/* ============================================================
+   REGISTER INPUT NORMALIZATION — remove browser white field boxes
+   ============================================================ */
+.pt-login-card .pt-login-input-wrap > input,
+.pt-login-card .pt-login-input-wrap input,
+.pt-login-card .pt-login-input-wrap .valid,
+.pt-login-card .pt-login-input-wrap .invalid{
+    appearance:none!important;
+    -webkit-appearance:none!important;
+    display:block!important;
+    flex:1 1 auto!important;
+    width:100%!important;
+    min-width:0!important;
+    height:100%!important;
+    margin:0!important;
+    padding:0 16px 0 8px!important;
+    border:0!important;
+    outline:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    background-color:transparent!important;
+    background-image:none!important;
+    color:#f5f8fc!important;
+    caret-color:#ffad36!important;
+    box-shadow:none!important;
+    -webkit-box-shadow:none!important;
+    font:inherit!important;
+}
+.pt-login-card .pt-login-input-wrap > input:focus{
+    outline:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+}
+.pt-login-card .pt-login-input-wrap > input:-webkit-autofill,
+.pt-login-card .pt-login-input-wrap > input:-webkit-autofill:hover,
+.pt-login-card .pt-login-input-wrap > input:-webkit-autofill:focus{
+    -webkit-text-fill-color:#f5f8fc!important;
+    -webkit-box-shadow:0 0 0 1000px transparent inset!important;
+    transition:background-color 99999s ease-out 0s!important;
+}

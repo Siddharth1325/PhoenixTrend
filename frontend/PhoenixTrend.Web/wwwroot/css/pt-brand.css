@@ -1,44 +1,13 @@
-/* PhoenixTrend approved sidebar brand — locked 2026-09-28 */
-.brand-lockup{
-  position:relative!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  height:112px!important;
-  padding:10px 10px 14px!important;
-  overflow:hidden!important;
-  background:transparent!important;
-  text-decoration:none!important;
-  border-bottom:1px solid rgba(255,255,255,.08)!important;
-}
-
-.brand-lockup::before,
-.brand-lockup::after{
-  content:none!important;
-  display:none!important;
-}
-
-.brand-lockup img,
-.brand-lockup .brand-logo{
-  display:block!important;
-  width:100%!important;
-  max-width:224px!important;
-  height:86px!important;
-  object-fit:contain!important;
-  object-position:center!important;
-  opacity:.96!important;
-  filter:drop-shadow(0 0 12px rgba(255,126,24,.16))!important;
-  transform:none!important;
-}
-
-@media(max-width:1100px) and (min-width:701px){
-  .brand-lockup{height:92px!important;padding:8px 8px 12px!important}
-  .brand-lockup img,
-  .brand-lockup .brand-logo{height:68px!important;max-width:190px!important}
-}
-
-@media(max-width:700px){
-  .brand-lockup{display:flex!important;height:84px!important}
-  .brand-lockup img,
-  .brand-lockup .brand-logo{height:60px!important;max-width:180px!important}
-}
+/* PhoenixTrend approved sidebar watermark — production */
+.brand-lockup{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;height:112px!important;padding:12px 8px 14px!important;overflow:hidden!important;background:transparent!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
+.brand-lockup::before,.brand-lockup::after{content:none!important;display:none!important}
+.brand-lockup img{display:none!important}
+.sidebar-brand-mark{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;opacity:.94;filter:drop-shadow(0 0 12px rgba(255,132,28,.12))}
+.sidebar-phoenix{display:grid;place-items:center;width:42px;height:56px;font-size:42px;line-height:1;font-family:Georgia,serif;font-weight:900;font-style:italic;color:#ff941f;transform:rotate(-13deg);text-shadow:0 0 12px rgba(255,113,0,.32)}
+.sidebar-wordmark{display:flex;flex-wrap:wrap;align-items:baseline;min-width:0;line-height:1}
+.sidebar-wordmark b,.sidebar-wordmark strong{font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:22px;letter-spacing:-1.2px}
+.sidebar-wordmark b{color:#d8dee8;font-weight:700}
+.sidebar-wordmark strong{color:#ff9824;font-weight:800}
+.sidebar-wordmark small{flex-basis:100%;margin-top:7px;color:#d7dce5;font-size:6px;font-weight:700;letter-spacing:1.35px;white-space:nowrap}
+@media(max-width:1100px) and (min-width:701px){.brand-lockup{height:96px!important}.sidebar-phoenix{width:34px;font-size:34px}.sidebar-wordmark b,.sidebar-wordmark strong{font-size:18px}.sidebar-wordmark small{font-size:5px;letter-spacing:1px}}
+@media(max-width:700px){.brand-lockup{height:88px!important}.sidebar-brand-mark{transform:scale(.9)}}

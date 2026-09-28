@@ -10,7 +10,7 @@
  display:block!important;position:static!important;width:auto!important;height:auto!important;
  max-width:188px!important;max-height:118px!important;object-fit:contain!important;object-position:center!important;
  margin:0 auto!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;
- clip-path:none!important;transform:none!important;filter:none!important;opacity:1!important;mix-blend-mode:screen!important
+ clip-path:none!important;transform:none!important;filter:none!important;opacity:1!important;mix-blend-mode:lighten!important;isolation:auto!important
 }
 @media(max-width:1100px) and (min-width:701px){
  .brand-lockup{height:112px!important;padding:4px 8px 6px!important}
@@ -20,3 +20,5 @@
  .brand-lockup{height:104px!important;padding:4px 7px 6px!important}
  .brand-lockup .sidebar-brand-watermark{max-width:156px!important;max-height:92px!important}
 }
+/* Keep the logo composited directly over the sidebar artwork so its black source background cannot render as a rectangle. */
+.sidebar-inner,.brand-lockup{isolation:auto!important}

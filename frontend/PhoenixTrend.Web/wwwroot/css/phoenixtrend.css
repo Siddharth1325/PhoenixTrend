@@ -5375,3 +5375,28 @@ img,svg,canvas,video{max-width:100%;height:auto}
     overflow-x: hidden !important;
   }
 }
+
+
+/* FINAL SIDEBAR CROP — use the artwork portion across the full sidebar width. */
+.pt-sidebar .sidebar-art{
+  background-image:url("/assets/sidebar-background.png")!important;
+  background-repeat:no-repeat!important;
+  background-position:left center!important;
+  background-size:360% 100%!important;
+  opacity:1!important;
+  filter:none!important;
+}
+.pt-sidebar .sidebar-overlay{
+  background:linear-gradient(180deg,rgba(0,0,0,.00),rgba(0,0,0,.03) 18%,rgba(0,0,0,.10) 80%,rgba(0,0,0,.02))!important;
+}
+.brand-lockup{
+  background:transparent!important;
+}
+.brand-lockup .brand-logo,
+.brand-lockup img{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  filter:drop-shadow(0 0 10px rgba(255,120,0,.16)) drop-shadow(0 0 8px rgba(0,140,255,.10))!important;
+  object-fit:contain!important;
+}

@@ -5588,3 +5588,83 @@ img,svg,canvas,video{max-width:100%;height:auto}
     filter:drop-shadow(0 2px 7px rgba(0,0,0,.65));
   }
 }
+
+
+/* ============================================================
+   PHOENIXTREND OFFICIAL PT MARK — LOCKED 2026-09-28
+   PT only. No bird image and no PhoenixTrend wordmark.
+   ============================================================ */
+.brand-lockup{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.brand-lockup .brand-logo,
+.brand-lockup img{
+  display:none!important;
+}
+.brand-lockup::before{
+  content:"PT";
+  display:block;
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+  font-size:76px;
+  line-height:.88;
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:-9px;
+  padding-right:8px;
+  background:
+    linear-gradient(112deg,#fff1c8 0%,#ffb229 18%,#ff7417 43%,#38c7ff 58%,#0878ff 82%,#d9f5ff 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(255,255,255,.14);
+  filter:
+    drop-shadow(-5px 0 12px rgba(255,118,19,.26))
+    drop-shadow(5px 0 13px rgba(0,133,255,.28));
+  transform:skewX(-5deg);
+}
+.brand-lockup::after{
+  content:"";
+  position:absolute;
+  width:112px;
+  height:2px;
+  left:50%;
+  bottom:17px;
+  transform:translateX(-50%);
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,#ff8a18 23%,#3abfff 76%,transparent);
+  box-shadow:0 0 12px rgba(42,163,255,.35),0 0 9px rgba(255,126,18,.28);
+}
+
+/* Compact/collapsed brand */
+.sidebar-collapsed .brand-lockup::before,
+.sidebar.is-collapsed .brand-lockup::before{
+  font-size:38px!important;
+  letter-spacing:-5px!important;
+}
+.sidebar-collapsed .brand-lockup::after,
+.sidebar.is-collapsed .brand-lockup::after{
+  width:52px!important;
+}
+
+/* Mobile PT header mark */
+@media (max-width:1100px){
+  .brand-lockup{
+    height:70px!important;
+    min-height:70px!important;
+  }
+  .brand-lockup::before{
+    font-size:48px!important;
+    letter-spacing:-6px!important;
+  }
+  .brand-lockup::after{
+    width:72px!important;
+    bottom:8px!important;
+  }
+}

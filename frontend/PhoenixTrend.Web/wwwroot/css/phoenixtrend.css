@@ -5529,3 +5529,62 @@ img,svg,canvas,video{max-width:100%;height:auto}
     border-radius:50%!important;
   }
 }
+
+
+/* ============================================================
+   PHOENIX BRAND LOCKUP — SYMBOL + TYPOGRAPHY
+   Crop the embedded wordmark out of the approved logo asset and
+   recreate PhoenixTrend as crisp UI typography.
+   ============================================================ */
+@media (min-width:1101px){
+  .brand-lockup{
+    position:relative!important;
+    height:138px!important;
+    flex-basis:138px!important;
+    padding:0!important;
+    margin:0 4px!important;
+    display:block!important;
+    overflow:hidden!important;
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.025),transparent 24%,rgba(0,0,0,.08))!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    border-bottom:1px solid rgba(255,255,255,.10)!important;
+  }
+
+  .brand-lockup .brand-logo,
+  .brand-lockup img{
+    position:absolute!important;
+    left:50%!important;
+    top:-7px!important;
+    width:170px!important;
+    height:122px!important;
+    max-width:none!important;
+    object-fit:cover!important;
+    object-position:center top!important;
+    clip-path:inset(0 0 31% 0)!important;
+    transform:translateX(-50%) scale(1.24)!important;
+    transform-origin:50% 18%!important;
+    filter:none!important;
+    opacity:1!important;
+  }
+
+  .brand-lockup::after{
+    content:"PhoenixTrend";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:13px;
+    text-align:center;
+    font-size:22px;
+    line-height:1;
+    font-weight:760;
+    letter-spacing:-1px;
+    background:linear-gradient(90deg,#f4f7fb 8%,#dce8f6 37%,#ffae35 64%,#ff7a18 96%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:none;
+    filter:drop-shadow(0 2px 7px rgba(0,0,0,.65));
+  }
+}

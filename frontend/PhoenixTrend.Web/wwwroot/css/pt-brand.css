@@ -1,13 +1,26 @@
-/* PhoenixTrend approved sidebar watermark — production */
-.brand-lockup{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;height:112px!important;padding:12px 8px 14px!important;overflow:hidden!important;background:transparent!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
+/* Sidebar brand uses the SAME connect.png artwork/watermark source as Connect.razor */
+.brand-lockup{
+  position:relative!important;display:block!important;height:132px!important;
+  padding:0!important;overflow:hidden!important;background:transparent!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;text-decoration:none!important
+}
 .brand-lockup::before,.brand-lockup::after{content:none!important;display:none!important}
-.brand-lockup img{display:none!important}
-.sidebar-brand-mark{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;opacity:.94;filter:drop-shadow(0 0 12px rgba(255,132,28,.12))}
-.sidebar-phoenix{display:grid;place-items:center;width:42px;height:56px;font-size:42px;line-height:1;font-family:Georgia,serif;font-weight:900;font-style:italic;color:#ff941f;transform:rotate(-13deg);text-shadow:0 0 12px rgba(255,113,0,.32)}
-.sidebar-wordmark{display:flex;flex-wrap:wrap;align-items:baseline;min-width:0;line-height:1}
-.sidebar-wordmark b,.sidebar-wordmark strong{font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:22px;letter-spacing:-1.2px}
-.sidebar-wordmark b{color:#d8dee8;font-weight:700}
-.sidebar-wordmark strong{color:#ff9824;font-weight:800}
-.sidebar-wordmark small{flex-basis:100%;margin-top:7px;color:#d7dce5;font-size:6px;font-weight:700;letter-spacing:1.35px;white-space:nowrap}
-@media(max-width:1100px) and (min-width:701px){.brand-lockup{height:96px!important}.sidebar-phoenix{width:34px;font-size:34px}.sidebar-wordmark b,.sidebar-wordmark strong{font-size:18px}.sidebar-wordmark small{font-size:5px;letter-spacing:1px}}
-@media(max-width:700px){.brand-lockup{height:88px!important}.sidebar-brand-mark{transform:scale(.9)}}
+.brand-lockup img,.sidebar-brand-mark{display:none!important}
+.sidebar-brand-watermark{
+  position:absolute!important;inset:0!important;display:block!important;
+  background-image:url('/assets/connect.png')!important;
+  background-repeat:no-repeat!important;
+  /* Connect artwork contains the approved PhoenixTrend watermark. Reuse it; do not redraw it. */
+  background-size:430px auto!important;
+  background-position:8% 5%!important;
+  opacity:1!important;
+  filter:none!important;
+}
+@media(max-width:1100px) and (min-width:701px){
+ .brand-lockup{height:112px!important}
+ .sidebar-brand-watermark{background-size:365px auto!important;background-position:7% 5%!important}
+}
+@media(max-width:700px){
+ .brand-lockup{height:108px!important}
+ .sidebar-brand-watermark{background-size:350px auto!important;background-position:7% 5%!important}
+}

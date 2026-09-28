@@ -1,0 +1,52 @@
+/* PhoenixTrend PT brand override */
+.brand-lockup{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:visible!important;
+  background:transparent!important;
+  text-decoration:none!important;
+}
+.brand-lockup img,.brand-lockup .brand-logo{display:none!important}
+.brand-lockup::before{
+  content:"PT"!important;
+  display:block!important;
+  position:relative!important;
+  z-index:5!important;
+  font-family:Inter,"Segoe UI",Arial,sans-serif!important;
+  font-size:78px!important;
+  line-height:.9!important;
+  font-weight:900!important;
+  font-style:italic!important;
+  letter-spacing:-10px!important;
+  padding-right:10px!important;
+  background:linear-gradient(115deg,#fff6dc 0%,#ffb42e 20%,#ff7417 43%,#46d1ff 59%,#087cff 82%,#e6f8ff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1px rgba(255,255,255,.12)!important;
+  filter:drop-shadow(-4px 0 10px rgba(255,119,16,.32)) drop-shadow(4px 0 11px rgba(0,135,255,.34))!important;
+  transform:skewX(-5deg)!important;
+}
+.brand-lockup::after{
+  content:""!important;
+  position:absolute!important;
+  z-index:4!important;
+  left:50%!important;
+  bottom:13px!important;
+  width:112px!important;
+  height:2px!important;
+  transform:translateX(-50%)!important;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,transparent,#ff8617 22%,#3cc5ff 77%,transparent)!important;
+  box-shadow:0 0 12px rgba(255,126,18,.28),0 0 12px rgba(34,163,255,.34)!important;
+}
+@media(max-width:1100px) and (min-width:701px){
+ .brand-lockup::before{font-size:46px!important;letter-spacing:-6px!important;padding-right:6px!important}
+ .brand-lockup::after{width:66px!important;bottom:7px!important}
+}
+@media(max-width:700px){
+ .brand-lockup{display:none!important}
+}

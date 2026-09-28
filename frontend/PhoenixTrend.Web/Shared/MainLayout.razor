@@ -40,7 +40,7 @@
                 {
                     <NavLink href="@item.Href"
                              Match="@item.Match"
-                             class="pt-nav-item">
+                             class="pt-nav-item @(item.Name == "Settings" ? "nav-settings" : "")">
 
                         <span class="nav-icon"
                               aria-hidden="true">
@@ -54,17 +54,15 @@
                         </span>
 
                         <span class="nav-active-mark"></span>
+                        <span class="nav-active-arrow" aria-hidden="true">
+                            <i class="ph ph-caret-right"></i>
+                        </span>
 
                     </NavLink>
                 }
 
             </nav>
 
-            <NavLink href="/ai" class="trady-glass-launcher" aria-label="Open Trady AI">
-                <span class="trady-glass-mark"><i class="ph-duotone ph-sparkle"></i></span>
-                <span class="trady-glass-copy"><strong>Trady AI</strong><small>Ask · Analyze · Trade smarter</small></span>
-                <i class="ph ph-arrow-up-right trady-glass-arrow"></i>
-            </NavLink>
 
         </div>
 
@@ -738,6 +736,13 @@
             "/risk",
             "ph ph-shield-check",
             "Risk",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/ai",
+            "ph-duotone ph-sparkle",
+            "Trady AI",
             NavLinkMatch.All
         ),
 

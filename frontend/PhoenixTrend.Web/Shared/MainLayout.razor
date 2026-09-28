@@ -40,7 +40,7 @@
                 {
                     <NavLink href="@item.Href"
                              Match="@item.Match"
-                             class="pt-nav-item @(item.Name == "Settings" ? "nav-settings" : "")">
+                             class="@($"pt-nav-item{(item.Name == "Settings" ? " nav-settings" : string.Empty)}")">
 
                         <span class="nav-icon"
                               aria-hidden="true">

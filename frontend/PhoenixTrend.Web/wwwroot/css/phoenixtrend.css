@@ -5159,3 +5159,68 @@ table{max-width:100%}
    backdrop-filter:blur(14px) saturate(120%)!important;-webkit-backdrop-filter:blur(14px) saturate(120%)!important;
  }
 }
+
+
+/* ============================================================
+   LOCKED CLEAR GLOSS GLASS — NO FROST / NO BACKDROP BLUR
+   ============================================================ */
+.pt-sidebar,
+.pt-nav-item,
+.pt-nav-item.active,
+.pt-main :is(.card,.panel,.widget,.surface,.tile,.stat-card,.metric-card,.kpi-card,.section-card,.content-card,.summary-card,.account-card,.engine-card,.portfolio-card,.risk-card,.market-card,.strategy-card,.automation-card,.hero-copy,.hero-panel,.toolbar,.table-wrap,.chart-card){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+/* Clear polished glass panels: transparent center + sharp reflections. */
+.pt-main :is(.card,.panel,.widget,.surface,.tile,.stat-card,.metric-card,.kpi-card,.section-card,.content-card,.summary-card,.account-card,.engine-card,.portfolio-card,.risk-card,.market-card,.strategy-card,.automation-card,.hero-copy,.hero-panel,.toolbar,.table-wrap,.chart-card){
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.040) 0,rgba(255,255,255,.010) 12%,rgba(2,9,17,.20) 48%,rgba(1,7,13,.27) 100%)!important;
+  border:1px solid rgba(114,187,238,.25)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 1px 0 0 rgba(255,151,34,.045),
+    inset -1px 0 0 rgba(27,151,255,.055),
+    0 10px 28px rgba(0,0,0,.18)!important;
+}
+
+/* Sidebar remains black in the middle, but reads as glossy polished glass. */
+.pt-sidebar{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  background:
+    linear-gradient(90deg,rgba(255,132,13,.035),transparent 10%,transparent 89%,rgba(15,139,255,.045)),
+    linear-gradient(180deg,rgba(255,255,255,.028),rgba(0,4,9,.88) 13%,rgba(0,3,7,.92) 76%,rgba(2,9,16,.84))!important;
+}
+.pt-sidebar .sidebar-inner{
+  background:linear-gradient(110deg,rgba(255,255,255,.020),transparent 24%,transparent 78%,rgba(70,178,255,.018))!important;
+}
+
+/* Ordinary nav rows stay clear; only the active row receives polished glass. */
+.pt-nav-item{background:transparent!important}
+.pt-nav-item.active{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.015) 28%,transparent 52%),
+    linear-gradient(100deg,rgba(126,48,3,.46),rgba(3,11,20,.28) 50%,rgba(3,80,153,.44))!important;
+  border-color:rgba(255,157,28,.90)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.23),
+    inset 0 -1px 0 rgba(27,150,255,.12),
+    0 0 13px rgba(255,121,0,.14),
+    0 0 12px rgba(20,137,255,.11)!important;
+}
+
+/* Mobile keeps clear glossy material as well — never frosted. */
+@media(max-width:600px){
+ .pt-sidebar{
+   backdrop-filter:none!important;
+   -webkit-backdrop-filter:none!important;
+   background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(1,8,15,.90))!important;
+ }
+ .pt-main :is(.card,.panel,.widget,.surface,.tile,.stat-card,.metric-card,.kpi-card,.section-card,.content-card,.summary-card,.account-card,.engine-card,.portfolio-card,.risk-card,.market-card,.strategy-card,.automation-card,.hero-copy,.hero-panel,.toolbar,.table-wrap,.chart-card){
+   backdrop-filter:none!important;
+   -webkit-backdrop-filter:none!important;
+ }
+}

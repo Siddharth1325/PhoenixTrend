@@ -1,0 +1,102 @@
+/* PhoenixTrend production glass system — transparent, bright, zero panel blur. */
+:root{
+ --pt-glass:rgba(5,17,29,.52);
+ --pt-glass-soft:rgba(7,22,36,.42);
+ --pt-glass-line:rgba(99,177,235,.28);
+ --pt-cyan:#28c7ff;--pt-orange:#ff9f2f;--pt-violet:#b568ff;--pt-green:#18e6a0;
+}
+.pt-shell{background:
+ radial-gradient(circle at 82% 9%,rgba(31,122,255,.12),transparent 28%),
+ radial-gradient(circle at 15% 82%,rgba(255,117,24,.10),transparent 30%),
+ #020810!important}
+.pt-sidebar .sidebar-art{opacity:.62!important;filter:saturate(1.2) contrast(1.04) brightness(1.08)!important}
+.sidebar-overlay{background:linear-gradient(180deg,rgba(2,8,15,.18),rgba(2,8,15,.72) 34%,rgba(2,8,15,.70) 70%,rgba(2,8,15,.24))!important}
+.pt-topbar,.statusbar{
+ background:rgba(2,10,18,.68)!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ box-shadow:inset 0 -1px 0 rgba(54,155,231,.12),0 8px 30px rgba(0,0,0,.12)!important
+}
+.pt-panel,.metric-card,.scanner,.symbol-strip button,
+.panel,.card,[class*="-panel"]:not(.pt-login-panel),[class*="-card"]:not(.pt-login-card){
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+.pt-panel,.metric-card,.scanner,.symbol-strip button,
+.pt-ai .panel,.pt-ai .pt-panel,.pt-ai .metric-card,
+.pt-ai .surface-1,.pt-ai .surface-2,.pt-ai .surface-3,.pt-ai .surface-4,.pt-ai .surface-5,
+.pt-ai .surface-6,.pt-ai .surface-7,.pt-ai .surface-8,.pt-ai .surface-9,.pt-ai .surface-10{
+ background:
+ linear-gradient(135deg,rgba(40,151,255,.055),transparent 36%),
+ radial-gradient(circle at 100% 0,rgba(255,137,32,.075),transparent 30%),
+ rgba(4,15,26,.52)!important;
+ border-color:var(--pt-glass-line)!important;
+ box-shadow:
+ inset 0 1px 0 rgba(255,255,255,.09),
+ inset 1px 0 0 rgba(31,169,255,.06),
+ 0 0 20px rgba(28,143,255,.035),
+ 0 12px 28px rgba(0,0,0,.12)!important;
+}
+.pt-panel:hover,.metric-card:hover,.pt-ai .panel:hover,.pt-ai .pt-panel:hover{
+ border-color:rgba(69,188,255,.40)!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 24px rgba(34,156,255,.08),0 12px 30px rgba(0,0,0,.14)!important
+}
+.panel-head,.pt-ai .panel-head{background:rgba(8,25,40,.34)!important}
+.filterbar,.tabbar,.chart-toolbar,.global-search,.trading-chart,.indicator-strip,
+.pt-ai .filterbar,.pt-ai .ai-input,.pt-ai .user-prompt,.pt-ai .ai-answer,
+.pt-ai .security-list>div,.pt-ai .quick-grid>div{
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ background:rgba(4,15,26,.48)!important;
+ border-color:rgba(86,166,225,.25)!important
+}
+.shell-banner:after{background:linear-gradient(90deg,rgba(2,9,16,.58),rgba(2,9,16,.02) 48%,rgba(2,9,16,.08)),linear-gradient(180deg,rgba(3,10,18,.01),rgba(3,10,18,.38))!important}
+
+/* Premium colorful Phosphor navigation icons. */
+.pt-nav-item:nth-child(1) .nav-icon{color:#ffae32!important}
+.pt-nav-item:nth-child(2) .nav-icon{color:#35d7ff!important}
+.pt-nav-item:nth-child(3) .nav-icon{color:#b96cff!important}
+.pt-nav-item:nth-child(4) .nav-icon{color:#4db7ff!important}
+.pt-nav-item:nth-child(5) .nav-icon{color:#56efd0!important}
+.pt-nav-item:nth-child(6) .nav-icon{color:#ff70d2!important}
+.pt-nav-item:nth-child(7) .nav-icon{color:#ff6d72!important}
+.pt-nav-item:nth-child(8) .nav-icon{color:#66a9ff!important}
+.pt-nav-item:nth-child(9) .nav-icon{color:#38e6a0!important}
+.pt-nav-item:nth-child(10) .nav-icon{color:#49c8ff!important}
+.nav-icon i,.metric-icon i{filter:drop-shadow(0 0 8px currentColor)}
+.metric-icon{border-radius:11px!important;border:1px solid currentColor!important;background:rgba(8,22,34,.44)!important}
+
+/* Login/register: smaller transparent glass, no blur, brighter edge lighting. */
+.pt-login-shade{background:linear-gradient(90deg,rgba(2,4,9,.01),rgba(2,4,9,.04) 64%,rgba(2,4,9,.14))!important}
+.pt-login-bg{filter:saturate(1.12) brightness(1.08)!important}
+.pt-login-panel{padding:24px 38px 24px 16px!important}
+.pt-login-card{
+ width:min(100%,520px)!important;padding:32px 36px!important;border-radius:18px!important;
+ background:
+ radial-gradient(circle at 12% 10%,rgba(255,140,42,.11),transparent 28%),
+ radial-gradient(circle at 92% 8%,rgba(42,151,255,.10),transparent 30%),
+ rgba(5,10,20,.36)!important;
+ border:1px solid rgba(255,164,58,.76)!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 28px rgba(255,135,35,.09),0 0 42px rgba(42,151,255,.06),0 24px 60px rgba(0,0,0,.24)!important
+}
+.pt-login-card-header{margin-bottom:26px!important}
+.pt-login-card-header h1{font-size:38px!important}
+.pt-login-card-header p{font-size:17px!important;margin-top:8px!important}
+.pt-login-field{margin-bottom:16px!important}
+.pt-login-field>label{margin-bottom:8px!important;font-size:15px!important}
+.pt-login-input-wrap{height:54px!important;background:rgba(5,12,23,.32)!important;border-color:rgba(173,195,220,.46)!important}
+.pt-login-input-wrap:focus-within{background:rgba(7,18,31,.42)!important;border-color:#ffab43!important;box-shadow:0 0 0 2px rgba(255,164,58,.10),0 0 22px rgba(40,168,255,.08)!important}
+.pt-login-input-wrap>i{width:58px;display:grid;place-items:center;font-size:23px}
+.pt-login-field:nth-of-type(1) .pt-login-input-wrap>i,.pt-login-field:nth-of-type(1) .pt-login-input-icon{color:#b96cff!important}
+.pt-login-field:nth-of-type(2) .pt-login-input-wrap>i,.pt-login-field:nth-of-type(2) .pt-login-input-icon{color:#39c9ff!important}
+.pt-login-field:nth-of-type(3) .pt-login-input-wrap>i{color:#ff9f2f!important}
+.pt-login-field:nth-of-type(4) .pt-login-input-wrap>i,.pt-login-field:nth-of-type(2) .pt-login-password-toggle{color:#26e1b0!important}
+.pt-login-field:nth-of-type(5) .pt-login-input-wrap>i{color:#ff65c8!important}
+.pt-login-input-icon i,.pt-login-input-wrap>i{filter:drop-shadow(0 0 8px currentColor)}
+.pt-login-input{height:52px!important}
+.pt-login-submit{height:58px!important}
+.pt-login-create{margin-top:24px!important}
+.pt-login-divider{margin:22px 0 20px!important}
+.pt-login-social-button{height:52px!important;background:rgba(4,12,22,.30)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:600px){.pt-login-panel{padding:18px!important}.pt-login-card{padding:26px 22px!important}.pt-login-card-header h1{font-size:34px!important}}
+
+/* Hard guarantee: PhoenixTrend uses clear glass, never frosted glass. */
+.pt-shell *, .pt-login-page *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}

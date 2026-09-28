@@ -1,28 +1,22 @@
-/* Final PhoenixTrend sidebar branding. */
+/* PhoenixTrend sidebar logo: show complete lockup; black pixels visually disappear into sidebar artwork. */
 .brand-lockup{
- position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
- height:132px!important;padding:7px 12px 10px!important;overflow:hidden!important;background:transparent!important;
+ position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;
+ height:132px!important;padding:5px 10px 8px!important;overflow:visible!important;background:transparent!important;
  border-bottom:1px solid rgba(255,255,255,.08)!important;text-decoration:none!important;
  backdrop-filter:none!important;-webkit-backdrop-filter:none!important
 }
 .brand-lockup::before,.brand-lockup::after{content:none!important;display:none!important}
 .brand-lockup .sidebar-brand-watermark{
- display:block!important;position:static!important;width:78px!important;height:78px!important;object-fit:cover!important;
- object-position:center!important;margin:0 auto!important;padding:0!important;background:transparent!important;
- border:0!important;border-radius:0!important;transform:none!important;filter:none!important;opacity:1!important;
- clip-path:circle(38% at 50% 50%)!important
-}
-.brand-lockup .sidebar-brand-name{
- display:block!important;margin-top:-2px!important;color:#fff!important;font-size:18px!important;font-weight:800!important;
- line-height:1!important;letter-spacing:-.35px!important;text-shadow:0 0 14px rgba(255,128,0,.18)!important
+ display:block!important;position:static!important;width:auto!important;height:auto!important;
+ max-width:188px!important;max-height:118px!important;object-fit:contain!important;object-position:center!important;
+ margin:0 auto!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;
+ clip-path:none!important;transform:none!important;filter:none!important;opacity:1!important;mix-blend-mode:screen!important
 }
 @media(max-width:1100px) and (min-width:701px){
- .brand-lockup{height:112px!important;padding:6px 8px 8px!important}
- .brand-lockup .sidebar-brand-watermark{width:66px!important;height:66px!important}
- .brand-lockup .sidebar-brand-name{font-size:16px!important}
+ .brand-lockup{height:112px!important;padding:4px 8px 6px!important}
+ .brand-lockup .sidebar-brand-watermark{max-width:168px!important;max-height:100px!important}
 }
 @media(max-width:700px){
- .brand-lockup{height:104px!important;padding:5px 8px 7px!important}
- .brand-lockup .sidebar-brand-watermark{width:60px!important;height:60px!important}
- .brand-lockup .sidebar-brand-name{font-size:15px!important}
+ .brand-lockup{height:104px!important;padding:4px 7px 6px!important}
+ .brand-lockup .sidebar-brand-watermark{max-width:156px!important;max-height:92px!important}
 }

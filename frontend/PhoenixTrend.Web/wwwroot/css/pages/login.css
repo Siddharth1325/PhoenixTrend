@@ -1288,3 +1288,86 @@
     background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(3,8,16,.30))!important;
   }
 }
+
+
+/* ============================================================
+   PREMIUM LOGIN SCALE — 2026-09-28
+   Keep approved clear glass, reduce footprint and visual weight.
+   ============================================================ */
+@media (min-width:901px){
+  .pt-login-shell{
+    grid-template-columns:minmax(0,61%) minmax(440px,39%)!important;
+  }
+
+  .pt-login-panel{
+    padding:30px 42px 30px 12px!important;
+  }
+
+  .pt-login-card{
+    width:min(100%,500px)!important;
+    max-height:calc(100vh - 56px)!important;
+    padding:34px 36px 30px!important;
+    border-radius:16px!important;
+    overflow:auto!important;
+    scrollbar-width:none;
+  }
+  .pt-login-card::-webkit-scrollbar{display:none}
+
+  .pt-login-card-header{
+    margin-bottom:28px!important;
+  }
+  .pt-login-card-header h1{
+    font-size:34px!important;
+    line-height:1.04!important;
+    font-weight:700!important;
+  }
+  .pt-login-card-header p{
+    margin-top:8px!important;
+    font-size:15px!important;
+  }
+
+  .pt-login-field{margin-bottom:18px!important}
+  .pt-login-field>label{
+    margin-bottom:8px!important;
+    font-size:14px!important;
+  }
+  .pt-login-input-wrap{height:54px!important;border-radius:9px!important}
+  .pt-login-input{height:52px!important;font-size:15px!important}
+  .pt-login-input-icon{width:54px!important;flex-basis:54px!important}
+  .pt-login-input-icon svg,.pt-login-password-toggle svg{width:22px!important;height:22px!important}
+  .pt-login-password-toggle{height:52px!important;width:52px!important;flex-basis:52px!important}
+
+  .pt-login-options{
+    margin:0 0 20px!important;
+    gap:14px!important;
+  }
+  .pt-login-checkbox,.pt-login-forgot{font-size:14px!important}
+  .pt-login-checkbox-box{width:20px!important;height:20px!important;flex-basis:20px!important}
+
+  .pt-login-submit{
+    height:56px!important;
+    border-radius:9px!important;
+    font-size:16px!important;
+  }
+  .pt-login-submit-arrow{font-size:23px!important}
+
+  .pt-login-divider{
+    margin:20px 0 16px!important;
+  }
+  .pt-login-divider small{font-size:13px!important}
+
+  .pt-login-social{
+    gap:10px!important;
+  }
+  .pt-login-social-button{
+    height:48px!important;
+    font-size:14px!important;
+    border-radius:9px!important;
+  }
+  .pt-login-social-button img{width:21px!important;height:21px!important}
+
+  .pt-login-create{
+    margin-top:18px!important;
+    font-size:13px!important;
+  }
+}

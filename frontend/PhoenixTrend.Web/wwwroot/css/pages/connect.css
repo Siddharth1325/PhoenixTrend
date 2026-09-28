@@ -1,0 +1,2033 @@
+/* ============================================================
+   PHOENIXTREND
+   CONNECT TRADING ACCOUNT
+   PHOSPHOR EDITION
+   ============================================================ */
+
+
+/* ============================================================
+   RESET
+   ============================================================ */
+
+.pt-connect-page,
+.pt-connect-page *,
+.pt-connect-page *::before,
+.pt-connect-page *::after {
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   PAGE
+   ============================================================ */
+
+.pt-connect-page {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+
+    color: #ffffff;
+
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: #020914;
+
+    isolation: isolate;
+}
+
+
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+
+.pt-connect-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-image:
+        url("/assets/connect.png");
+
+    background-repeat: no-repeat;
+
+    background-position:
+        center center;
+
+    background-size:
+        contain;
+
+    transform:
+        translate3d(0, 0, 0)
+        scale(1.001);
+
+    transform-origin:
+        center center;
+
+    will-change:
+        transform;
+
+    pointer-events: none;
+}
+
+
+/* Fill wide screens without stretching the main image */
+
+.pt-connect-page::before {
+    content: "";
+
+    position: absolute;
+    inset: -80px;
+
+    z-index: -2;
+
+    background:
+        url("/assets/connect.png")
+        center center / cover
+        no-repeat;
+
+    filter:
+        blur(45px)
+        brightness(.38)
+        saturate(1.15);
+
+    transform:
+        scale(1.10);
+
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   BACKGROUND OVERLAY
+   ============================================================ */
+
+.pt-connect-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 5, 13, .01) 0%,
+            rgba(0, 5, 13, .00) 42%,
+            rgba(0, 6, 15, .07) 56%,
+            rgba(0, 6, 15, .24) 72%,
+            rgba(0, 5, 13, .46) 100%
+        );
+}
+
+
+/* ============================================================
+   AMBIENT LIGHT
+   ============================================================ */
+
+.pt-connect-ambient {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    overflow: hidden;
+
+    pointer-events: none;
+}
+
+.pt-connect-ambient::before {
+    content: "";
+
+    position: absolute;
+
+    right: -15%;
+    bottom: -50%;
+
+    width: 65vw;
+    height: 65vw;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 128, 24, .14) 0%,
+            rgba(255, 96, 18, .05) 32%,
+            transparent 67%
+        );
+
+    filter:
+        blur(45px);
+
+    animation:
+        ptConnectAmbient
+        8s ease-in-out
+        infinite alternate;
+}
+
+@keyframes ptConnectAmbient {
+
+    from {
+        opacity: .58;
+
+        transform:
+            translate3d(0, 12px, 0)
+            scale(.96);
+    }
+
+    to {
+        opacity: .95;
+
+        transform:
+            translate3d(-18px, -8px, 0)
+            scale(1.04);
+    }
+}
+
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+
+.pt-connect-shell {
+    position: relative;
+    z-index: 10;
+
+    width: 100%;
+    height: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 61%)
+        minmax(500px, 39%);
+
+    align-items: center;
+
+    gap:
+        clamp(30px, 4vw, 68px);
+
+    padding:
+        clamp(28px, 4vh, 58px)
+        clamp(44px, 5vw, 92px);
+}
+
+
+/* ============================================================
+   LEFT VISUAL
+   ============================================================ */
+
+.pt-connect-visual {
+    min-width: 0;
+    height: 100%;
+
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   CARD
+   ============================================================ */
+
+.pt-connect-card {
+    position: relative;
+
+    justify-self: end;
+
+    width:
+        min(570px, 100%);
+
+    max-height:
+        calc(100vh - 62px);
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(255, 166, 49, .58);
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19, 35, 58, .82) 0%,
+            rgba(8, 20, 39, .86) 37%,
+            rgba(7, 15, 29, .89) 68%,
+            rgba(30, 15, 22, .82) 100%
+        );
+
+    backdrop-filter:
+        blur(30px)
+        saturate(138%);
+
+    -webkit-backdrop-filter:
+        blur(30px)
+        saturate(138%);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, .14),
+
+        inset 0 -1px 0
+        rgba(255, 145, 34, .04),
+
+        0 30px 90px
+        rgba(0, 0, 0, .48),
+
+        0 0 60px
+        rgba(255, 121, 21, .055);
+
+    isolation: isolate;
+}
+
+
+/* Mouse reflection */
+
+.pt-connect-card-reflection {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            520px circle at
+            var(--mouse-x, 50%)
+            var(--mouse-y, 20%),
+
+            rgba(255, 255, 255, .115),
+
+            rgba(255, 172, 67, .035) 28%,
+
+            transparent 58%
+        );
+}
+
+
+/* Bottom orange glow */
+
+.pt-connect-card-glow {
+    position: absolute;
+
+    left: -20%;
+    bottom: -32%;
+
+    z-index: 0;
+
+    width: 80%;
+    height: 70%;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 98, 23, .20),
+            rgba(255, 91, 18, .055) 44%,
+            transparent 70%
+        );
+
+    filter:
+        blur(34px);
+
+    pointer-events: none;
+}
+
+
+/* Glass shine */
+
+.pt-connect-card::after {
+    content: "";
+
+    position: absolute;
+
+    top: -60%;
+    left: -70%;
+
+    z-index: 1;
+
+    width: 40%;
+    height: 220%;
+
+    transform:
+        rotate(16deg);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, .02),
+            rgba(255, 255, 255, .10),
+            rgba(255, 185, 85, .035),
+            transparent
+        );
+
+    filter:
+        blur(5px);
+
+    pointer-events: none;
+
+    animation:
+        ptConnectCardSweep
+        10s ease-in-out
+        infinite;
+}
+
+@keyframes ptConnectCardSweep {
+
+    0%,
+    25% {
+        left: -70%;
+        opacity: 0;
+    }
+
+    35% {
+        opacity: .8;
+    }
+
+    58% {
+        left: 130%;
+        opacity: .18;
+    }
+
+    100% {
+        left: 130%;
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   CARD CONTENT
+   ============================================================ */
+
+.pt-connect-card-content {
+    position: relative;
+    z-index: 4;
+
+    padding:
+        34px 42px 30px;
+}
+
+
+/* ============================================================
+   PHOSPHOR ICON BASE
+   ============================================================ */
+
+.pt-connect-page .ph,
+.pt-connect-page .ph-duotone {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    font-style: normal;
+
+    line-height: 1;
+
+    vertical-align: middle;
+}
+
+
+/* ============================================================
+   BACK
+   ============================================================ */
+
+.pt-connect-back {
+    appearance: none;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin:
+        0 0 23px;
+
+    padding: 0;
+
+    border: 0;
+    outline: 0;
+
+    color:
+        rgba(225, 233, 245, .70);
+
+    background:
+        transparent;
+
+    font: inherit;
+
+    font-size: 12px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    transition:
+        color .2s ease,
+        transform .2s ease;
+}
+
+.pt-connect-back .ph {
+    font-size: 17px;
+
+    color:
+        rgba(229, 237, 248, .80);
+}
+
+.pt-connect-back:hover {
+    color: #ffffff;
+
+    transform:
+        translateX(-3px);
+}
+
+.pt-connect-back:hover .ph {
+    color: #ffad32;
+}
+
+
+/* ============================================================
+   HEADING
+   ============================================================ */
+
+.pt-connect-heading {
+    margin-bottom: 21px;
+}
+
+.pt-connect-eyebrow {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 10px;
+
+    color: #ffad32;
+
+    font-size: 10px;
+    font-weight: 850;
+
+    letter-spacing: .15em;
+
+    text-transform: uppercase;
+}
+
+.pt-connect-eyebrow .ph-duotone {
+    font-size: 17px;
+
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(255, 159, 36, .20)
+        );
+}
+
+.pt-connect-heading h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size:
+        clamp(35px, 2.5vw, 46px);
+
+    line-height: 1.02;
+
+    font-weight: 900;
+
+    letter-spacing:
+        -.045em;
+}
+
+.pt-connect-heading h1 > span {
+    display: block;
+
+    margin-top: 4px;
+
+    background:
+        linear-gradient(
+            100deg,
+            #ffffff 0%,
+            #ffe09a 32%,
+            #ffb23d 67%,
+            #ff8c1d 100%
+        );
+
+    -webkit-background-clip:
+        text;
+
+    background-clip:
+        text;
+
+    -webkit-text-fill-color:
+        transparent;
+}
+
+.pt-connect-heading p {
+    margin:
+        12px 0 0;
+
+    color:
+        rgba(216, 225, 238, .69);
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   BROKER CARD
+   ============================================================ */
+
+.pt-connect-broker {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 19px;
+
+    padding:
+        13px 14px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .09);
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, .045),
+            rgba(255, 255, 255, .016)
+        );
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, .045);
+
+    transition:
+        border-color .2s ease,
+        background .2s ease;
+}
+
+.pt-connect-broker:hover {
+    border-color:
+        rgba(255, 173, 50, .20);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, .055),
+            rgba(255, 143, 26, .025)
+        );
+}
+
+
+/* Broker icon */
+
+.pt-connect-broker-icon {
+    flex:
+        0 0 44px;
+
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+    place-items: center;
+
+    border:
+        1px solid
+        rgba(255, 171, 50, .30);
+
+    border-radius: 11px;
+
+    color: #ffad32;
+
+    background:
+        rgba(255, 150, 32, .065);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, .05);
+}
+
+.pt-connect-broker-icon .ph-duotone {
+    font-size: 25px;
+
+    filter:
+        drop-shadow(
+            0 0 9px
+            rgba(255, 156, 36, .20)
+        );
+}
+
+
+/* Broker copy */
+
+.pt-connect-broker-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.pt-connect-broker-copy > small {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color:
+        rgba(184, 198, 217, .57);
+
+    font-size: 8px;
+    font-weight: 850;
+
+    letter-spacing: .15em;
+}
+
+.pt-connect-broker-copy h2 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 20px;
+
+    line-height: 1.15;
+
+    font-weight: 850;
+
+    letter-spacing:
+        -.02em;
+}
+
+
+/* Broker metadata */
+
+.pt-connect-broker-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-top: 5px;
+
+    color:
+        rgba(184, 198, 217, .62);
+
+    font-size: 9px;
+}
+
+.pt-connect-broker-meta > span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+.pt-connect-broker-meta .ph {
+    color: #5be0ad;
+
+    font-size: 11px;
+}
+
+.pt-connect-broker-meta > b {
+    width: 3px;
+    height: 3px;
+
+    display: inline-block;
+
+    border-radius: 50%;
+
+    background: #4fe0a4;
+
+    box-shadow:
+        0 0 6px
+        rgba(79, 224, 164, .40);
+}
+
+
+/* Broker supported badge */
+
+.pt-connect-broker-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+
+    padding:
+        5px 7px;
+
+    border:
+        1px solid
+        rgba(74, 223, 165, .18);
+
+    border-radius: 999px;
+
+    color:
+        rgba(105, 233, 184, .85);
+
+    background:
+        rgba(29, 146, 104, .07);
+
+    font-size: 7px;
+    font-weight: 850;
+
+    letter-spacing: .09em;
+}
+
+.pt-connect-broker-badge .ph {
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   FORM
+   ============================================================ */
+
+.pt-connect-field {
+    margin-bottom: 14px;
+}
+
+.pt-connect-field > label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        rgba(250, 251, 255, .94);
+
+    font-size: 13px;
+    font-weight: 720;
+}
+
+
+/* ============================================================
+   INPUT SHELL
+   ============================================================ */
+
+.pt-connect-input-shell {
+    position: relative;
+
+    width: 100%;
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(150, 168, 194, .34);
+
+    border-radius: 11px;
+
+    background:
+        rgba(4, 12, 24, .48);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, .018);
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+.pt-connect-input-shell:hover {
+    border-color:
+        rgba(174, 190, 211, .44);
+}
+
+.pt-connect-input-shell:focus-within {
+    border-color:
+        rgba(255, 173, 50, .68);
+
+    background:
+        rgba(5, 14, 27, .67);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 159, 36, .07);
+}
+
+
+/* ============================================================
+   FIELD ICON
+   ============================================================ */
+
+.pt-connect-field-icon {
+    flex:
+        0 0 51px;
+
+    width: 51px;
+    height: 100%;
+
+    display: grid;
+    place-items: center;
+
+    color:
+        rgba(229, 237, 248, .78);
+}
+
+.pt-connect-field-icon .ph {
+    font-size: 21px;
+
+    transition:
+        color .2s ease,
+        transform .2s ease,
+        filter .2s ease;
+}
+
+.pt-connect-input-shell:focus-within
+.pt-connect-field-icon .ph {
+    color: #ffad32;
+
+    transform:
+        scale(1.05);
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(255, 166, 47, .20)
+        );
+}
+
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+
+.pt-connect-input {
+    appearance: none;
+
+    flex: 1;
+
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+
+    padding:
+        0 13px 0 0;
+
+    border:
+        0 !important;
+
+    outline:
+        0 !important;
+
+    color:
+        #ffffff !important;
+
+    background:
+        transparent !important;
+
+    box-shadow:
+        none !important;
+
+    font: inherit;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.pt-connect-input::placeholder {
+    color:
+        rgba(178, 191, 211, .48);
+
+    opacity: 1;
+}
+
+
+/* ============================================================
+   EYE BUTTON
+   ============================================================ */
+
+.pt-connect-eye {
+    appearance: none;
+
+    flex:
+        0 0 50px;
+
+    width: 50px;
+    height: 100%;
+
+    display: grid;
+    place-items: center;
+
+    border: 0;
+
+    color:
+        rgba(230, 237, 248, .73);
+
+    background:
+        transparent;
+
+    cursor: pointer;
+
+    transition:
+        color .2s ease,
+        background .2s ease;
+}
+
+.pt-connect-eye .ph {
+    font-size: 21px;
+
+    transition:
+        transform .2s ease;
+}
+
+.pt-connect-eye:hover {
+    color: #ffffff;
+
+    background:
+        rgba(255, 255, 255, .025);
+}
+
+.pt-connect-eye:hover .ph {
+    transform:
+        scale(1.07);
+}
+
+
+/* ============================================================
+   PAPER TRADING
+   ============================================================ */
+
+.pt-connect-paper {
+    position: relative;
+
+    min-height: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin:
+        3px 0 17px;
+
+    padding:
+        10px 13px;
+
+    border:
+        1px solid
+        rgba(138, 157, 184, .16);
+
+    border-radius: 12px;
+
+    background:
+        rgba(3, 11, 22, .36);
+
+    cursor: pointer;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease;
+}
+
+.pt-connect-paper:hover {
+    border-color:
+        rgba(255, 170, 48, .22);
+
+    background:
+        rgba(7, 16, 28, .47);
+}
+
+.pt-connect-paper-left {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+}
+
+
+/* Paper icon */
+
+.pt-connect-paper-icon {
+    flex:
+        0 0 36px;
+
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border:
+        1px solid
+        rgba(66, 226, 165, .23);
+
+    border-radius: 10px;
+
+    color: #4ee1a7;
+
+    background:
+        rgba(24, 152, 106, .075);
+}
+
+.pt-connect-paper-icon .ph-duotone {
+    font-size: 21px;
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(78, 225, 167, .16)
+        );
+}
+
+
+/* Paper copy */
+
+.pt-connect-paper-copy {
+    display: flex;
+    flex-direction: column;
+}
+
+.pt-connect-paper-copy strong {
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.pt-connect-paper-copy small {
+    margin-top: 3px;
+
+    color:
+        rgba(179, 193, 212, .56);
+
+    font-size: 9px;
+}
+
+
+/* Hide checkbox */
+
+.pt-connect-paper > input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   SWITCH
+   ============================================================ */
+
+.pt-connect-switch {
+    position: relative;
+
+    flex:
+        0 0 48px;
+
+    width: 48px;
+    height: 27px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .08);
+
+    border-radius: 999px;
+
+    background:
+        rgba(91, 107, 130, .42);
+
+    box-shadow:
+        inset 0 2px 6px
+        rgba(0, 0, 0, .28);
+
+    transition:
+        background .25s ease,
+        box-shadow .25s ease;
+}
+
+.pt-connect-switch > span {
+    position: absolute;
+
+    top: 3px;
+    left: 3px;
+
+    width: 19px;
+    height: 19px;
+
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, .38);
+
+    transition:
+        transform .25s
+        cubic-bezier(.2, .8, .2, 1);
+}
+
+.pt-connect-paper > input:checked +
+.pt-connect-switch {
+    background:
+        linear-gradient(
+            90deg,
+            #ff881c,
+            #ffb73f
+        );
+
+    box-shadow:
+        0 0 18px
+        rgba(255, 151, 32, .16);
+}
+
+.pt-connect-paper > input:checked +
+.pt-connect-switch > span {
+    transform:
+        translateX(21px);
+}
+
+
+/* ============================================================
+   MESSAGE
+   ============================================================ */
+
+.pt-connect-message {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin:
+        -3px 0 13px;
+
+    padding:
+        10px 12px;
+
+    border-radius: 9px;
+
+    font-size: 11px;
+    font-weight: 650;
+
+    line-height: 1.4;
+}
+
+.pt-connect-message .ph-duotone {
+    font-size: 19px;
+}
+
+.pt-connect-message.error {
+    border:
+        1px solid
+        rgba(255, 92, 92, .23);
+
+    color: #ffaaaa;
+
+    background:
+        rgba(128, 24, 32, .15);
+}
+
+.pt-connect-message.success {
+    border:
+        1px solid
+        rgba(54, 226, 160, .23);
+
+    color: #77efbb;
+
+    background:
+        rgba(14, 102, 70, .16);
+}
+
+
+/* ============================================================
+   PRIMARY BUTTON
+   ============================================================ */
+
+.pt-connect-submit {
+    position: relative;
+
+    width: 100%;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 11px;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(255, 222, 145, .60);
+
+    border-radius: 11px;
+
+    color: #120a02;
+
+    background:
+        linear-gradient(
+            100deg,
+            #ff811c 0%,
+            #ff9f28 38%,
+            #ffc34d 72%,
+            #ffd46a 100%
+        );
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, .48),
+
+        0 14px 32px
+        rgba(255, 127, 17, .15);
+
+    font: inherit;
+
+    font-size: 14px;
+    font-weight: 850;
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        filter .2s ease,
+        box-shadow .2s ease;
+}
+
+.pt-connect-submit > span:not(
+    .pt-connect-submit-shine
+):not(
+    .pt-connect-spinner
+) {
+    position: relative;
+    z-index: 2;
+}
+
+.pt-connect-submit > .ph,
+.pt-connect-submit > .ph-duotone {
+    position: relative;
+    z-index: 2;
+
+    font-size: 20px;
+
+    color: #171006;
+}
+
+.pt-connect-submit >
+.ph-arrow-right {
+    font-size: 18px;
+
+    transition:
+        transform .2s ease;
+}
+
+.pt-connect-submit:hover:not(:disabled) {
+    transform:
+        translateY(-2px);
+
+    filter:
+        brightness(1.045);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, .55),
+
+        0 17px 38px
+        rgba(255, 127, 17, .22);
+}
+
+.pt-connect-submit:hover:not(:disabled)
+> .ph-arrow-right {
+    transform:
+        translateX(4px);
+}
+
+.pt-connect-submit:disabled {
+    opacity: .70;
+
+    cursor: wait;
+}
+
+
+/* ============================================================
+   BUTTON SHINE
+   ============================================================ */
+
+.pt-connect-submit-shine {
+    position: absolute;
+
+    top: -65%;
+    left: -35%;
+
+    z-index: 1;
+
+    width: 20%;
+    height: 230%;
+
+    transform:
+        rotate(18deg);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, .62),
+            transparent
+        );
+
+    filter:
+        blur(2px);
+
+    animation:
+        ptConnectButtonShine
+        4.8s ease-in-out
+        infinite;
+
+    pointer-events: none;
+}
+
+@keyframes ptConnectButtonShine {
+
+    0%,
+    25% {
+        left: -35%;
+        opacity: 0;
+    }
+
+    36% {
+        opacity: .85;
+    }
+
+    58% {
+        left: 125%;
+        opacity: .25;
+    }
+
+    100% {
+        left: 125%;
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   SPINNER
+   ============================================================ */
+
+.pt-connect-spinner {
+    position: relative;
+    z-index: 2;
+
+    width: 18px;
+    height: 18px;
+
+    border:
+        2px solid
+        rgba(16, 10, 3, .25);
+
+    border-top-color:
+        #171006;
+
+    border-radius: 50%;
+
+    animation:
+        ptConnectSpin
+        .7s linear
+        infinite;
+}
+
+@keyframes ptConnectSpin {
+
+    to {
+        transform:
+            rotate(360deg);
+    }
+}
+
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+
+.pt-connect-divider {
+    display: grid;
+
+    grid-template-columns:
+        1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 13px;
+
+    margin:
+        15px 0 11px;
+}
+
+.pt-connect-divider > span {
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(171, 186, 206, .27)
+        );
+}
+
+.pt-connect-divider > span:last-child {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(171, 186, 206, .27),
+            transparent
+        );
+}
+
+.pt-connect-divider em {
+    color:
+        rgba(184, 197, 215, .53);
+
+    font-size: 8px;
+    font-style: normal;
+
+    letter-spacing: .14em;
+}
+
+
+/* ============================================================
+   SKIP
+   ============================================================ */
+
+.pt-connect-skip {
+    width: 100%;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border:
+        1px solid
+        rgba(139, 156, 180, .19);
+
+    border-radius: 10px;
+
+    color:
+        rgba(232, 239, 249, .82);
+
+    background:
+        rgba(3, 10, 19, .25);
+
+    font: inherit;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        color .2s ease,
+        border-color .2s ease,
+        background .2s ease;
+}
+
+.pt-connect-skip .ph {
+    color: #ffad32;
+
+    font-size: 16px;
+
+    transition:
+        transform .2s ease;
+}
+
+.pt-connect-skip:hover:not(:disabled) {
+    color: #ffffff;
+
+    border-color:
+        rgba(255, 169, 48, .29);
+
+    background:
+        rgba(255, 143, 27, .04);
+}
+
+.pt-connect-skip:hover:not(:disabled)
+.ph {
+    transform:
+        translateX(4px);
+}
+
+
+/* ============================================================
+   SECURITY FOOTER
+   ============================================================ */
+
+.pt-connect-security {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 14px;
+
+    padding-top: 13px;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, .065);
+}
+
+.pt-connect-security-icon {
+    flex:
+        0 0 32px;
+
+    width: 32px;
+    height: 32px;
+
+    display: grid;
+    place-items: center;
+
+    border:
+        1px solid
+        rgba(255, 164, 44, .23);
+
+    border-radius: 9px;
+
+    color: #ffad32;
+
+    background:
+        rgba(255, 139, 25, .05);
+}
+
+.pt-connect-security-icon
+.ph-duotone {
+    font-size: 18px;
+
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(255, 157, 35, .17)
+        );
+}
+
+.pt-connect-security-copy {
+    display: flex;
+    flex-direction: column;
+}
+
+.pt-connect-security-copy strong {
+    color:
+        rgba(248, 250, 254, .91);
+
+    font-size: 9px;
+    font-weight: 750;
+}
+
+.pt-connect-security-copy small {
+    margin-top: 2px;
+
+    color:
+        rgba(177, 191, 211, .50);
+
+    font-size: 8px;
+
+    line-height: 1.4;
+}
+
+
+/* ============================================================
+   JS EMBERS
+   ============================================================ */
+
+.pt-connect-embers {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+
+    overflow: hidden;
+
+    pointer-events: none;
+}
+
+.pt-connect-ember {
+    position: absolute;
+
+    left: var(--x);
+    bottom: -12px;
+
+    width: var(--size);
+    height: var(--size);
+
+    border-radius: 50%;
+
+    background: #ffac3d;
+
+    box-shadow:
+        0 0 7px
+        rgba(255, 137, 28, .70);
+
+    opacity: 0;
+
+    animation:
+        ptConnectEmber
+        var(--duration)
+        linear
+        var(--delay)
+        infinite;
+}
+
+@keyframes ptConnectEmber {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translate3d(0, 0, 0);
+    }
+
+    15% {
+        opacity: .30;
+    }
+
+    70% {
+        opacity: .10;
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate3d(
+                var(--drift),
+                -65vh,
+                0
+            );
+    }
+}
+
+
+/* ============================================================
+   SHORT DESKTOP
+   ============================================================ */
+
+@media (
+    min-width: 901px
+) and (
+    max-height: 900px
+) {
+
+    .pt-connect-card-content {
+        padding:
+            24px 36px 22px;
+    }
+
+    .pt-connect-back {
+        margin-bottom: 15px;
+    }
+
+    .pt-connect-heading {
+        margin-bottom: 15px;
+    }
+
+    .pt-connect-heading h1 {
+        font-size: 33px;
+    }
+
+    .pt-connect-heading p {
+        margin-top: 7px;
+
+        font-size: 12px;
+    }
+
+    .pt-connect-broker {
+        margin-bottom: 13px;
+
+        padding:
+            9px 11px;
+    }
+
+    .pt-connect-broker-icon {
+        width: 38px;
+        height: 38px;
+
+        flex-basis: 38px;
+    }
+
+    .pt-connect-broker-icon
+    .ph-duotone {
+        font-size: 22px;
+    }
+
+    .pt-connect-broker-copy h2 {
+        font-size: 17px;
+    }
+
+    .pt-connect-field {
+        margin-bottom: 10px;
+    }
+
+    .pt-connect-input-shell {
+        height: 47px;
+    }
+
+    .pt-connect-paper {
+        min-height: 53px;
+
+        margin-bottom: 11px;
+
+        padding:
+            7px 10px;
+    }
+
+    .pt-connect-paper-icon {
+        width: 31px;
+        height: 31px;
+
+        flex-basis: 31px;
+    }
+
+    .pt-connect-submit {
+        height: 48px;
+    }
+
+    .pt-connect-divider {
+        margin:
+            10px 0 8px;
+    }
+
+    .pt-connect-skip {
+        height: 39px;
+    }
+
+    .pt-connect-security {
+        margin-top: 9px;
+
+        padding-top: 9px;
+    }
+}
+
+
+/* ============================================================
+   MEDIUM DESKTOP
+   ============================================================ */
+
+@media (max-width: 1180px) {
+
+    .pt-connect-shell {
+        grid-template-columns:
+            minmax(0, 51%)
+            minmax(460px, 49%);
+
+        gap: 25px;
+
+        padding:
+            28px 34px;
+    }
+
+    .pt-connect-card-content {
+        padding-left: 34px;
+        padding-right: 34px;
+    }
+
+    .pt-connect-broker-badge {
+        display: none;
+    }
+}
+
+
+/* ============================================================
+   MOBILE / TABLET
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .pt-connect-page {
+        position: relative;
+
+        min-height: 100vh;
+        height: auto;
+
+        overflow-y: auto;
+    }
+
+    .pt-connect-bg {
+        position: fixed;
+
+        background-size: cover;
+
+        background-position:
+            39% center;
+
+        opacity: .35;
+    }
+
+    .pt-connect-overlay {
+        position: fixed;
+
+        background:
+            rgba(1, 7, 15, .68);
+    }
+
+    .pt-connect-shell {
+        min-height: 100vh;
+
+        display: block;
+
+        padding:
+            24px 18px 42px;
+    }
+
+    .pt-connect-visual {
+        display: none;
+    }
+
+    .pt-connect-card {
+        width:
+            min(560px, 100%);
+
+        max-height: none;
+
+        margin:
+            18px auto 0;
+    }
+
+    .pt-connect-card-content {
+        padding:
+            29px 25px;
+    }
+
+    .pt-connect-heading h1 {
+        font-size:
+            clamp(34px, 10vw, 44px);
+    }
+}
+
+
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 520px) {
+
+    .pt-connect-card {
+        border-radius: 19px;
+    }
+
+    .pt-connect-card-content {
+        padding:
+            26px 20px;
+    }
+
+    .pt-connect-heading h1 {
+        font-size: 33px;
+    }
+
+    .pt-connect-heading p {
+        font-size: 12px;
+    }
+
+    .pt-connect-broker-badge {
+        display: none;
+    }
+
+    .pt-connect-broker-meta {
+        font-size: 8px;
+    }
+
+    .pt-connect-input-shell {
+        height: 52px;
+    }
+
+    .pt-connect-submit {
+        height: 54px;
+
+        font-size: 13px;
+    }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (
+    prefers-reduced-motion: reduce
+) {
+
+    .pt-connect-page *,
+    .pt-connect-page *::before,
+    .pt-connect-page *::after {
+        animation-duration:
+            .001ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        scroll-behavior:
+            auto !important;
+    }
+}
+
+/* ============================================================
+   ALPACA BROKER LOGO
+   ADDITIVE OVERRIDE ONLY
+   Does not modify existing Connect layout
+   ============================================================ */
+
+.pt-connect-broker-icon.pt-connect-alpaca-logo {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 4px;
+
+    color: transparent;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 171, 50, .08),
+            rgba(7, 17, 31, .24)
+        );
+}
+
+
+.pt-connect-broker-icon.pt-connect-alpaca-logo img {
+    position: relative;
+
+    z-index: 2;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    object-position: center;
+
+    border-radius: 7px;
+}

@@ -1,0 +1,272 @@
+@page "/register"
+@layout EmptyLayout
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<PageTitle>PhoenixTrend | Create Account</PageTitle>
+
+<div class="pt-login-page">
+    <div class="pt-login-bg" aria-hidden="true"></div>
+    <div class="pt-login-shade" aria-hidden="true"></div>
+
+    <main class="pt-login-shell">
+
+        <section class="pt-login-art" aria-label="PhoenixTrend">
+
+            <div class="pt-login-brand">
+
+                <img src="/assets/phoenixtrend-logo.png"
+                     alt="PhoenixTrend"
+                     class="pt-login-logo" />
+
+                <div class="pt-login-wordmark">
+
+                    <div class="pt-login-name">
+                        <span>Phoenix</span>
+                        <strong>Trend</strong>
+                    </div>
+
+                    <div class="pt-login-tagline">
+                        TRADE SMARTER <i>•</i> GO FURTHER
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="pt-login-panel">
+
+            <div class="pt-login-card">
+
+                <header class="pt-login-card-header">
+
+                    <h1>Create Account</h1>
+
+                    <p>
+                        Create your PhoenixTrend workspace
+                    </p>
+
+                </header>
+
+
+                <EditForm Model="@model"
+                          OnValidSubmit="@RegisterAccount"
+                          class="pt-login-form">
+
+                    <DataAnnotationsValidator />
+
+
+                    <div class="pt-login-field">
+
+                        <label>
+                            Display Name
+                        </label>
+
+                        <div class="pt-login-input-wrap">
+
+                            <i class="ph ph-user"></i>
+
+                            <InputText @bind-Value="model.DisplayName" />
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pt-login-field">
+
+                        <label>
+                            Username
+                        </label>
+
+                        <div class="pt-login-input-wrap">
+
+                            <i class="ph ph-identification-card"></i>
+
+                            <InputText @bind-Value="model.Username" />
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pt-login-field">
+
+                        <label>
+                            Email Address
+                        </label>
+
+                        <div class="pt-login-input-wrap">
+
+                            <i class="ph ph-envelope"></i>
+
+                            <InputText @bind-Value="model.Email"
+                                       type="email" />
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pt-login-field">
+
+                        <label>
+                            Password
+                        </label>
+
+                        <div class="pt-login-input-wrap">
+
+                            <i class="ph ph-lock"></i>
+
+                            <InputText @bind-Value="model.Password"
+                                       type="password" />
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pt-login-field">
+
+                        <label>
+                            Confirm Password
+                        </label>
+
+                        <div class="pt-login-input-wrap">
+
+                            <i class="ph ph-lock-key"></i>
+
+                            <InputText @bind-Value="model.ConfirmPassword"
+                                       type="password" />
+
+                        </div>
+
+                    </div>
+
+
+                    @if (!string.IsNullOrWhiteSpace(error))
+                    {
+                        <div class="pt-login-error">
+                            @error
+                        </div>
+                    }
+
+
+                    <button type="submit"
+                            class="pt-login-submit"
+                            disabled="@busy">
+
+                        @(busy
+                            ? "Creating account..."
+                            : "Create Account")
+
+                    </button>
+
+
+                    <div class="pt-login-create">
+
+                        Already have an account?
+
+                        <a href="/login">
+                            Sign in
+                        </a>
+
+                    </div>
+
+                </EditForm>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+@code {
+    private readonly RegisterModel model = new();
+
+    private bool busy;
+
+    private string? error;
+
+
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        if (await Auth.RestoreAsync())
+        {
+            Navigation.NavigateTo(
+                "/home",
+                true);
+        }
+    }
+
+
+    private async Task RegisterAccount()
+    {
+        if (busy)
+        {
+            return;
+        }
+
+        error = null;
+
+        if (model.Password != model.ConfirmPassword)
+        {
+            error =
+                "Passwords do not match.";
+
+            return;
+        }
+
+        try
+        {
+            busy = true;
+
+            var result =
+                await Auth.RegisterAsync(
+                    model.Email,
+                    model.Username,
+                    model.DisplayName,
+                    model.Password);
+
+            if (!result.Ok)
+            {
+                error = result.Error;
+                return;
+            }
+
+            Navigation.NavigateTo(
+                "/home",
+                true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+
+    private sealed class RegisterModel
+    {
+        public string DisplayName { get; set; } = "";
+
+        public string Username { get; set; } = "";
+
+        public string Email { get; set; } = "";
+
+        public string Password { get; set; } = "";
+
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

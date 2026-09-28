@@ -1,0 +1,180 @@
+@page "/login"
+@layout EmptyLayout
+@inject NavigationManager Navigation
+@inject AuthService Auth
+
+<PageTitle>PhoenixTrend | Sign In</PageTitle>
+
+<div class="pt-login-page">
+    <div class="pt-login-bg" aria-hidden="true"></div>
+    <div class="pt-login-shade" aria-hidden="true"></div>
+
+    <main class="pt-login-shell">
+        <section class="pt-login-art" aria-label="PhoenixTrend">
+            <div class="pt-login-brand">
+                <img src="/assets/phoenixtrend-logo.png" alt="PhoenixTrend" class="pt-login-logo" />
+                <div class="pt-login-wordmark">
+                    <div class="pt-login-name"><span>Phoenix</span><strong>Trend</strong></div>
+                    <div class="pt-login-tagline">TRADE SMARTER <i>•</i> GO FURTHER</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="pt-login-panel">
+            <div class="pt-login-card">
+                <header class="pt-login-card-header">
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to your PhoenixTrend account</p>
+                </header>
+
+                <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin" class="pt-login-form">
+                    <DataAnnotationsValidator />
+
+                    <div class="pt-login-field">
+                        <label for="pt-email">Email Address</label>
+                        <div class="pt-login-input-wrap">
+                            <span class="pt-login-input-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M3 5.5h18v13H3z"/><path d="m4 7 8 6 8-6"/></svg>
+                            </span>
+                            <InputText id="pt-email"
+                                       @bind-Value="loginModel.Email"
+                                       type="email"
+                                       autocomplete="email"
+                                       class="pt-login-input"
+                                       placeholder="you@example.com" />
+                        </div>
+                    </div>
+
+                    <div class="pt-login-field">
+                        <label for="pt-password">Password</label>
+                        <div class="pt-login-input-wrap">
+                            <span class="pt-login-input-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                            </span>
+                            <InputText id="pt-password"
+                                       @bind-Value="loginModel.Password"
+                                       type="@PasswordInputType"
+                                       autocomplete="current-password"
+                                       class="pt-login-input"
+                                       placeholder="Enter your password" />
+                            <button type="button"
+                                    class="pt-login-password-toggle"
+                                    @onclick="TogglePassword"
+                                    aria-label="Show or hide password">
+                                @if (showPassword)
+                                {
+                                    <svg viewBox="0 0 24 24"><path d="M3 12s3.2-5 9-5 9 5 9 5-3.2 5-9 5-9-5-9-5Z"/><circle cx="12" cy="12" r="2.4"/><path d="M4 4l16 16"/></svg>
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 24 24"><path d="M3 12s3.2-5 9-5 9 5 9 5-3.2 5-9 5-9-5-9-5Z"/><circle cx="12" cy="12" r="2.4"/></svg>
+                                }
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-login-options">
+                        <label class="pt-login-checkbox">
+                            <InputCheckbox @bind-Value="loginModel.RememberMe" />
+                            <span class="pt-login-checkbox-box"></span>
+                            <span>Remember me</span>
+                        </label>
+                        <a href="/forgot-password" class="pt-login-forgot">Forgot password?</a>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        <div class="pt-login-error">
+                            <span>!</span>
+                            <p>@errorMessage</p>
+                        </div>
+                    }
+
+                    <button type="submit" class="pt-login-submit" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="pt-login-spinner"></span>
+                            <span>Signing in...</span>
+                        }
+                        else
+                        {
+                            <span>Sign In</span>
+                            <span class="pt-login-submit-arrow">→</span>
+                        }
+                    </button>
+                </EditForm>
+
+                <div class="pt-login-divider">
+                    <span></span>
+                    <small>Or continue with</small>
+                    <span></span>
+                </div>
+
+                <div class="pt-login-social">
+                    <button type="button" class="pt-login-social-button">
+                        <img src="/assets/google.png" alt="" />
+                        <span>Google</span>
+                    </button>
+                    <button type="button" class="pt-login-social-button">
+                        <img src="/assets/apple.png" alt="" />
+                        <span>Apple</span>
+                    </button>
+                    <button type="button" class="pt-login-social-button">
+                        <img src="/assets/microsoft.png" alt="" />
+                        <span>Microsoft</span>
+                    </button>
+                </div>
+
+                <div class="pt-login-create">
+                    <span>Don't have an account?</span>
+                    <a href="/register">Create one</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+@code {
+    private readonly LoginModel loginModel = new();
+    private bool showPassword;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private string PasswordInputType => showPassword ? "text" : "password";
+
+    private void TogglePassword()
+    {
+        showPassword = !showPassword;
+    }
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        if (string.IsNullOrWhiteSpace(loginModel.Email))
+        {
+            errorMessage = "Enter your email address.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(loginModel.Password))
+        {
+            errorMessage = "Enter your password.";
+            return;
+        }
+        isSubmitting = true;
+        var result = await Auth.LoginAsync(loginModel.Email, loginModel.Password);
+        isSubmitting = false;
+        if (!result.Ok)
+        {
+            errorMessage = result.Error ?? "PhoenixTrend could not sign you in.";
+            return;
+        }
+        Navigation.NavigateTo("/home", replace: true);
+    }
+
+    private sealed class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public bool RememberMe { get; set; }
+    }
+}

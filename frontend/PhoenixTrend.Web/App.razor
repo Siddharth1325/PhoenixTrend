@@ -1,0 +1,46 @@
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+@if (!_ready)
+{
+    <div class="pt-auth-boot"><i class="ph-duotone ph-shield-check"></i><span>Securing PhoenixTrend…</span></div>
+}
+else
+{
+    <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="GuardNavigation">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(MainLayout)"><h1>Not found</h1></LayoutView>
+        </NotFound>
+    </Router>
+}
+
+@code {
+    private bool _ready;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GuardCurrentUri();
+        _ready = true;
+    }
+
+    private async Task GuardNavigation(NavigationContext context)
+    {
+        var path = "/" + (context.Path ?? string.Empty).TrimStart('/');
+        if (IsPublic(path)) return;
+        if (!await Auth.RestoreAsync()) Navigation.NavigateTo("/login", replace: true);
+    }
+
+    private async Task GuardCurrentUri()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var path = "/" + relative.Split('?', '#')[0].TrimStart('/');
+        if (!IsPublic(path) && !await Auth.RestoreAsync()) Navigation.NavigateTo("/login", replace: true);
+    }
+
+    private static bool IsPublic(string path) =>
+        path.Equals("/login", StringComparison.OrdinalIgnoreCase) ||
+        path.Equals("/register", StringComparison.OrdinalIgnoreCase);
+}

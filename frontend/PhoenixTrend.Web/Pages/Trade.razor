@@ -1,0 +1,21 @@
+@page "/trade"
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
+
+<PageTitle>PhoenixTrend | TradeDesk</PageTitle>
+
+<div class="connect-message">Opening TradeDesk...</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "symbol")]
+    public string? Symbol { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var symbol = string.IsNullOrWhiteSpace(Symbol)
+            ? string.Empty
+            : $"?symbol={Uri.EscapeDataString(Symbol.Trim().ToUpperInvariant())}";
+
+        Navigation.NavigateTo($"/charts{symbol}", replace: true);
+    }
+}

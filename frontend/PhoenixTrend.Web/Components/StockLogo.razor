@@ -1,0 +1,206 @@
+<span class="stock-logo @SizeClass"
+      title="@DisplayTitle">
+
+    @if (!_imageFailed && !string.IsNullOrWhiteSpace(LogoUrl))
+    {
+        <img src="@LogoUrl"
+             alt="@($"{DisplayTitle} logo")"
+             loading="lazy"
+             referrerpolicy="no-referrer"
+             @onerror="HandleImageError" />
+    }
+    else
+    {
+        <span class="stock-logo-fallback"
+              aria-label="@DisplayTitle">
+            @FallbackText
+        </span>
+    }
+
+</span>
+
+@code
+{
+    [Parameter, EditorRequired]
+    public string Symbol { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Size { get; set; } = "normal";
+
+    [Parameter]
+    public string? AssetType { get; set; }
+
+    private bool _imageFailed;
+    private string _previousKey = string.Empty;
+
+    private string CleanSymbol =>
+        string.IsNullOrWhiteSpace(Symbol)
+            ? string.Empty
+            : Symbol.Trim().ToUpperInvariant();
+
+    private string CleanAssetType =>
+        string.IsNullOrWhiteSpace(AssetType)
+            ? string.Empty
+            : AssetType.Trim().ToLowerInvariant();
+
+    private string DisplayTitle =>
+        string.IsNullOrWhiteSpace(CleanAssetType)
+            ? CleanSymbol
+            : $"{CleanSymbol} ({CleanAssetType})";
+
+    private static readonly Dictionary<string, string> Domains =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            // Stocks
+            ["AAPL"] = "apple.com",
+            ["TSLA"] = "tesla.com",
+            ["NVDA"] = "nvidia.com",
+            ["MSFT"] = "microsoft.com",
+            ["AMZN"] = "amazon.com",
+            ["GOOGL"] = "google.com",
+            ["GOOG"] = "google.com",
+            ["META"] = "meta.com",
+            ["NFLX"] = "netflix.com",
+            ["AMD"] = "amd.com",
+            ["INTC"] = "intel.com",
+            ["IBM"] = "ibm.com",
+            ["ORCL"] = "oracle.com",
+            ["CRM"] = "salesforce.com",
+            ["ADBE"] = "adobe.com",
+            ["PYPL"] = "paypal.com",
+            ["SHOP"] = "shopify.com",
+            ["UBER"] = "uber.com",
+            ["ABNB"] = "airbnb.com",
+            ["SPOT"] = "spotify.com",
+            ["SNAP"] = "snap.com",
+            ["COIN"] = "coinbase.com",
+
+            // ETFs
+            ["SPY"] = "ssga.com",
+            ["QQQ"] = "invesco.com",
+            ["VOO"] = "vanguard.com",
+            ["IWM"] = "ishares.com",
+            ["DIA"] = "ssga.com",
+            ["XLK"] = "ssga.com",
+            ["XLF"] = "ssga.com",
+            ["XLE"] = "ssga.com",
+            ["TLT"] = "ishares.com",
+            ["IEF"] = "ishares.com",
+            ["SHY"] = "ishares.com",
+
+            // Crypto
+            ["BTCUSD"] = "bitcoin.org",
+            ["BTC-USD"] = "bitcoin.org",
+            ["ETHUSD"] = "ethereum.org",
+            ["ETH-USD"] = "ethereum.org",
+            ["SOLUSD"] = "solana.com",
+            ["SOL-USD"] = "solana.com",
+            ["XRPUSD"] = "xrpl.org",
+            ["XRP-USD"] = "xrpl.org",
+            ["DOGEUSD"] = "dogecoin.com",
+            ["DOGE-USD"] = "dogecoin.com",
+            ["ADAUSD"] = "cardano.org",
+            ["ADA-USD"] = "cardano.org",
+            ["AVAXUSD"] = "avax.network",
+            ["AVAX-USD"] = "avax.network",
+
+            // Futures / commodities
+            ["ES"] = "cmegroup.com",
+            ["ES=F"] = "cmegroup.com",
+            ["NQ"] = "cmegroup.com",
+            ["NQ=F"] = "cmegroup.com",
+            ["YM"] = "cmegroup.com",
+            ["YM=F"] = "cmegroup.com",
+            ["RTY"] = "cmegroup.com",
+            ["RTY=F"] = "cmegroup.com",
+            ["GC=F"] = "cmegroup.com",
+            ["SI=F"] = "cmegroup.com",
+            ["CL=F"] = "cmegroup.com",
+            ["NG=F"] = "cmegroup.com",
+            ["HG=F"] = "cmegroup.com",
+            ["GOLD"] = "cmegroup.com",
+            ["SILVER"] = "cmegroup.com",
+            ["OIL"] = "cmegroup.com",
+            ["NATGAS"] = "cmegroup.com",
+            ["COPPER"] = "cmegroup.com"
+        };
+
+    private string LogoUrl
+    {
+        get
+        {
+            if (Domains.TryGetValue(CleanSymbol, out var domain))
+            {
+                return
+                    $"https://www.google.com/s2/favicons" +
+                    $"?domain={domain}&sz=128";
+            }
+
+            return string.Empty;
+        }
+    }
+
+    private string FallbackText =>
+        CleanAssetType switch
+        {
+            "crypto" => CryptoFallback(CleanSymbol),
+            "forex" => "FX",
+            "future" or "futures" => "F",
+            "commodity" or "commodities" => CommodityFallback(CleanSymbol),
+            "bond" or "bonds" => "B",
+            "etf" or "etfs" => "ETF",
+            "option" or "options" => "OPT",
+            _ => string.IsNullOrWhiteSpace(CleanSymbol)
+                ? "?"
+                : CleanSymbol[..Math.Min(2, CleanSymbol.Length)]
+        };
+
+    private static string CryptoFallback(string symbol) =>
+        symbol switch
+        {
+            "BTCUSD" or "BTC-USD" => "₿",
+            "ETHUSD" or "ETH-USD" => "Ξ",
+            "SOLUSD" or "SOL-USD" => "S",
+            "XRPUSD" or "XRP-USD" => "X",
+            "DOGEUSD" or "DOGE-USD" => "Ð",
+            _ => "C"
+        };
+
+    private static string CommodityFallback(string symbol) =>
+        symbol switch
+        {
+            "GC=F" or "GOLD" => "Au",
+            "SI=F" or "SILVER" => "Ag",
+            "CL=F" or "OIL" => "Oil",
+            "NG=F" or "NATGAS" => "NG",
+            "HG=F" or "COPPER" => "Cu",
+            _ => "CMD"
+        };
+
+    private string SizeClass =>
+        Size.Trim().ToLowerInvariant() switch
+        {
+            "small" => "stock-logo-small",
+            "large" => "stock-logo-large",
+            _ => "stock-logo-normal"
+        };
+
+    protected override void OnParametersSet()
+    {
+        var key = $"{CleanAssetType}:{CleanSymbol}";
+
+        if (!string.Equals(
+                _previousKey,
+                key,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            _imageFailed = false;
+            _previousKey = key;
+        }
+    }
+
+    private void HandleImageError()
+    {
+        _imageFailed = true;
+    }
+}

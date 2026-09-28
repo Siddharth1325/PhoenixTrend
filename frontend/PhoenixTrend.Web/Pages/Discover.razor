@@ -1,0 +1,2383 @@
+@page "/discover"
+
+@using System.Text.Json
+
+@using Microsoft.AspNetCore.Components.Rendering
+
+@inject PhoenixApi Api
+
+@inject NavigationManager Navigation
+
+<PageTitle>PhoenixTrend | Discover</PageTitle>
+
+<div class="pt-discover">
+
+    <section class="discover-hero">
+
+        <div class="discover-hero-copy">
+
+            <h1>Discover</h1>
+
+            <p>Find opportunities with AI-powered scanners, patterns and market intelligence</p>
+
+        </div>
+
+        <button type="button"
+
+                class="discover-hero-refresh"
+
+                disabled="@Loading"
+
+                @onclick="Load">
+
+            @if (Loading)
+
+            {
+
+                <i class="ph ph-spinner-gap"></i>
+
+                <span>Refreshing...</span>
+
+            }
+
+            else
+
+            {
+
+                <i class="ph ph-arrows-clockwise"></i>
+
+                <span>Refresh</span>
+
+            }
+
+        </button>
+
+    </section>
+
+    <section class="discover-insights">
+
+        <button class="insight-card purple" @onclick='() => SelectTab("AI Scan (NETRA)")'>
+
+            <span class="insight-icon"><i class="ph ph-brain"></i></span>
+
+            <span class="insight-copy">
+
+                <strong>AI Market Insights</strong>
+
+                <small>Key opportunities identified from current market conditions</small>
+
+            </span>
+
+            <i class="ph ph-caret-right insight-arrow"></i>
+
+        </button>
+
+        <button class="insight-card green" @onclick='() => RunNamedScan("High Momentum")'>
+
+            <span class="insight-icon"><i class="ph ph-fire"></i></span>
+
+            <span class="insight-copy">
+
+                <strong>Trending Now</strong>
+
+                <small>Stocks with high momentum and unusual activity</small>
+
+            </span>
+
+            <i class="ph ph-caret-right insight-arrow"></i>
+
+        </button>
+
+        <button class="insight-card orange" @onclick='() => OpenChart("SPY")'>
+
+            <span class="insight-icon"><i class="ph ph-chart-bar"></i></span>
+
+            <span class="insight-copy">
+
+                <strong>Pattern Recognition</strong>
+
+                <small>Chart patterns and technical setups across all markets</small>
+
+            </span>
+
+            <i class="ph ph-caret-right insight-arrow"></i>
+
+        </button>
+
+        <button class="insight-card blue" @onclick='() => SelectTab("Pre-Built Scanners")'>
+
+            <span class="insight-icon"><i class="ph ph-star"></i></span>
+
+            <span class="insight-copy">
+
+                <strong>Watchlist Ideas</strong>
+
+                <small>AI-curated candidates from the discovery engine</small>
+
+            </span>
+
+            <i class="ph ph-caret-right insight-arrow"></i>
+
+        </button>
+
+    </section>
+
+    <div class="discover-tabs" role="tablist">
+
+        @foreach (var tab in Tabs)
+
+        {
+
+            <button class="@(ActiveTab == tab ? "active" : "")"
+
+                    @onclick="() => SelectTab(tab)">
+
+                @tab
+
+            </button>
+
+        }
+
+    </div>
+
+    @if (Loading)
+
+    {
+
+        <div class="discover-message">
+
+            <i class="ph ph-spinner-gap"></i>
+
+            Running PhoenixTrend discovery...
+
+        </div>
+
+    }
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+
+    {
+
+        <div class="discover-message error">
+
+            <i class="ph ph-warning-circle"></i>
+
+            @ErrorMessage
+
+        </div>
+
+    }
+
+    @if (ActiveTab == "Pre-Built Scanners")
+
+    {
+
+        <section class="discover-workspace">
+
+            <aside class="scanner-menu">
+
+                @foreach (var scan in Scans)
+
+                {
+
+                    <button class="@(ActiveScanner == scan.Name ? "active" : "")"
+
+                            @onclick="() => RunNamedScan(scan.Name)">
+
+                        <span class="scan-icon @scan.Tone">
+
+                            <i class="@scan.Icon"></i>
+
+                        </span>
+
+                        <span class="scan-menu-copy">
+
+                            <strong>@scan.Name</strong>
+
+                            <small>@scan.Detail</small>
+
+                        </span>
+
+                        <b>@GetScannerCount(scan.Name)</b>
+
+                    </button>
+
+                }
+
+            </aside>
+
+            <main class="discover-center">
+
+                <div class="scan-filterbar">
+
+                    <label>
+
+                        <span>Market</span>
+
+                        <select @bind="MarketFilter">
+
+                            <option>All US Markets</option>
+
+                            <option>Stocks</option>
+
+                            <option>ETFs</option>
+
+                        </select>
+
+                    </label>
+
+                    <label>
+
+                        <span>Sector</span>
+
+                        <select @bind="SectorFilter">
+
+                            <option>All Sectors</option>
+
+                            <option>Technology</option>
+
+                            <option>Financials</option>
+
+                            <option>Healthcare</option>
+
+                            <option>Energy</option>
+
+                        </select>
+
+                    </label>
+
+                    <label>
+
+                        <span>Market Cap</span>
+
+                        <select @bind="PriceFilter">
+
+                            <option>All</option>
+
+                            <option>Under 20</option>
+
+                            <option>20-100</option>
+
+                            <option>Above 100</option>
+
+                        </select>
+
+                    </label>
+
+                    <label class="timeframe-filter">
+
+                        <span>Time Frame</span>
+
+                        <select @bind="TimeFrame">
+
+                            <option>1D</option>
+
+                            <option>1W</option>
+
+                            <option>1M</option>
+
+                        </select>
+
+                    </label>
+
+                    <button class="scan-primary" @onclick="RunScan">
+
+                        <i class="ph ph-radar"></i>
+
+                        Scan
+
+                    </button>
+
+                </div>
+
+                <section class="discover-panel scan-results">
+
+                    <header class="discover-panel-head">
+
+                        <div>
+
+                            <strong>Scan Results</strong>
+
+                            <small>@FilteredRows.Count opportunities found</small>
+
+                        </div>
+
+                        <button class="ghost-action" type="button" title="Results are shown from the live discovery service">
+
+                            <i class="ph ph-database"></i>
+
+                            Live Data
+
+                        </button>
+
+                    </header>
+
+                    <div class="table-wrap">
+
+                        <table class="discover-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>#</th>
+
+                                    <th>Symbol</th>
+
+                                    <th>Price</th>
+
+                                    <th>Change</th>
+
+                                    <th>AI Score</th>
+
+                                    <th>Signal</th>
+
+                                    <th>Pattern</th>
+
+                                    <th>Actions</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @if (FilteredRows.Count == 0)
+
+                                {
+
+                                    <tr>
+
+                                        <td colspan="8" class="empty-cell">No discovery opportunities are available for the current scan.</td>
+
+                                    </tr>
+
+                                }
+
+                                else
+
+                                {
+
+                                    @for (var i = 0; i < FilteredRows.Count; i++)
+
+                                    {
+
+                                        var row = FilteredRows[i];
+
+                                        <tr>
+
+                                            <td>@(i + 1)</td>
+
+                                            <td>
+
+                                                <button class="symbol-button" @onclick="() => OpenChart(row.Symbol)">
+
+                                                    <StockLogo Symbol="@row.Symbol" Size="26" />
+
+                                                    <strong>@row.Symbol</strong>
+
+                                                </button>
+
+                                            </td>
+
+                                            <td>@row.Price</td>
+
+                                            <td class="@GetChangeClass(row.Change)">@row.Change</td>
+
+                                            <td>
+
+                                                <span class="ai-score">@row.Score</span>
+
+                                            </td>
+
+                                            <td><span class="@GetSignalClass(row.Signal)">@row.Signal</span></td>
+
+                                            <td><span class="pattern-pill">@row.Pattern</span></td>
+
+                                            <td class="row-actions">
+
+                                                <button title="Open chart" @onclick="() => OpenChart(row.Symbol)">
+
+                                                    <i class="ph ph-chart-line-up"></i>
+
+                                                </button>
+
+                                                <button class="analyze" title="Analyze" @onclick="() => AnalyzeSymbol(row.Symbol)">
+
+                                                    <i class="ph ph-sparkle"></i>
+
+                                                </button>
+
+                                            </td>
+
+                                        </tr>
+
+                                    }
+
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+            <aside class="discover-right">
+
+                <section class="discover-panel sector-panel">
+
+                    <header class="discover-panel-head">
+
+                        <strong>Top Sectors Today</strong>
+
+                        <span>Overview</span>
+
+                    </header>
+
+                    <div class="sector-list">
+
+                        @foreach (var sector in SectorRows)
+
+                        {
+
+                            <div>
+
+                                <span>@sector.Name</span>
+
+                                <i><b style="@($"width:{sector.Width}%")"></b></i>
+
+                                <em class="@(sector.Change < 0 ? "red" : "green")">@FormatSignedPercent(sector.Change)</em>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                </section>
+
+                <section class="discover-panel sentiment-panel">
+
+                    <header class="discover-panel-head">
+
+                        <strong>Market Sentiment</strong>
+
+                        <span>Signal mix</span>
+
+                    </header>
+
+                    <div class="sentiment-body">
+
+                        <div class="sentiment-ring" style="@SentimentStyle">
+
+                            <div>
+
+                                <strong>@BullishPercent</strong>
+
+                                <small>Bullish</small>
+
+                            </div>
+
+                        </div>
+
+                        <div class="sentiment-legend">
+
+                            <span><i class="bull"></i>@BullishPercent% Bullish</span>
+
+                            <span><i class="neutral"></i>@NeutralPercent% Neutral</span>
+
+                            <span><i class="bear"></i>@BearishPercent% Bearish</span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </aside>
+
+        </section>
+
+        <section class="discover-bottom-grid">
+
+            <section class="discover-panel">
+
+                <header class="discover-panel-head">
+
+                    <strong>AI Top Picks</strong>
+
+                    <button class="text-action" @onclick='() => SelectTab("AI Scan (NETRA)")'>View All</button>
+
+                </header>
+
+                <div class="pick-list">
+
+                    @foreach (var row in Rows.Take(5))
+
+                    {
+
+                        <div>
+
+                            <StockLogo Symbol="@row.Symbol" Size="28" />
+
+                            <strong>@row.Symbol</strong>
+
+                            <span class="@GetChangeClass(row.Change)">@row.Change</span>
+
+                            <small>@GetPickDescription(row)</small>
+
+                            <button @onclick="() => AnalyzeSymbol(row.Symbol)">View</button>
+
+                        </div>
+
+                    }
+
+                </div>
+
+            </section>
+
+            <section class="discover-panel">
+
+                <header class="discover-panel-head">
+
+                    <strong>Chart Pattern Screener</strong>
+
+                    <button class="text-action" @onclick='() => OpenChart("SPY")'>View All</button>
+
+                </header>
+
+                <div class="pattern-preview-grid">
+
+                    @foreach (var row in Rows.Where(x => x.Pattern != "—").Take(4))
+
+                    {
+
+                        <button class="pattern-preview-card"
+                                @onclick="() => OpenChart(row.Symbol)">
+
+                            <div class="pattern-preview-title">
+                                @FormatPatternName(row.Pattern)
+                            </div>
+
+                            <div class="pattern-candle-chart">
+
+                                @if (HasPatternChart(row.Symbol))
+
+                                {
+
+                                    <svg viewBox="0 0 260 104"
+                                         preserveAspectRatio="none"
+                                         role="img"
+                                         aria-label="@($"{row.Symbol} candlestick chart for {FormatPatternName(row.Pattern)}")">
+
+                                        <line x1="0" y1="26" x2="260" y2="26" class="pattern-grid-line" />
+                                        <line x1="0" y1="52" x2="260" y2="52" class="pattern-grid-line" />
+                                        <line x1="0" y1="78" x2="260" y2="78" class="pattern-grid-line" />
+
+                                        @foreach (var candle in GetPatternCandles(row.Symbol))
+
+                                        {
+
+                                            <line x1="@candle.X"
+                                                  y1="@candle.HighY"
+                                                  x2="@candle.X"
+                                                  y2="@candle.LowY"
+                                                  class="@($"pattern-wick {candle.Tone}")" />
+
+                                            <rect x="@candle.BodyX"
+                                                  y="@candle.BodyY"
+                                                  width="@candle.BodyWidth"
+                                                  height="@candle.BodyHeight"
+                                                  rx="0.7"
+                                                  class="@($"pattern-candle {candle.Tone}")" />
+
+                                        }
+
+                                        @foreach (var overlay in GetPatternOverlays(row.Symbol, row.Pattern))
+
+                                        {
+
+                                            <polyline points="@overlay.Points"
+                                                      class="@($"pattern-overlay {overlay.Tone}")" />
+
+                                        }
+
+                                    </svg>
+
+                                }
+
+                                else
+
+                                {
+
+                                    <div class="pattern-chart-loading">
+                                        <i class="ph ph-chart-line-up"></i>
+                                    </div>
+
+                                }
+
+                            </div>
+
+                            <div class="pattern-preview-footer">
+
+                                <span class="pattern-symbol">
+                                    <StockLogo Symbol="@row.Symbol" Size="18" />
+                                    <b>@row.Symbol</b>
+                                </span>
+
+                                <em class="@GetChangeClass(row.Change)">
+                                    @row.Change
+                                </em>
+
+                            </div>
+
+                        </button>
+
+                    }
+
+                    @if (!Rows.Any(x => x.Pattern != "—"))
+
+                    {
+
+                        <div class="panel-empty">Pattern cards appear when the backend returns pattern data.</div>
+
+                    }
+
+                </div>
+
+            </section>
+
+            <section class="discover-panel">
+
+                <header class="discover-panel-head">
+
+                    <strong>Unusual Activity</strong>
+
+                    <button class="text-action" @onclick='() => SelectTab("Unusual Activity")'>View All</button>
+
+                </header>
+
+                <div class="activity-table-wrap">
+                    <div class="activity-table-head">
+                        <span>Time</span>
+                        <span>Symbol</span>
+                        <span>Type</span>
+                        <span>Details</span>
+                    </div>
+
+                    @foreach (var activity in UnusualActivityRows.Take(7))
+                    {
+                        <button class="activity-table-row"
+                                type="button"
+                                title="@($"Analyze {activity.Symbol}")"
+                                @onclick="() => AnalyzeSymbol(activity.Symbol)">
+                            <time>@activity.Time</time>
+
+                            <span class="activity-symbol">
+                                <StockLogo Symbol="@activity.Symbol" Size="24" />
+                                <strong>@activity.Symbol</strong>
+                            </span>
+
+                            <span class="activity-type volume">Volume</span>
+
+                            <span class="activity-detail">@activity.Details</span>
+                        </button>
+                    }
+
+                    @if (UnusualActivityRows.Count == 0)
+                    {
+                        <div class="activity-empty">
+                            No real unusual-volume events are available right now.
+                        </div>
+                    }
+                </div>
+
+            </section>
+
+        </section>
+
+    }
+
+    @if (ActiveTab != "Pre-Built Scanners" && ActiveTab != "Custom Scan")
+
+    {
+
+        <section class="discover-panel standalone-panel category-results-panel">
+
+            <header class="discover-panel-head">
+
+                <div>
+
+                    <strong>@ActiveTab</strong>
+
+                    <small>@CategoryNote</small>
+
+                </div>
+
+                <button class="ghost-action" @onclick="() => SelectTab(ActiveTab)">
+
+                    <i class="ph ph-arrows-clockwise"></i>
+
+                    Refresh
+
+                </button>
+
+            </header>
+
+            <div class="category-summary">
+
+                <span><i class="@GetTabIcon(ActiveTab)"></i></span>
+
+                <div>
+
+                    <strong>@ActiveTab</strong>
+
+                    <small>@(string.IsNullOrWhiteSpace(CategoryNote) ? "PhoenixTrend live scanner results." : CategoryNote)</small>
+
+                </div>
+
+                <b>@Rows.Count results</b>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table class="discover-table category-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Symbol</th>
+
+                            <th>Price</th>
+
+                            <th>Change</th>
+
+                            <th>Confidence</th>
+
+                            <th>Signal</th>
+
+                            <th>Pattern</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Rows.Count == 0)
+
+                        {
+
+                            <tr>
+
+                                <td colspan="8" class="empty-cell">No results are available from the current live scanner.</td>
+
+                            </tr>
+
+                        }
+
+                        else
+
+                        {
+
+                            @for (var i = 0; i < Rows.Count; i++)
+
+                            {
+
+                                var row = Rows[i];
+
+                                <tr>
+
+                                    <td>@(i + 1)</td>
+
+                                    <td>
+
+                                        <button class="symbol-button" @onclick="() => OpenChart(row.Symbol)">
+
+                                            <StockLogo Symbol="@row.Symbol" Size="28" />
+
+                                            <strong>@row.Symbol</strong>
+
+                                        </button>
+
+                                    </td>
+
+                                    <td>@row.Price</td>
+
+                                    <td class="@GetChangeClass(row.Change)">@row.Change</td>
+
+                                    <td><span class="ai-score">@row.Score</span></td>
+
+                                    <td><span class="@GetSignalClass(row.Signal)">@row.Signal</span></td>
+
+                                    <td><span class="pattern-pill">@row.Pattern</span></td>
+
+                                    <td class="row-actions">
+
+                                        <button title="Open chart" @onclick="() => OpenChart(row.Symbol)">
+
+                                            <i class="ph ph-chart-line-up"></i>
+
+                                        </button>
+
+                                        <button class="analyze" title="Analyze" @onclick="() => AnalyzeSymbol(row.Symbol)">
+
+                                            <i class="ph ph-sparkle"></i>
+
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    }
+
+    @if (SelectedAnalysis is not null)
+
+    {
+
+        <section class="discover-panel analysis-panel">
+
+            <header class="discover-panel-head">
+
+                <div>
+
+                    <strong>Phoenix Analysis — @SelectedAnalysis.Symbol</strong>
+
+                    <small>Analysis, intelligence and pattern data</small>
+
+                </div>
+
+                <button class="ghost-action" @onclick="() => OpenChart(SelectedAnalysis.Symbol)">
+
+                    <i class="ph ph-chart-line-up"></i>
+
+                    Open Chart
+
+                </button>
+
+            </header>
+
+            <div class="analysis-kpis">
+
+                <div><span>Signal</span><strong>@SelectedAnalysis.Signal</strong></div>
+
+                <div><span>Confidence</span><strong>@SelectedAnalysis.Confidence</strong></div>
+
+                <div><span>Intelligence Score</span><strong>@SelectedAnalysis.Score</strong></div>
+
+                <div><span>Strategy</span><strong>@SelectedAnalysis.Strategy</strong></div>
+
+                <div><span>Pattern</span><strong>@SelectedAnalysis.Pattern</strong></div>
+
+                <div><span>Status</span><strong>@SelectedAnalysis.Status</strong></div>
+
+            </div>
+
+        </section>
+
+    }
+
+</div>
+
+@code {
+
+    private bool Loading;
+
+    private string ErrorMessage = string.Empty;
+
+    private string ActiveTab = "Pre-Built Scanners";
+
+    private string ActiveScanner = "Top Opportunities";
+
+    private string MarketFilter = "All US Markets";
+
+    private string SectorFilter = "All Sectors";
+
+    private string PriceFilter = "All";
+
+    private string VolumeFilter = "Any Volume";
+
+    private string SignalFilter = "All Signals";
+
+    private string TimeFrame = "1D";
+
+    private string PatternSymbol = "AAPL";
+
+    private string CategoryNote = string.Empty;
+
+    private AnalysisView? SelectedAnalysis;
+
+    private readonly List<OpportunityRow> Rows = new();
+
+    private readonly List<OpportunityRow> UnusualRows = new();
+
+    private readonly List<UnusualActivityView> UnusualActivityRows = new();
+
+    private readonly List<PatternView> PatternRows = new();
+
+    private readonly Dictionary<string, List<PatternBar>> PatternChartBars =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly string[] Tabs =
+
+    {
+
+        "Pre-Built Scanners",
+
+        "Custom Scan",
+
+        "AI Scan (NETRA)",
+
+        "Options Flow",
+
+        "Unusual Activity",
+
+        "Earnings",
+
+        "IPO",
+
+        "Sectors",
+
+        "ETFs",
+
+        "Crypto"
+
+    };
+
+    private readonly ScanItem[] Scans =
+
+    {
+
+        new("ph ph-seal-check", "Top Opportunities", "PhoenixTrend ranked", "orange"),
+
+        new("ph ph-trend-up", "Breakout Stocks", "Price and volume breakouts", "green"),
+
+        new("ph ph-gauge", "High Momentum", "Strong technical momentum", "green"),
+
+        new("ph ph-chart-bar", "Unusual Volume", "Abnormal trading volume", "purple"),
+
+        new("ph ph-lightning", "Options Flow", "Options activity", "orange"),
+
+        new("ph ph-calendar-check", "Earnings Plays", "Earnings setups", "green"),
+
+        new("ph ph-rocket-launch", "Gap & Go", "Gap continuation", "green"),
+
+        new("ph ph-chart-line-up", "Trending Sectors", "Relative sector strength", "green"),
+
+        new("ph ph-brain", "AI Picks (NETRA)", "Intelligence-ranked setups", "purple")
+
+    };
+
+    private readonly SectorRow[] SectorRows =
+
+    {
+
+        new("Technology", 88, 2.34),
+
+        new("Consumer Cyclical", 71, 1.87),
+
+        new("Communication", 62, 1.62),
+
+        new("Financials", 48, 0.85),
+
+        new("Industrials", 41, 0.64),
+
+        new("Healthcare", 29, 0.41),
+
+        new("Energy", 18, -0.12),
+
+        new("Utilities", 23, -0.28)
+
+    };
+
+    private List<OpportunityRow> FilteredRows =>
+
+        Rows.Where(row =>
+
+            SignalFilter == "All Signals" ||
+
+            row.Signal.Equals(SignalFilter, StringComparison.OrdinalIgnoreCase))
+
+        .ToList();
+
+    private int BullishPercent
+
+    {
+
+        get
+
+        {
+
+            if (Rows.Count == 0) return 0;
+
+            var bullish = Rows.Count(x =>
+
+                x.Signal.Equals("BUY", StringComparison.OrdinalIgnoreCase) ||
+
+                (!x.Change.StartsWith("-") && x.Change != "—"));
+
+            return (int)Math.Round(bullish * 100d / Rows.Count);
+
+        }
+
+    }
+
+    private int BearishPercent
+
+    {
+
+        get
+
+        {
+
+            if (Rows.Count == 0) return 0;
+
+            var bearish = Rows.Count(x =>
+
+                x.Signal.Equals("SELL", StringComparison.OrdinalIgnoreCase) ||
+
+                x.Change.StartsWith("-"));
+
+            return (int)Math.Round(bearish * 100d / Rows.Count);
+
+        }
+
+    }
+
+    private int NeutralPercent => Math.Max(0, 100 - BullishPercent - BearishPercent);
+
+    private string SentimentStyle =>
+
+        $"--bull:{BullishPercent * 3.6}deg;--neutral:{(BullishPercent + NeutralPercent) * 3.6}deg;";
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+
+    {
+
+        if (Loading) return;
+
+        try
+
+        {
+
+            Loading = true;
+
+            ErrorMessage = string.Empty;
+
+            await LoadDiscovery();
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage = "Unable to load PhoenixTrend discovery data.";
+
+        }
+
+        finally
+
+        {
+
+            Loading = false;
+
+        }
+
+    }
+
+    private async Task SelectTab(string tab)
+
+    {
+
+        ActiveTab = tab;
+
+        ErrorMessage = string.Empty;
+
+        CategoryNote = string.Empty;
+
+        if (tab == "Pre-Built Scanners")
+
+        {
+
+            await Load();
+
+            return;
+
+        }
+
+        if (tab == "Custom Scan")
+
+            return;
+
+        await LoadCategory(TabCategory(tab));
+
+    }
+
+    private static string TabCategory(string tab) =>
+
+        tab switch
+
+        {
+
+            "AI Scan (NETRA)" => "ai",
+
+            "Options Flow" => "options-flow",
+
+            "Unusual Activity" => "unusual-activity",
+
+            "Earnings" => "earnings",
+
+            "IPO" => "ipo",
+
+            "Sectors" => "sectors",
+
+            "ETFs" => "etfs",
+
+            "Crypto" => "crypto",
+
+            _ => "prebuilt"
+
+        };
+
+    private async Task LoadCategory(string category)
+
+    {
+
+        try
+
+        {
+
+            Loading = true;
+
+            ErrorMessage = string.Empty;
+
+            var result = await Api.DiscoverCategory(category);
+
+            if (result is null)
+
+            {
+
+                ErrorMessage = $"Unable to load {ActiveTab}.";
+
+                Rows.Clear();
+
+                return;
+
+            }
+
+            CategoryNote = ReadString(result.Value, "note", string.Empty);
+
+            Rows.Clear();
+
+            if (!TryGetArray(result.Value, out var items))
+
+            {
+
+                ErrorMessage = $"{ActiveTab} returned no scanner results.";
+
+                return;
+
+            }
+
+            ParseOpportunityRows(items);
+
+            await LoadPatternPreviewCharts();
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage = $"Unable to load {ActiveTab}.";
+
+        }
+
+        finally
+
+        {
+
+            Loading = false;
+
+        }
+
+    }
+
+    private async Task RunScan()
+
+    {
+
+        ActiveScanner = "Custom Scan";
+
+        ActiveTab = "Pre-Built Scanners";
+
+        await Load();
+
+    }
+
+    private async Task RunNamedScan(string scanner)
+
+    {
+
+        ActiveScanner = scanner;
+
+        ActiveTab = "Pre-Built Scanners";
+
+        await Load();
+
+    }
+
+    private async Task LoadDiscovery()
+    {
+        var prebuiltTask = Api.DiscoverCategory("prebuilt");
+        var unusualTask = Api.DiscoverCategory("unusual-activity");
+
+        await Task.WhenAll(prebuiltTask, unusualTask);
+
+        var result = await prebuiltTask;
+        var unusual = await unusualTask;
+
+        Rows.Clear();
+        UnusualRows.Clear();
+
+        if (result is null)
+        {
+            ErrorMessage = "Discovery service returned no data.";
+            return;
+        }
+
+        if (!TryGetArray(result.Value, out var items))
+        {
+            ErrorMessage = "Discovery response does not contain opportunities.";
+            return;
+        }
+
+        ParseOpportunityRows(items, Rows);
+
+        if (unusual is not null &&
+            TryGetArray(unusual.Value, out var unusualItems))
+        {
+            ParseOpportunityRows(unusualItems, UnusualRows);
+        }
+
+        await LoadUnusualActivity();
+        await LoadPatternPreviewCharts();
+    }
+
+    private void ParseOpportunityRows(JsonElement items, List<OpportunityRow>? target = null)
+
+    {
+
+        target ??= Rows;
+
+        foreach (var item in items.EnumerateArray())
+
+        {
+
+            if (item.ValueKind != JsonValueKind.Object) continue;
+
+            var symbol = ReadString(item, "symbol", "");
+
+            if (string.IsNullOrWhiteSpace(symbol)) continue;
+
+            var price = ReadDouble(item, "price");
+
+            var change = ReadDouble(item, "change_percent");
+
+            if (double.IsNaN(change)) change = ReadDouble(item, "change_pct");
+
+            var score = ReadDouble(item, "ai_score");
+
+            if (double.IsNaN(score)) score = ReadDouble(item, "score");
+
+            if (double.IsNaN(score)) score = ReadDouble(item, "confidence");
+
+            var signal = ReadString(item, "signal", "");
+
+            if (string.IsNullOrWhiteSpace(signal))
+
+                signal = ReadString(item, "action", "WATCH");
+
+            var pattern = ReadString(item, "pattern", "—");
+
+            if (string.IsNullOrWhiteSpace(pattern)) pattern = "—";
+
+            target.Add(new OpportunityRow(
+
+                symbol.ToUpperInvariant(),
+
+                FormatPrice(price),
+
+                FormatPercent(change),
+
+                FormatScore(score),
+
+                signal.ToUpperInvariant(),
+
+                pattern));
+
+        }
+
+    }
+
+    private async Task LoadUnusualActivity()
+    {
+        UnusualActivityRows.Clear();
+
+        var symbols = UnusualRows
+            .Select(x => x.Symbol)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(12)
+            .ToArray();
+
+        if (symbols.Length == 0)
+            return;
+
+        var tasks = symbols.Select(async symbol =>
+        {
+            try
+            {
+                var context = await Api.Context(symbol);
+                if (context is null)
+                    return null;
+
+                var ratio = ReadFirstNumberRecursive(
+                    context,
+                    "volume_ratio",
+                    "volumeRatio");
+
+                // Do not label ordinary volume as unusual.
+                if (double.IsNaN(ratio) || double.IsInfinity(ratio) || ratio < 1.5)
+                    return null;
+
+                var asOf = ReadFirstStringRecursive(
+                    context,
+                    "volume_as_of",
+                    "volumeAsOf");
+
+                var time = FormatActivityTime(asOf);
+
+                return new UnusualActivityView(
+                    symbol.ToUpperInvariant(),
+                    time,
+                    ratio,
+                    $"{ratio:0.0}x average volume");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Unable to load unusual-volume context for {symbol}: {ex.Message}");
+                return null;
+            }
+        });
+
+        var loaded = await Task.WhenAll(tasks);
+
+        UnusualActivityRows.AddRange(
+            loaded
+                .Where(x => x is not null)
+                .Select(x => x!)
+                .OrderByDescending(x => x.VolumeRatio));
+    }
+
+    private static string FormatActivityTime(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return "—";
+
+        if (DateTimeOffset.TryParse(
+                value,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AllowWhiteSpaces |
+                System.Globalization.DateTimeStyles.AssumeUniversal,
+                out var timestamp))
+        {
+            return timestamp.ToLocalTime().ToString(
+                "h:mm tt",
+                System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        return "—";
+    }
+
+    private async Task LoadPatternPreviewCharts()
+
+    {
+
+        var symbols = Rows
+            .Where(x => x.Pattern != "—")
+            .Select(x => x.Symbol)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(4)
+            .ToArray();
+
+        if (symbols.Length == 0)
+
+        {
+
+            PatternChartBars.Clear();
+
+            return;
+
+        }
+
+        var keep = new HashSet<string>(
+            symbols,
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var existing in PatternChartBars.Keys.ToArray())
+
+        {
+
+            if (!keep.Contains(existing))
+                PatternChartBars.Remove(existing);
+
+        }
+
+        var tasks = symbols.Select(async symbol =>
+
+        {
+
+            var result = await Api.ChartRange(symbol, "3M", "1d");
+
+            return (Symbol: symbol, Bars: ExtractPatternBars(result));
+
+        });
+
+        var loaded = await Task.WhenAll(tasks);
+
+        foreach (var item in loaded)
+
+        {
+
+            if (item.Bars.Count >= 4)
+                PatternChartBars[item.Symbol] = item.Bars;
+            else
+                PatternChartBars.Remove(item.Symbol);
+
+        }
+
+    }
+
+    private static List<PatternBar> ExtractPatternBars(JsonElement? root)
+
+    {
+
+        var result = new List<PatternBar>();
+
+        if (root is null)
+            return result;
+
+        var value = root.Value;
+        JsonElement bars;
+
+        if (value.ValueKind == JsonValueKind.Array)
+
+        {
+
+            bars = value;
+
+        }
+
+        else if (value.ValueKind == JsonValueKind.Object)
+
+        {
+
+            if (!TryGetChartArray(value, out bars))
+                return result;
+
+        }
+
+        else
+
+        {
+
+            return result;
+
+        }
+
+        foreach (var bar in bars.EnumerateArray())
+
+        {
+
+            if (bar.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var open = ReadDouble(bar, "open");
+            if (double.IsNaN(open)) open = ReadDouble(bar, "o");
+
+            var high = ReadDouble(bar, "high");
+            if (double.IsNaN(high)) high = ReadDouble(bar, "h");
+
+            var low = ReadDouble(bar, "low");
+            if (double.IsNaN(low)) low = ReadDouble(bar, "l");
+
+            var close = ReadDouble(bar, "close");
+            if (double.IsNaN(close)) close = ReadDouble(bar, "c");
+
+            if (double.IsNaN(open) ||
+                double.IsNaN(high) ||
+                double.IsNaN(low) ||
+                double.IsNaN(close) ||
+                high <= 0 ||
+                low <= 0)
+
+                continue;
+
+            result.Add(new PatternBar(open, high, low, close));
+
+        }
+
+        return result.TakeLast(34).ToList();
+
+    }
+
+    private static bool TryGetChartArray(
+        JsonElement root,
+        out JsonElement array)
+
+    {
+
+        foreach (var name in new[] { "value", "candles", "bars", "data", "prices" })
+
+        {
+
+            if (root.TryGetProperty(name, out var candidate) &&
+                candidate.ValueKind == JsonValueKind.Array)
+
+            {
+
+                array = candidate;
+                return true;
+
+            }
+
+        }
+
+        array = default;
+        return false;
+
+    }
+
+    private bool HasPatternChart(string symbol) =>
+        PatternChartBars.TryGetValue(symbol, out var bars) &&
+        bars.Count >= 4;
+
+    private IReadOnlyList<PatternCandleView> GetPatternCandles(string symbol)
+
+    {
+
+        if (!PatternChartBars.TryGetValue(symbol, out var bars) ||
+            bars.Count < 2)
+
+            return Array.Empty<PatternCandleView>();
+
+        const double width = 260;
+        const double height = 104;
+        const double padX = 5;
+        const double padY = 7;
+
+        var min = bars.Min(x => x.Low);
+        var max = bars.Max(x => x.High);
+        var range = Math.Max(0.000001, max - min);
+        var step = (width - (padX * 2)) / bars.Count;
+        var bodyWidth = Math.Max(2.2, Math.Min(5.8, step * 0.62));
+
+        double Y(double price) =>
+            padY + ((max - price) / range * (height - (padY * 2)));
+
+        var result = new List<PatternCandleView>(bars.Count);
+
+        for (var i = 0; i < bars.Count; i++)
+
+        {
+
+            var bar = bars[i];
+            var x = padX + (i * step) + (step / 2);
+            var openY = Y(bar.Open);
+            var closeY = Y(bar.Close);
+            var bodyY = Math.Min(openY, closeY);
+            var bodyHeight = Math.Max(1.4, Math.Abs(closeY - openY));
+
+            result.Add(new PatternCandleView(
+                F(x),
+                F(x - (bodyWidth / 2)),
+                F(Y(bar.High)),
+                F(Y(bar.Low)),
+                F(bodyY),
+                F(bodyWidth),
+                F(bodyHeight),
+                bar.Close >= bar.Open ? "up" : "down"));
+
+        }
+
+        return result;
+
+    }
+
+    private IReadOnlyList<PatternOverlayView> GetPatternOverlays(
+        string symbol,
+        string pattern)
+
+    {
+
+        if (!PatternChartBars.TryGetValue(symbol, out var bars) ||
+            bars.Count < 4)
+
+            return Array.Empty<PatternOverlayView>();
+
+        const double width = 260;
+        const double height = 104;
+        const double padX = 5;
+        const double padY = 7;
+
+        var min = bars.Min(x => x.Low);
+        var max = bars.Max(x => x.High);
+        var range = Math.Max(0.000001, max - min);
+
+        double X(double index) =>
+            padX + (index / Math.Max(1, bars.Count - 1)) * (width - (padX * 2));
+
+        double Y(double price) =>
+            padY + ((max - price) / range * (height - (padY * 2)));
+
+        string P(params (double X, double Y)[] points) =>
+            string.Join(" ", points.Select(p => $"{F(p.X)},{F(p.Y)}"));
+
+        var key = pattern
+            .Replace("_", " ")
+            .Replace("-", " ")
+            .Trim()
+            .ToLowerInvariant();
+
+        var overlays = new List<PatternOverlayView>();
+
+        if (key.Contains("double bottom"))
+
+        {
+
+            var lows = bars
+                .Select((bar, index) => new { bar.Low, Index = index })
+                .OrderBy(x => x.Low)
+                .Take(Math.Min(8, bars.Count))
+                .OrderBy(x => x.Index)
+                .ToList();
+
+            if (lows.Count >= 2)
+
+            {
+
+                var left = lows.First();
+                var right = lows.Last();
+                var middleIndex = (left.Index + right.Index) / 2;
+                var middleHigh = bars
+                    .Skip(left.Index)
+                    .Take(Math.Max(1, right.Index - left.Index + 1))
+                    .Max(x => x.High);
+
+                overlays.Add(new PatternOverlayView(
+                    P(
+                        (X(left.Index), Y(left.Low)),
+                        (X(middleIndex), Y(middleHigh)),
+                        (X(right.Index), Y(right.Low))),
+                    "white"));
+
+            }
+
+        }
+
+        else if (key.Contains("triangle"))
+
+        {
+
+            var half = Math.Max(2, bars.Count / 2);
+            var first = bars.Take(half).ToList();
+            var second = bars.Skip(Math.Max(1, half - 1)).ToList();
+
+            overlays.Add(new PatternOverlayView(
+                P(
+                    (X(0), Y(first.Min(x => x.Low))),
+                    (X(bars.Count - 1), Y(second.Min(x => x.Low)))),
+                "orange"));
+
+            overlays.Add(new PatternOverlayView(
+                P(
+                    (X(0), Y(first.Max(x => x.High))),
+                    (X(bars.Count - 1), Y(second.Max(x => x.High)))),
+                "green"));
+
+        }
+
+        else if (key.Contains("flag"))
+
+        {
+
+            var start = Math.Max(0, bars.Count - 14);
+            var section = bars.Skip(start).ToList();
+
+            overlays.Add(new PatternOverlayView(
+                P(
+                    (X(start), Y(section.First().High)),
+                    (X(bars.Count - 1), Y(section.Last().High))),
+                "white"));
+
+            overlays.Add(new PatternOverlayView(
+                P(
+                    (X(start), Y(section.First().Low)),
+                    (X(bars.Count - 1), Y(section.Last().Low))),
+                "orange"));
+
+        }
+
+        else if (key.Contains("cup") && key.Contains("handle"))
+
+        {
+
+            var start = Math.Max(0, bars.Count - 26);
+            var end = bars.Count - 1;
+            var mid = (start + end) / 2;
+            var leftPrice = bars[start].High;
+            var rightPrice = bars[end].High;
+            var bottomPrice = bars
+                .Skip(start)
+                .Take(end - start + 1)
+                .Min(x => x.Low);
+
+            overlays.Add(new PatternOverlayView(
+                P(
+                    (X(start), Y(leftPrice)),
+                    (X((start + mid) / 2.0), Y((leftPrice + bottomPrice) / 2.0)),
+                    (X(mid), Y(bottomPrice)),
+                    (X((mid + end) / 2.0), Y((rightPrice + bottomPrice) / 2.0)),
+                    (X(end), Y(rightPrice))),
+                "orange"));
+
+        }
+
+        else
+
+        {
+
+            var start = Math.Max(0, bars.Count - 18);
+
+            overlays.Add(new PatternOverlayView(
+                P(
+                    (X(start), Y(bars[start].Close)),
+                    (X(bars.Count - 1), Y(bars[^1].Close))),
+                bars[^1].Close >= bars[start].Close ? "green" : "red"));
+
+        }
+
+        return overlays;
+
+    }
+
+    private static string F(double value) =>
+        value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string FormatPatternName(string pattern) =>
+        System.Globalization.CultureInfo.InvariantCulture.TextInfo
+            .ToTitleCase(
+                pattern
+                    .Replace("_", " ")
+                    .Replace("-", " ")
+                    .Trim()
+                    .ToLowerInvariant());
+
+    private async Task AnalyzeSymbol(string symbol)
+
+    {
+
+        try
+
+        {
+
+            Loading = true;
+
+            ErrorMessage = string.Empty;
+
+            var analysisTask = Api.Analyze(symbol);
+
+            var intelligenceTask = Api.Intelligence(symbol);
+
+            var patternsTask = Api.Patterns(symbol);
+
+            await Task.WhenAll(analysisTask, intelligenceTask, patternsTask);
+
+            var analysis = await analysisTask;
+
+            var intelligence = await intelligenceTask;
+
+            var patterns = await patternsTask;
+
+            var signal = ReadFirstStringRecursive(analysis, "signal", "action");
+            if (string.IsNullOrWhiteSpace(signal)) signal = "—";
+
+            var confidence = ReadFirstNumberRecursive(
+                analysis,
+                "confidence",
+                "confidence_score",
+                "score");
+
+            var strategy = ReadFirstStringRecursive(
+                analysis,
+                "strategy",
+                "strategy_name");
+            if (string.IsNullOrWhiteSpace(strategy)) strategy = "—";
+
+            var status = ReadFirstStringRecursive(analysis, "status");
+            if (string.IsNullOrWhiteSpace(status)) status = "Complete";
+
+            var score = ReadFirstNumberRecursive(
+                intelligence,
+                "intelligence_score",
+                "intelligenceScore",
+                "ai_score",
+                "score",
+                "confidence_score",
+                "confidence");
+
+            SelectedAnalysis = new AnalysisView(
+
+                symbol.ToUpperInvariant(),
+
+                signal,
+
+                FormatConfidence(confidence),
+
+                FormatScore(score),
+
+                strategy,
+
+                ExtractFirstPatternName(patterns),
+
+                status);
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage = $"Unable to analyze {symbol}.";
+
+        }
+
+        finally
+
+        {
+
+            Loading = false;
+
+        }
+
+    }
+
+    private async Task LoadPatternAnalysis()
+
+    {
+
+        PatternRows.Clear();
+
+        var symbol = PatternSymbol.Trim().ToUpperInvariant();
+
+        if (string.IsNullOrWhiteSpace(symbol)) return;
+
+        PatternSymbol = symbol;
+
+        var result = await Api.Patterns(symbol);
+
+        if (result is null)
+
+        {
+
+            ErrorMessage = $"No pattern data available for {symbol}.";
+
+            return;
+
+        }
+
+        if (!TryGetPatternArray(result.Value, out var items)) return;
+
+        foreach (var item in items.EnumerateArray())
+
+        {
+
+            if (item.ValueKind != JsonValueKind.Object) continue;
+
+            var name = ReadString(item, "name", "");
+
+            if (string.IsNullOrWhiteSpace(name)) name = ReadString(item, "pattern", "Pattern");
+
+            var confidence = ReadDouble(item, "confidence");
+
+            PatternRows.Add(new PatternView(name, FormatConfidence(confidence)));
+
+        }
+
+    }
+
+    private void OpenChart(string symbol) =>
+
+        Navigation.NavigateTo($"/charts?symbol={Uri.EscapeDataString(symbol)}");
+
+    private RenderFragment OpportunityTable() => builder =>
+
+    {
+
+        var seq = 0;
+
+        builder.OpenElement(seq++, "div");
+
+        builder.AddAttribute(seq++, "class", "table-wrap");
+
+        builder.OpenElement(seq++, "table");
+
+        builder.AddAttribute(seq++, "class", "discover-table");
+
+        builder.AddMarkupContent(seq++, "<thead><tr><th>Symbol</th><th>Price</th><th>Change</th><th>AI Score</th><th>Signal</th><th>Pattern</th></tr></thead>");
+
+        builder.OpenElement(seq++, "tbody");
+
+        foreach (var row in Rows)
+
+        {
+
+            builder.OpenElement(seq++, "tr");
+
+            Cell(builder, ref seq, row.Symbol);
+
+            Cell(builder, ref seq, row.Price);
+
+            Cell(builder, ref seq, row.Change, GetChangeClass(row.Change));
+
+            Cell(builder, ref seq, row.Score);
+
+            Cell(builder, ref seq, row.Signal);
+
+            Cell(builder, ref seq, row.Pattern);
+
+            builder.CloseElement();
+
+        }
+
+        builder.CloseElement();
+
+        builder.CloseElement();
+
+        builder.CloseElement();
+
+    };
+
+    private static void Cell(RenderTreeBuilder builder, ref int seq, string text, string? css = null)
+
+    {
+
+        builder.OpenElement(seq++, "td");
+
+        if (!string.IsNullOrWhiteSpace(css)) builder.AddAttribute(seq++, "class", css);
+
+        builder.AddContent(seq++, text);
+
+        builder.CloseElement();
+
+    }
+
+    private int GetScannerCount(string name) =>
+
+        name switch
+
+        {
+
+            "Top Opportunities" => Rows.Count,
+
+            "Breakout Stocks" => Rows.Count(x => x.Pattern.Contains("break", StringComparison.OrdinalIgnoreCase)),
+
+            "High Momentum" => Rows.Count(x => !x.Change.StartsWith("-") && x.Change != "—"),
+
+            "Unusual Volume" => Rows.Count(x => x.Pattern.Contains("volume", StringComparison.OrdinalIgnoreCase)),
+
+            "Options Flow" => 0,
+
+            "Earnings Plays" => 0,
+
+            "Gap & Go" => Rows.Count(x => x.Pattern.Contains("gap", StringComparison.OrdinalIgnoreCase)),
+
+            "Trending Sectors" => 0,
+
+            "AI Picks (NETRA)" => Rows.Count(x => x.Score != "—"),
+
+            _ => 0
+
+        };
+
+    private static string GetPickDescription(OpportunityRow row) =>
+
+        row.Pattern != "—"
+
+            ? $"{row.Pattern} · {row.Signal}"
+
+            : $"PhoenixTrend signal: {row.Signal}";
+
+    private static string GetTabIcon(string tab) =>
+
+        tab switch
+
+        {
+
+            "AI Scan (NETRA)" => "ph ph-brain",
+
+            "Options Flow" => "ph ph-lightning",
+
+            "Unusual Activity" => "ph ph-waveform",
+
+            "Earnings" => "ph ph-calendar-check",
+
+            "IPO" => "ph ph-buildings",
+
+            "Sectors" => "ph ph-chart-polar",
+
+            "ETFs" => "ph ph-stack",
+
+            "Crypto" => "ph ph-currency-btc",
+
+            _ => "ph ph-radar"
+
+        };
+
+    private static bool TryGetArray(JsonElement root, out JsonElement array)
+
+    {
+
+        if (root.ValueKind == JsonValueKind.Array)
+
+        {
+
+            array = root;
+
+            return true;
+
+        }
+
+        if (root.ValueKind == JsonValueKind.Object)
+
+        {
+
+            foreach (var name in new[] { "opportunities", "results", "data", "items", "discover" })
+
+            {
+
+                if (root.TryGetProperty(name, out var candidate) && candidate.ValueKind == JsonValueKind.Array)
+
+                {
+
+                    array = candidate;
+
+                    return true;
+
+                }
+
+            }
+
+        }
+
+        array = default;
+
+        return false;
+
+    }
+
+    private static bool TryGetPatternArray(JsonElement root, out JsonElement array)
+
+    {
+
+        if (root.ValueKind == JsonValueKind.Array)
+
+        {
+
+            array = root;
+
+            return true;
+
+        }
+
+        if (root.ValueKind == JsonValueKind.Object &&
+
+            root.TryGetProperty("patterns", out var patterns) &&
+
+            patterns.ValueKind == JsonValueKind.Array)
+
+        {
+
+            array = patterns;
+
+            return true;
+
+        }
+
+        array = default;
+
+        return false;
+
+    }
+
+    private static string ExtractFirstPatternName(JsonElement? root)
+
+    {
+
+        if (root is null || !TryGetPatternArray(root.Value, out var patterns)) return "—";
+
+        foreach (var item in patterns.EnumerateArray())
+
+        {
+
+            if (item.ValueKind != JsonValueKind.Object) continue;
+
+            var name = ReadString(item, "name", "");
+
+            if (string.IsNullOrWhiteSpace(name)) name = ReadString(item, "pattern", "");
+
+            if (!string.IsNullOrWhiteSpace(name)) return name;
+
+        }
+
+        return "—";
+
+    }
+
+    private static double ReadFirstNumberRecursive(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null) return double.NaN;
+        return ReadFirstNumberRecursive(root.Value, properties);
+    }
+
+    private static double ReadFirstNumberRecursive(
+        JsonElement element,
+        params string[] properties)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in properties)
+            {
+                if (!element.TryGetProperty(property, out var value)) continue;
+
+                if (value.ValueKind == JsonValueKind.Number &&
+                    value.TryGetDouble(out var number))
+                    return number;
+
+                if (value.ValueKind == JsonValueKind.String &&
+                    double.TryParse(
+                        value.GetString(),
+                        System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        out number))
+                    return number;
+            }
+
+            foreach (var child in element.EnumerateObject())
+            {
+                var nested = ReadFirstNumberRecursive(child.Value, properties);
+                if (!double.IsNaN(nested)) return nested;
+            }
+        }
+        else if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var child in element.EnumerateArray())
+            {
+                var nested = ReadFirstNumberRecursive(child, properties);
+                if (!double.IsNaN(nested)) return nested;
+            }
+        }
+
+        return double.NaN;
+    }
+
+    private static string ReadFirstStringRecursive(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null) return string.Empty;
+        return ReadFirstStringRecursive(root.Value, properties);
+    }
+
+    private static string ReadFirstStringRecursive(
+        JsonElement element,
+        params string[] properties)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in properties)
+            {
+                if (!element.TryGetProperty(property, out var value)) continue;
+
+                if (value.ValueKind == JsonValueKind.String)
+                {
+                    var text = value.GetString();
+                    if (!string.IsNullOrWhiteSpace(text)) return text;
+                }
+            }
+
+            foreach (var child in element.EnumerateObject())
+            {
+                var nested = ReadFirstStringRecursive(child.Value, properties);
+                if (!string.IsNullOrWhiteSpace(nested)) return nested;
+            }
+        }
+        else if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var child in element.EnumerateArray())
+            {
+                var nested = ReadFirstStringRecursive(child, properties);
+                if (!string.IsNullOrWhiteSpace(nested)) return nested;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static double ReadNumberFromNullable(JsonElement? root, string property) =>
+
+        root is null || root.Value.ValueKind != JsonValueKind.Object
+
+            ? double.NaN
+
+            : ReadDouble(root.Value, property);
+
+    private static string ReadString(JsonElement element, string property, string fallback)
+
+    {
+
+        if (!element.TryGetProperty(property, out var value)) return fallback;
+
+        return value.ValueKind == JsonValueKind.String ? value.GetString() ?? fallback : value.ToString();
+
+    }
+
+    private static double ReadDouble(JsonElement element, string property)
+
+    {
+
+        if (!element.TryGetProperty(property, out var value)) return double.NaN;
+
+        if (value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out var number)) return number;
+
+        return double.TryParse(value.ToString(), out number) ? number : double.NaN;
+
+    }
+
+    private static string FormatPrice(double value) =>
+
+        double.IsNaN(value) ? "—" : value.ToString("$#,##0.00");
+
+    private static string FormatPercent(double value) =>
+
+        double.IsNaN(value) ? "—" : value.ToString("+0.00;-0.00;0.00") + "%";
+
+    private static string FormatScore(double value)
+
+    {
+
+        if (double.IsNaN(value)) return "—";
+
+        if (value <= 1) value *= 100;
+
+        return value.ToString("0");
+
+    }
+
+    private static string FormatConfidence(double value)
+
+    {
+
+        if (double.IsNaN(value)) return "—";
+
+        if (value <= 1) value *= 100;
+
+        return $"{value:0}%";
+
+    }
+
+    private static string FormatSignedPercent(double value) =>
+
+        value.ToString("+0.00;-0.00;0.00") + "%";
+
+    private static string GetChangeClass(string change) =>
+
+        string.IsNullOrWhiteSpace(change) || change == "—"
+
+            ? ""
+
+            : change.StartsWith("-") ? "red" : "green";
+
+    private static string GetSignalClass(string signal) =>
+
+        signal.Equals("SELL", StringComparison.OrdinalIgnoreCase)
+
+            ? "signal-pill sell"
+
+            : signal.Equals("BUY", StringComparison.OrdinalIgnoreCase)
+
+                ? "signal-pill buy"
+
+                : "signal-pill watch";
+
+    private sealed record ScanItem(string Icon, string Name, string Detail, string Tone);
+
+    private sealed record OpportunityRow(string Symbol, string Price, string Change, string Score, string Signal, string Pattern);
+    private sealed record UnusualActivityView(string Symbol, string Time, double VolumeRatio, string Details);
+
+    private sealed record PatternBar(double Open, double High, double Low, double Close);
+
+    private sealed record PatternCandleView(
+        string X,
+        string BodyX,
+        string HighY,
+        string LowY,
+        string BodyY,
+        string BodyWidth,
+        string BodyHeight,
+        string Tone);
+
+    private sealed record PatternOverlayView(string Points, string Tone);
+
+    private sealed record PatternView(string Name, string Confidence);
+
+    private sealed record AnalysisView(string Symbol, string Signal, string Confidence, string Score, string Strategy, string Pattern, string Status);
+
+    private sealed record SectorRow(string Name, int Width, double Change);
+
+}

@@ -1,0 +1,136 @@
+<section class="pt-panel @Class">
+
+    @if (HasHeader)
+    {
+        <header class="panel-head">
+
+            <div class="panel-head-copy">
+
+                @if (!string.IsNullOrWhiteSpace(Title))
+                {
+                    <h2>
+                        @Title
+                    </h2>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Subtitle))
+                {
+                    <p>
+                        @Subtitle
+                    </p>
+                }
+
+            </div>
+
+
+            @if (!string.IsNullOrWhiteSpace(Action))
+            {
+                <button
+                    type="button"
+                    class="text-action"
+                    disabled="@ActionDisabled"
+                    @onclick="HandleAction">
+
+                    @if (ActionLoading)
+                    {
+                        @LoadingText
+                    }
+                    else
+                    {
+                        @Action
+                    }
+
+                </button>
+            }
+
+        </header>
+    }
+
+
+    <div class="panel-body">
+        @ChildContent
+    </div>
+
+</section>
+
+
+@code
+{
+    // =========================================================
+    // HEADER
+    // =========================================================
+
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+
+    [Parameter]
+    public string Subtitle { get; set; } = string.Empty;
+
+
+    // =========================================================
+    // ACTION
+    // =========================================================
+
+    [Parameter]
+    public string Action { get; set; } = string.Empty;
+
+
+    [Parameter]
+    public EventCallback OnAction { get; set; }
+
+
+    [Parameter]
+    public bool ActionDisabled { get; set; }
+
+
+    [Parameter]
+    public bool ActionLoading { get; set; }
+
+
+    [Parameter]
+    public string LoadingText { get; set; } = "Loading...";
+
+
+    // =========================================================
+    // STYLE
+    // =========================================================
+
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+
+
+    // =========================================================
+    // CONTENT
+    // =========================================================
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+
+    // =========================================================
+    // STATE
+    // =========================================================
+
+    private bool HasHeader =>
+        !string.IsNullOrWhiteSpace(Title) ||
+        !string.IsNullOrWhiteSpace(Subtitle) ||
+        !string.IsNullOrWhiteSpace(Action);
+
+
+    // =========================================================
+    // ACTION HANDLER
+    // =========================================================
+
+    private async Task HandleAction()
+    {
+        if (ActionDisabled ||
+            ActionLoading ||
+            !OnAction.HasDelegate)
+        {
+            return;
+        }
+
+        await OnAction.InvokeAsync();
+    }
+}

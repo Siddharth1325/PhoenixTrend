@@ -1,0 +1,3208 @@
+@page "/automations"
+
+
+
+@using System.Globalization
+
+@using System.Text.Json
+
+@implements IAsyncDisposable
+
+
+
+@inject PhoenixTrend.Web.Services.PhoenixApi Api
+
+@inject IJSRuntime JS
+
+@inject NavigationManager Navigation
+
+
+
+<PageTitle>Automations | PhoenixTrend</PageTitle>
+
+
+
+<div class="pt-automations">
+
+
+
+    <section class="auto-hero">
+
+        <div class="auto-hero-content">
+
+
+
+            <div class="auto-hero-copy">
+
+                <div class="auto-eyebrow">
+
+                    <i class="ph ph-cpu"></i>
+
+                    PHOENIXTREND AUTOMATIC TRADING ENGINE
+
+                </div>
+
+
+
+                <h1>Automations</h1>
+
+
+
+                <p>
+
+                    Configure, launch and monitor automated trading strategies
+
+                    across multiple asset classes with enterprise-grade reliability.
+
+                </p>
+
+
+
+                <div class="auto-hero-pills">
+
+                    <span class="auto-pill">
+
+                        <i></i>
+
+                        Engine @EngineState
+
+                    </span>
+
+
+
+                    <span class="auto-pill">
+
+                        @EnabledSectionCount Sections On
+
+                    </span>
+
+
+
+                    <span class="auto-pill">
+
+                        @RunningCount Running
+
+                    </span>
+
+
+
+                    <span class="auto-pill">
+
+                        @TotalOrders Orders
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+        </div>
+
+    </section>
+
+
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+
+    {
+
+        <div class="auto-alert error">
+
+            <span>@ErrorMessage</span>
+
+
+
+            <button type="button"
+
+                    @onclick="ClearMessages">
+
+                ×
+
+            </button>
+
+        </div>
+
+    }
+
+
+
+    @if (!string.IsNullOrWhiteSpace(SuccessMessage))
+
+    {
+
+        <div class="auto-alert success">
+
+            <span>@SuccessMessage</span>
+
+
+
+            <button type="button"
+
+                    @onclick="ClearMessages">
+
+                ×
+
+            </button>
+
+        </div>
+
+    }
+
+
+
+    <nav class="auto-section-nav"
+
+         aria-label="Automation sections">
+
+
+
+        @foreach (var navItem in NavigationSections)
+
+        {
+
+            var sectionKey = navItem.Key;
+
+            var assetClass = navItem.AssetClass;
+
+
+
+            <button type="button"
+
+                    class="@NavClass(sectionKey)"
+
+                    data-auto-section="@JsSectionName(sectionKey)"
+
+                    @onclick="() => OpenSection(sectionKey)">
+
+
+
+                <span class="auto-nav-icon">
+
+                    <i class="@navItem.Icon"></i>
+
+                </span>
+
+
+
+                <span>@navItem.Label</span>
+
+
+
+                @if (assetClass is not null)
+
+                {
+
+                    <i class="@CapabilityDotClass(assetClass)"
+
+                       title="@CapabilityText(assetClass)">
+
+                    </i>
+
+                }
+
+
+
+            </button>
+
+        }
+
+
+
+    </nav>
+
+
+
+    @if (Loading)
+
+    {
+
+        <section class="auto-loading-panel">
+
+            <div class="auto-loader"></div>
+
+
+
+            <strong>
+
+                Loading automatic trading engine
+
+            </strong>
+
+        </section>
+
+    }
+
+    else if (ActiveSection == "ENGINE")
+
+    {
+
+        <section class="auto-section">
+
+
+
+            <div class="auto-engine-shell">
+
+
+
+                <div class="auto-engine-main">
+
+
+
+                    <div class="auto-engine-command">
+
+
+
+                        <div class="auto-engine-command-copy">
+
+                            <span>MASTER CONTROL CENTER</span>
+
+
+
+                            <strong>
+
+                                Automatic Trading Engine
+
+                            </strong>
+
+
+
+                            <small>
+
+                                Each asset section runs independently.
+
+                                Turning a section ON starts its automations automatically.
+
+                                Turning it OFF stops new automated activity.
+
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="auto-master-action">
+
+
+
+                            <div class="auto-master-state">
+
+
+
+                                <i class="ph @(EngineState == "RUNNING"
+
+                                    ? "ph-check-circle"
+
+                                    : "ph-warning-octagon")">
+
+                                </i>
+
+
+
+                                <span>
+
+                                    <b>ENGINE @EngineState</b>
+
+                                    <small>@EngineDescription</small>
+
+                                </span>
+
+
+
+                            </div>
+
+
+
+                            @if (EngineState == "RUNNING")
+
+                            {
+
+                                <button type="button"
+
+                                        class="auto-start-btn stop"
+
+                                        disabled="@EngineBusy"
+
+                                        @onclick="StopEngine">
+
+
+
+                                    <i class="ph ph-stop"></i>
+
+                                    Stop Engine
+
+
+
+                                </button>
+
+                            }
+
+                            else if (EngineState == "EMERGENCY_STOP")
+
+                            {
+
+                                <button type="button"
+
+                                        class="auto-start-btn"
+
+                                        disabled>
+
+
+
+                                    <i class="ph ph-warning-octagon"></i>
+
+                                    Emergency Stop Active
+
+
+
+                                </button>
+
+                            }
+
+                            else
+
+                            {
+
+                                <button type="button"
+
+                                        class="auto-start-btn"
+
+                                        disabled="@EngineBusy"
+
+                                        @onclick="StartEngine">
+
+
+
+                                    <i class="ph ph-play"></i>
+
+                                    Start Engine
+
+
+
+                                </button>
+
+                            }
+
+
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="auto-engine-metrics">
+
+
+
+                        <article>
+
+                            <span class="auto-metric-icon">
+
+                                <i class="ph ph-plugs-connected"></i>
+
+                            </span>
+
+
+
+                            <span class="auto-metric-copy">
+
+                                <span>Broker Connection</span>
+
+
+
+                                <strong class="@(BrokerConnected ? "good" : "bad")">
+
+                                    @(BrokerConnected
+
+                                        ? "CONNECTED"
+
+                                        : "DISCONNECTED")
+
+                                </strong>
+
+                            </span>
+
+                        </article>
+
+
+
+                        <article>
+
+                            <span class="auto-metric-icon">
+
+                                <i class="ph ph-chart-line-up"></i>
+
+                            </span>
+
+
+
+                            <span class="auto-metric-copy">
+
+                                <span>Sections On</span>
+
+                                <strong>@EnabledSectionCount</strong>
+
+                            </span>
+
+                        </article>
+
+
+
+                        <article>
+
+                            <span class="auto-metric-icon">
+
+                                <i class="ph ph-play-circle"></i>
+
+                            </span>
+
+
+
+                            <span class="auto-metric-copy">
+
+                                <span>Running</span>
+
+                                <strong>@RunningCount</strong>
+
+                            </span>
+
+                        </article>
+
+
+
+                        <article>
+
+                            <span class="auto-metric-icon">
+
+                                <i class="ph ph-gear-six"></i>
+
+                            </span>
+
+
+
+                            <span class="auto-metric-copy">
+
+                                <span>Automations</span>
+
+                                <strong>@AutomationItems.Count</strong>
+
+                            </span>
+
+                        </article>
+
+
+
+                        <article>
+
+                            <span class="auto-metric-icon">
+
+                                <i class="ph ph-file-text"></i>
+
+                            </span>
+
+
+
+                            <span class="auto-metric-copy">
+
+                                <span>Orders</span>
+
+                                <strong>@TotalOrders</strong>
+
+                            </span>
+
+                        </article>
+
+
+
+                    </div>
+
+
+
+                    <div class="auto-engine-layout">
+
+
+
+                        <article class="auto-panel">
+
+
+
+                            <header class="auto-panel-header">
+
+                                <div>
+
+                                    <h3>Asset Engines</h3>
+
+
+
+                                    <span>
+
+                                        Enable or disable each asset class.
+
+                                        Each section runs independently.
+
+                                    </span>
+
+                                </div>
+
+
+
+                                <small>
+
+                                    @EnabledSectionCount enabled
+
+                                </small>
+
+                            </header>
+
+
+
+                            <div class="auto-engine-assets">
+
+
+
+                                @foreach (var asset in AssetNavigation)
+
+                                {
+
+                                    var cls = asset.AssetClass!;
+
+                                    var state = SectionFor(cls);
+
+                                    var supported = IsSupported(cls);
+
+                                    var enabled = state?.Enabled == true;
+
+                                    var running = state?.RunningAutomations > 0;
+
+                                    var key = asset.Key;
+
+
+
+                                    <div class="@EngineAssetClass(enabled, running)"
+
+                                         data-asset-section="@JsSectionName(cls)"
+
+                                         data-section-enabled="@(enabled ? "true" : "false")">
+
+
+
+                                        <button type="button"
+
+                                                class="auto-engine-asset-main"
+
+                                                @onclick="() => OpenSection(key)">
+
+
+
+                                            <span class="auto-engine-asset-icon">
+
+                                                <i class="@asset.Icon"></i>
+
+                                            </span>
+
+
+
+                                            <span class="auto-engine-asset-copy">
+
+                                                <strong>@asset.Label</strong>
+
+                                                <small>@SectionDescription(cls)</small>
+
+                                            </span>
+
+
+
+                                        </button>
+
+
+
+                                        <div class="auto-section-toggle-wrap">
+
+
+
+                                            <span class="auto-section-toggle-label">
+
+                                                @(!supported
+
+                                                    ? "UNAVAILABLE"
+
+                                                    : enabled
+
+                                                        ? "ON"
+
+                                                        : "OFF")
+
+                                            </span>
+
+
+
+                                            <button type="button"
+
+                                                    class="@SwitchClass(enabled)"
+
+                                                    role="switch"
+
+                                                    aria-checked="@enabled"
+
+                                                    aria-label="@($"{asset.Label} automation section")"
+
+                                                    disabled="@(!supported || SectionBusy == cls)"
+
+                                                    @onclick="() => ToggleSection(cls)">
+
+
+
+                                                <span></span>
+
+
+
+                                            </button>
+
+
+
+                                        </div>
+
+
+
+                                    </div>
+
+                                }
+
+
+
+                            </div>
+
+
+
+                        </article>
+
+
+
+                        <article class="auto-panel">
+
+
+
+                            <header class="auto-panel-header">
+
+                                <div>
+
+                                    <h3>Engine Activity</h3>
+
+
+
+                                    <span>
+
+                                        Current runtime status and active automations.
+
+                                    </span>
+
+                                </div>
+
+
+
+                                <small>
+
+                                    View All Activity →
+
+                                </small>
+
+                            </header>
+
+
+
+                            <div class="auto-runtime-table">
+
+
+
+                                <div class="auto-runtime-row head">
+
+                                    <span>Automation</span>
+
+                                    <span>Asset</span>
+
+                                    <span>Symbol</span>
+
+                                    <span>Strategy</span>
+
+                                    <span>Action</span>
+
+                                    <span>State</span>
+
+                                    <span>Runtime</span>
+
+                                </div>
+
+
+
+                                @if (AssetActivityItems.Count == 0)
+
+                                {
+
+                                    <div class="auto-empty-runtime">
+
+                                        <i class="ph ph-activity"></i>
+
+                                        <strong>@(RunningCount > 0 ? "Asset engines are running and waiting for the next market event." : "No asset automation runtime is active.")</strong>
+
+                                        <span>@(RunningCount > 0 ? "Live scan, decision, risk and execution events will appear here automatically." : "Enable an asset section and start the engine.")</span>
+
+                                    </div>
+
+                                }
+
+                                else
+
+                                {
+
+                                    @foreach (var activity in AssetActivityItems.Take(20))
+
+                                    {
+
+                                        <div class="auto-runtime-row" data-runtime-state="@activity.RuntimeState">
+
+                                            <span class="auto-runtime-automation">
+                                                <i class="@AssetIconClass(activity.AssetClass)"></i>
+                                                <span>@($"{DisplayAsset(activity.AssetClass)} Engine")</span>
+                                            </span>
+
+                                            <span>@DisplayAsset(activity.AssetClass)</span>
+
+                                            <span class="auto-runtime-symbol">
+                                                @if (!string.IsNullOrWhiteSpace(activity.Symbol))
+                                                {
+                                                    <StockLogo Symbol="@activity.Symbol" Size="small" />
+                                                    <strong>@activity.Symbol</strong>
+                                                }
+                                                else
+                                                {
+                                                    <span class="auto-runtime-dash">—</span>
+                                                }
+                                            </span>
+
+                                            <span>@Dash(activity.Strategy)</span>
+
+                                            <span class="@ActionClass(activity.Action)">
+                                                <i class="@ActionIconClass(activity.Action)"></i>
+                                                @Dash(activity.Action)
+                                            </span>
+
+                                            <span>
+                                                <b class="auto-state-badge @StateClass(activity.State)">
+                                                    @DisplayActivityState(activity.State)
+                                                </b>
+                                            </span>
+
+                                            <span>
+                                                <b class="auto-runtime-badge">@activity.RuntimeState</b>
+                                            </span>
+
+                                        </div>
+
+                                    }
+
+                                }
+
+                            </div>
+
+
+
+                        </article>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+                <aside class="auto-side-stack">
+
+
+
+                    <section class="auto-side-card emergency">
+
+
+
+                        <div class="auto-side-title">
+
+                            Emergency Controls
+
+                        </div>
+
+
+
+                        <div class="auto-emergency-body">
+
+
+
+                            <div class="auto-emergency-head">
+
+                                <i class="ph ph-warning-octagon"></i>
+
+
+
+                                <span>
+
+                                    <b>Emergency Stop</b>
+
+
+
+                                    <small>
+
+                                        Immediately stop all automation runtimes
+
+                                        across all asset sections.
+
+                                    </small>
+
+                                </span>
+
+                            </div>
+
+
+
+                            @if (EngineState == "EMERGENCY_STOP")
+
+                            {
+
+                                <button type="button"
+
+                                        class="auto-emergency-btn reset"
+
+                                        disabled="@EngineBusy"
+
+                                        @onclick="ClearEmergencyStop">
+
+
+
+                                    <i class="ph ph-arrow-counter-clockwise"></i>
+
+                                    Reset Emergency Stop
+
+
+
+                                </button>
+
+                            }
+
+                            else
+
+                            {
+
+                                <button type="button"
+
+                                        class="auto-emergency-btn"
+
+                                        disabled="@EngineBusy"
+
+                                        @onclick="EmergencyStop">
+
+
+
+                                    <i class="ph ph-stop-fill"></i>
+
+                                    Stop All Automations
+
+
+
+                                </button>
+
+                            }
+
+
+
+                        </div>
+
+
+
+                    </section>
+
+
+
+                    <section class="auto-side-card">
+
+
+
+                        <div class="auto-side-title auto-system-head">
+
+                            <span>System Status</span>
+
+
+
+                            <span class="auto-live">
+
+                                <i class="ph ph-circle-fill"></i>
+
+                                Live
+
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="auto-status-row">
+
+                            <span class="auto-status-label">
+
+                                <i class="ph ph-flask"></i>
+
+                                Engine State
+
+                            </span>
+
+
+
+                            <b class="@(EngineState == "RUNNING" ? "good" : "bad")">
+
+                                @EngineState
+
+                            </b>
+
+                        </div>
+
+
+
+                        <div class="auto-status-row">
+
+                            <span class="auto-status-label">
+
+                                <i class="ph ph-compass"></i>
+
+                                Broker Connection
+
+                            </span>
+
+
+
+                            <b class="@(BrokerConnected ? "good" : "bad")">
+
+                                @(BrokerConnected
+
+                                    ? "Connected"
+
+                                    : "Disconnected")
+
+                            </b>
+
+                        </div>
+
+
+
+                        <div class="auto-status-row">
+
+                            <span class="auto-status-label">
+
+                                <i class="ph ph-chart-line-up"></i>
+
+                                Active Sections
+
+                            </span>
+
+
+
+                            <b>
+
+                                @EnabledSectionCount / @AssetNavigation.Count()
+
+                            </b>
+
+                        </div>
+
+
+
+                        <div class="auto-status-row">
+
+                            <span class="auto-status-label">
+
+                                <i class="ph ph-flow-arrow"></i>
+
+                                Running Automations
+
+                            </span>
+
+
+
+                            <b>@RunningCount</b>
+
+                        </div>
+
+
+
+                        <div class="auto-status-row">
+
+                            <span class="auto-status-label">
+
+                                <i class="ph ph-record"></i>
+
+                                Open Orders
+
+                            </span>
+
+
+
+                            <b>@TotalOrders</b>
+
+                        </div>
+
+
+
+                    </section>
+
+
+
+                </aside>
+
+
+
+            </div>
+
+
+
+        </section>
+
+    }
+
+    else if (ActiveSection == "ACTIVITY")
+
+    {
+
+        <section class="auto-section">
+
+            <div class="auto-section-header">
+
+                <div>
+
+                    <span>LIVE AUTOMATION MONITOR</span>
+
+                    <h2>Automation Activity</h2>
+
+                    <p>Runtime state, latest symbols, strategy decisions and submitted order requests.</p>
+
+                </div>
+
+                <span class="auto-live-indicator"><i class="ph ph-broadcast"></i> Live</span>
+
+            </div>
+
+
+
+            <div class="auto-panel">
+
+                <div class="auto-runtime-table">
+
+                    <div class="auto-runtime-row head">
+
+                        <span>Automation</span><span>Asset</span><span>Symbol</span><span>Strategy</span><span>Action</span><span>State</span><span>Orders</span>
+
+                    </div>
+
+                    @if (AssetActivityItems.Count == 0)
+
+                    {
+
+                        <div class="auto-empty"><i class="ph ph-activity"></i><strong>@(RunningCount > 0 ? "Asset engines are running and waiting for market activity." : "No asset runtime activity yet.")</strong><span>Live backend events appear here automatically.</span></div>
+
+                    }
+
+                    else
+
+                    {
+
+                        @foreach (var activity in AssetActivityItems)
+
+                        {
+
+                            <div class="auto-runtime-row" data-runtime-state="@activity.RuntimeState">
+
+                                <span class="auto-runtime-automation">
+                                    <i class="@AssetIconClass(activity.AssetClass)"></i>
+                                    <span>@($"{DisplayAsset(activity.AssetClass)} Engine")</span>
+                                </span>
+
+                                <span>@DisplayAsset(activity.AssetClass)</span>
+
+                                <span class="auto-runtime-symbol">
+                                    @if (!string.IsNullOrWhiteSpace(activity.Symbol))
+                                    {
+                                        <StockLogo Symbol="@activity.Symbol" Size="small" />
+                                        <strong>@activity.Symbol</strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="auto-runtime-dash">—</span>
+                                    }
+                                </span>
+
+                                <span>@Dash(activity.Strategy)</span>
+
+                                <span class="@ActionClass(activity.Action)">
+                                    <i class="@ActionIconClass(activity.Action)"></i>
+                                    @Dash(activity.Action)
+                                </span>
+
+                                <span>
+                                    <b class="auto-state-badge @StateClass(activity.State)">
+                                        @DisplayActivityState(activity.State)
+                                    </b>
+                                </span>
+
+                                <span>
+                                    <b class="auto-runtime-badge">@activity.RuntimeState</b>
+                                </span>
+
+                            </div>
+
+                        }
+
+                    }
+
+                </div>
+
+            </div>
+
+        </section>
+
+    }
+
+    else
+
+    {
+
+        var nav = NavigationSections.FirstOrDefault(x =>
+
+            string.Equals(x.Key, ActiveSection, StringComparison.OrdinalIgnoreCase));
+
+        var assetClass = nav?.AssetClass ?? string.Empty;
+
+        var section = SectionFor(assetClass);
+
+        var assetAutomations = AutomationsFor(assetClass).ToList();
+
+
+
+        <section class="auto-section">
+
+            <div class="auto-section-header">
+
+                <div>
+
+                    <span>@(DisplayAsset(assetClass).ToUpperInvariant()) AUTOMATION</span>
+
+                    <h2>@DisplayAsset(assetClass) Automation Engine</h2>
+
+                    <p>@SectionDescription(assetClass)</p>
+
+                </div>
+
+                @if (section is not null)
+
+                {
+
+                    <button type="button"
+
+                            class="@SwitchClass(section.Enabled)"
+
+                            disabled="@(!section.Supported || SectionBusy is not null)"
+
+                            title="@CapabilityText(assetClass)"
+
+                            @onclick="() => ToggleSection(assetClass)">
+
+                        <span></span>
+
+                    </button>
+
+                }
+
+            </div>
+
+
+
+            @if (section is null || !section.Supported)
+
+            {
+
+                <div class="auto-capability-warning">
+
+                    <i class="ph ph-warning-circle"></i>
+
+                    <div>
+
+                        <strong>@DisplayAsset(assetClass) automation is unavailable.</strong>
+
+                        <p>@(section?.Reason ?? "The connected backend/broker does not currently expose this asset automation capability.")</p>
+
+                    </div>
+
+                </div>
+
+            }
+
+
+
+            <div class="auto-asset-status-grid">
+
+                <article><span>Section</span><strong class="@(section?.Enabled == true ? "good" : "")">@(section?.Enabled == true ? "ENABLED" : "DISABLED")</strong></article>
+
+                <article><span>Broker</span><strong class="@(BrokerConnected ? "good" : "bad")">@(BrokerConnected ? "CONNECTED" : "DISCONNECTED")</strong></article>
+
+                <article><span>Automations</span><strong>@assetAutomations.Count</strong></article>
+
+                <article><span>Running</span><strong>@(section?.RunningAutomations ?? 0)</strong></article>
+
+            </div>
+
+
+
+            <div class="auto-panel">
+
+                <div class="auto-panel-header">
+
+                    <div>
+
+                        <span>CONFIGURED AUTOMATIONS</span>
+
+                        <h3>@DisplayAsset(assetClass) Strategies</h3>
+
+                        <small>Enable and run configured automation strategies for this asset class.</small>
+
+                    </div>
+
+                </div>
+
+
+
+                @if (assetAutomations.Count == 0)
+
+                {
+
+                    <div class="auto-empty">
+
+                        <i class="ph ph-robot"></i>
+
+                        @if (section?.Enabled == true && section.RunningAutomations > 0)
+
+                        {
+
+                            <strong>@DisplayAsset(assetClass) automatic runtime is active.</strong>
+
+                            <span>PhoenixTrend is automatically discovering, analyzing, waiting for actionable signals, applying risk controls, and managing execution for this asset class.</span>
+
+                        }
+
+                        else
+
+                        {
+
+                            <strong>@DisplayAsset(assetClass) automation is not running.</strong>
+
+                            <span>Enable this asset section while the master engine is running to start its automatic backend runtime.</span>
+
+                        }
+
+                    </div>
+
+                }
+
+                else
+
+                {
+
+                    @foreach (var automation in assetAutomations)
+
+                    {
+
+                        var runtime = RuntimeFor(automation.Id);
+
+                        var runtimeState = RuntimeState(runtime);
+
+                        <div class="auto-automation-row" data-runtime-state="@runtimeState">
+
+                            <div>
+
+                                <strong>@automation.Name</strong>
+
+                                <small>@DisplayAsset(automation.AssetClass) · @(automation.AutoSelectStrategy ? "Automatic strategy selection" : Dash(automation.Strategy))</small>
+
+                                @if (automation.Symbols.Count > 0)
+
+                                {
+
+                                    <div class="auto-symbol-strip">
+
+                                        @foreach (var symbol in automation.Symbols)
+
+                                        {
+
+                                            <span class="auto-symbol-chip">
+                                                <StockLogo Symbol="@symbol" Size="small" />
+                                                <span>@symbol</span>
+                                            </span>
+
+                                        }
+
+                                    </div>
+
+                                }
+
+                            </div>
+
+                            <div style="display:flex;align-items:center;gap:8px;">
+
+                                <span class="auto-runtime-badge">@runtimeState</span>
+
+                                @if (IsRuntimeActive(runtime))
+
+                                {
+
+                                    <button type="button" class="auto-btn" disabled="@Busy" @onclick="() => StopRuntime(automation.Id)">Stop</button>
+
+                                }
+
+                                else if (!automation.Enabled)
+
+                                {
+
+                                    <button type="button" class="auto-btn" disabled="@Busy" @onclick="() => EnableAndStartRuntime(automation.Id)">Enable &amp; Start</button>
+
+                                }
+
+                                else
+
+                                {
+
+                                    <button type="button" class="auto-btn" disabled="@Busy" @onclick="() => StartRuntime(automation.Id)">Start</button>
+
+                                }
+
+                            </div>
+
+                        </div>
+
+                    }
+
+                }
+
+            </div>
+
+        </section>
+
+    }
+
+
+
+</div>
+
+
+
+@code {
+
+    private bool Loading = true;
+
+    private bool Busy;
+
+    private bool EngineBusy;
+
+    private bool _renderSyncPending = true;
+
+
+
+    private string? SectionBusy;
+
+    private string ActiveSection = "ENGINE";
+
+    private string EngineState = "STOPPED";
+
+
+
+    private string? ErrorMessage;
+
+    private string? SuccessMessage;
+
+
+
+    private bool BrokerConnected;
+
+
+
+    private readonly List<NavigationItem> NavigationSections = new()
+
+    {
+
+        new("ENGINE", "Engine", "ph ph-cpu"),
+
+        new("STOCK", "Stocks", "ph ph-chart-line-up", "stocks"),
+
+        new("OPTIONS", "Options", "ph ph-stack", "options"),
+
+        new("CRYPTO", "Crypto", "ph ph-currency-btc", "crypto"),
+
+        new("FUTURES", "Futures", "ph ph-trend-up", "futures"),
+
+        new("ETF", "ETFs", "ph ph-chart-pie-slice", "etfs"),
+
+        new("FOREX", "Forex", "ph ph-currency-circle-dollar", "forex"),
+
+        new("BONDS", "Bonds", "ph ph-bank", "bonds"),
+
+        new("ACTIVITY", "Activity", "ph ph-activity")
+
+    };
+
+
+
+    private IEnumerable<NavigationItem> AssetNavigation =>
+
+        NavigationSections.Where(x => x.AssetClass is not null);
+
+
+
+    private readonly List<SectionState> SectionStates = new();
+
+    private readonly List<AutomationItem> AutomationItems = new();
+
+    private readonly List<RuntimeItem> RuntimeItems = new();
+
+    private readonly List<AssetActivityItem> AssetActivityItems = new();
+
+    private readonly CancellationTokenSource _liveRefreshCts = new();
+
+    private Task? _liveRefreshTask;
+
+
+
+    private int EnabledSectionCount =>
+
+        SectionStates.Count(x => x.Enabled);
+
+
+
+    private int RunningCount =>
+
+        Math.Max(
+
+            RuntimeItems.Count(x =>
+
+                string.Equals(
+
+                    x.State,
+
+                    "RUNNING",
+
+                    StringComparison.OrdinalIgnoreCase) ||
+
+                string.Equals(
+
+                    x.State,
+
+                    "STARTING",
+
+                    StringComparison.OrdinalIgnoreCase)),
+
+            SectionStates.Count(x => x.RunningAutomations > 0));
+
+
+
+    private int TotalOrders =>
+
+        RuntimeItems.Sum(x => x.Orders);
+
+
+
+    private string EngineDescription =>
+
+        EngineState switch
+
+        {
+
+            "RUNNING" => "Automation engine is armed and running.",
+
+            "EMERGENCY_STOP" => "Emergency stop is active.",
+
+            "STARTING" => "Automation engine is starting.",
+
+            "STOPPING" => "Automation engine is stopping.",
+
+            _ => "Engine is stopped."
+
+        };
+
+
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        await LoadData();
+
+        _liveRefreshTask = RunLiveRefreshAsync(_liveRefreshCts.Token);
+
+    }
+
+
+
+    private async Task RunLiveRefreshAsync(CancellationToken token)
+
+    {
+
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+        try
+
+        {
+
+            while (await timer.WaitForNextTickAsync(token))
+
+            {
+
+                if (Busy || EngineBusy) continue;
+
+                await InvokeAsync(async () =>
+
+                {
+
+                    await LoadData();
+
+                    StateHasChanged();
+
+                });
+
+            }
+
+        }
+
+        catch (OperationCanceledException) { }
+
+    }
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+
+    {
+
+        if (!firstRender && !_renderSyncPending)
+
+            return;
+
+
+
+        _renderSyncPending = false;
+
+
+
+        try
+
+        {
+
+            await JS.InvokeVoidAsync(
+
+                "PhoenixAutomations.initialize");
+
+
+
+            await JS.InvokeVoidAsync(
+
+                "PhoenixAutomations.setActiveSection",
+
+                JsSectionName(ActiveSection));
+
+
+
+            await JS.InvokeVoidAsync(
+
+                "PhoenixAutomations.setEngineState",
+
+                EngineState);
+
+
+
+            foreach (var section in SectionStates)
+
+            {
+
+                await JS.InvokeVoidAsync(
+
+                    "PhoenixAutomations.setSectionState",
+
+                    JsSectionName(section.AssetClass),
+
+                    section.Enabled);
+
+
+
+                await JS.InvokeVoidAsync(
+
+                    "PhoenixAutomations.setSectionRunning",
+
+                    JsSectionName(section.AssetClass),
+
+                    section.RunningAutomations > 0);
+
+            }
+
+
+
+            foreach (var runtime in RuntimeItems)
+
+            {
+
+                await JS.InvokeVoidAsync(
+
+                    "PhoenixAutomations.setRuntimeState",
+
+                    runtime.AutomationId,
+
+                    runtime.State);
+
+            }
+
+        }
+
+        catch
+
+        {
+
+            // Visual synchronization is optional. Blazor remains authoritative.
+
+        }
+
+    }
+
+
+
+    private async Task RefreshAsync()
+
+    {
+
+        if (Busy)
+
+            return;
+
+
+
+        Busy = true;
+
+        ClearMessages();
+
+
+
+        try
+
+        {
+
+            await LoadData();
+
+            SuccessMessage = "Automation data refreshed.";
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            ErrorMessage = ex.Message;
+
+        }
+
+        finally
+
+        {
+
+            Busy = false;
+
+        }
+
+    }
+
+
+
+    private async Task LoadData()
+
+    {
+
+        Loading = true;
+
+
+
+        try
+
+        {
+
+            var engineTask = Api.AutomationEngineStatus();
+
+            var sectionsTask = Api.AutomationAssetSections();
+
+            var automationsTask = Api.Automations();
+
+            var runtimesTask = Api.AutomationRuntimes();
+
+            var assetActivityTask = Api.AutomationAssetActivity();
+
+            var brokerTask = Api.BrokerStatus();
+
+
+
+            await Task.WhenAll(
+
+                engineTask,
+
+                sectionsTask,
+
+                automationsTask,
+
+                runtimesTask,
+
+                assetActivityTask,
+
+                brokerTask);
+
+
+
+            ParseEngineStatus(await engineTask);
+
+            ParseSections(await sectionsTask);
+
+            ParseAutomations(await automationsTask);
+
+            ParseRuntimes(await runtimesTask);
+
+            ParseAssetActivity(await assetActivityTask);
+
+            ParseBrokerStatus(await brokerTask);
+
+
+
+            EnsureNavigationSections();
+
+            _renderSyncPending = true;
+
+        }
+
+        finally
+
+        {
+
+            Loading = false;
+
+        }
+
+    }
+
+
+
+    private void ParseEngineStatus(JsonElement? payload)
+
+    {
+
+        if (payload is not { } root ||
+
+            root.ValueKind != JsonValueKind.Object)
+
+            return;
+
+
+
+        var state = GetString(root, "state");
+
+
+
+        if (!string.IsNullOrWhiteSpace(state))
+
+            EngineState = state.ToUpperInvariant();
+
+
+
+        var brokerConnected = GetBool(root, "broker_connected");
+
+        if (brokerConnected.HasValue)
+
+            BrokerConnected = brokerConnected.Value;
+
+    }
+
+
+
+    private void ParseSections(JsonElement? payload)
+
+    {
+
+        SectionStates.Clear();
+
+
+
+        if (payload is not { } root ||
+
+            root.ValueKind != JsonValueKind.Array)
+
+            return;
+
+
+
+        foreach (var item in root.EnumerateArray())
+
+        {
+
+            if (item.ValueKind != JsonValueKind.Object)
+
+                continue;
+
+
+
+            var assetClass = GetString(item, "asset_class");
+
+            if (string.IsNullOrWhiteSpace(assetClass))
+
+                continue;
+
+
+
+            SectionStates.Add(new SectionState
+
+            {
+
+                AssetClass = assetClass,
+
+                Enabled = GetBool(item, "enabled") ?? false,
+
+                Supported = GetBool(item, "supported") ?? false,
+
+                RunningAutomations = GetInt(item, "running_automations"),
+
+                AutomationCount = GetInt(item, "automation_count"),
+
+                Reason = GetString(item, "reason")
+
+            });
+
+        }
+
+    }
+
+
+
+    private void ParseAutomations(JsonElement? payload)
+
+    {
+
+        AutomationItems.Clear();
+
+
+
+        if (payload is not { } root ||
+
+            root.ValueKind != JsonValueKind.Array)
+
+            return;
+
+
+
+        foreach (var item in root.EnumerateArray())
+
+        {
+
+            if (item.ValueKind != JsonValueKind.Object)
+
+                continue;
+
+
+
+            var id = GetString(item, "id");
+
+            if (string.IsNullOrWhiteSpace(id))
+
+                continue;
+
+
+
+            var symbols = new List<string>();
+
+            if (item.TryGetProperty("symbols", out var symbolArray) &&
+
+                symbolArray.ValueKind == JsonValueKind.Array)
+
+            {
+
+                foreach (var symbol in symbolArray.EnumerateArray())
+
+                {
+
+                    if (symbol.ValueKind == JsonValueKind.String &&
+
+                        !string.IsNullOrWhiteSpace(symbol.GetString()))
+
+                    {
+
+                        symbols.Add(symbol.GetString()!.Trim().ToUpperInvariant());
+
+                    }
+
+                }
+
+            }
+
+
+
+            AutomationItems.Add(new AutomationItem
+
+            {
+
+                Id = id,
+
+                Name = GetString(item, "name") ?? "Automation",
+
+                AssetClass = GetString(item, "asset_class") ?? string.Empty,
+
+                Enabled = GetBool(item, "enabled") ?? false,
+
+                AutoSelectStrategy = GetBool(item, "auto_select_strategy") ?? true,
+
+                Strategy = GetString(item, "strategy"),
+
+                Symbols = symbols
+
+            });
+
+        }
+
+    }
+
+
+
+    private void ParseRuntimes(JsonElement? payload)
+
+    {
+
+        RuntimeItems.Clear();
+
+
+
+        if (payload is not { } root ||
+
+            root.ValueKind != JsonValueKind.Array)
+
+            return;
+
+
+
+        foreach (var item in root.EnumerateArray())
+
+        {
+
+            if (item.ValueKind != JsonValueKind.Object)
+
+                continue;
+
+
+
+            var automationId = GetString(item, "automation_id");
+
+            if (string.IsNullOrWhiteSpace(automationId))
+
+                continue;
+
+
+
+            RuntimeItems.Add(new RuntimeItem
+
+            {
+
+                AutomationId = automationId,
+
+                State = GetString(item, "state") ?? "STOPPED",
+
+                LastSymbol = GetString(item, "last_symbol"),
+
+                LastStrategy = GetString(item, "last_strategy"),
+
+                LastAction = GetString(item, "last_action"),
+
+                Orders = GetInt(item, "orders_requested")
+
+            });
+
+        }
+
+    }
+
+
+
+    private void ParseAssetActivity(JsonElement? payload)
+
+    {
+
+        AssetActivityItems.Clear();
+
+        if (payload is not { } root || root.ValueKind != JsonValueKind.Array)
+
+            return;
+
+
+
+        foreach (var item in root.EnumerateArray())
+
+        {
+
+            if (item.ValueKind != JsonValueKind.Object) continue;
+
+            AssetActivityItems.Add(new AssetActivityItem
+
+            {
+
+                AssetClass = GetString(item, "asset_class") ?? string.Empty,
+
+                Symbol = GetString(item, "symbol"),
+
+                Strategy = GetString(item, "strategy"),
+
+                Action = GetString(item, "action"),
+
+                State = GetString(item, "state") ?? "MONITORING",
+
+                RuntimeState = GetString(item, "runtime_state") ?? "RUNNING",
+
+                Message = GetString(item, "message"),
+
+                Timestamp = GetString(item, "timestamp")
+
+            });
+
+        }
+
+    }
+
+
+
+    private void ParseBrokerStatus(JsonElement? payload)
+
+    {
+
+        if (payload is not { } root ||
+
+            root.ValueKind != JsonValueKind.Object)
+
+            return;
+
+
+
+        BrokerConnected =
+
+            GetBool(root, "connected") ?? BrokerConnected;
+
+    }
+
+
+
+    private void EnsureNavigationSections()
+
+    {
+
+        foreach (var asset in AssetNavigation)
+
+        {
+
+            var cls = asset.AssetClass!;
+
+
+
+            if (SectionStates.Any(x =>
+
+                    string.Equals(
+
+                        x.AssetClass,
+
+                        cls,
+
+                        StringComparison.OrdinalIgnoreCase)))
+
+            {
+
+                continue;
+
+            }
+
+
+
+            SectionStates.Add(new SectionState
+
+            {
+
+                AssetClass = cls,
+
+                Enabled = false,
+
+                RunningAutomations = 0,
+
+                AutomationCount = 0,
+
+                Supported = false,
+
+                Reason = "This asset class is not available from the connected automation backend."
+
+            });
+
+        }
+
+    }
+
+
+
+    private void OpenSection(string section)
+
+    {
+
+        ActiveSection =
+
+            string.IsNullOrWhiteSpace(section)
+
+                ? "ENGINE"
+
+                : section.ToUpperInvariant();
+
+
+
+        _renderSyncPending = true;
+
+    }
+
+
+
+    private string NavClass(string section)
+
+    {
+
+        return string.Equals(
+
+                ActiveSection,
+
+                section,
+
+                StringComparison.OrdinalIgnoreCase)
+
+            ? "auto-nav-item active"
+
+            : "auto-nav-item";
+
+    }
+
+
+
+    private static string JsSectionName(string section)
+
+    {
+
+        if (string.IsNullOrWhiteSpace(section))
+
+            return string.Empty;
+
+
+
+        return section
+
+            .Trim()
+
+            .ToLowerInvariant()
+
+            .Replace("_", "-")
+
+            .Replace(" ", "-");
+
+    }
+
+
+
+    private string CapabilityDotClass(string assetClass)
+
+    {
+
+        return IsSupported(assetClass)
+
+            ? "auto-nav-cap supported"
+
+            : "auto-nav-cap unsupported";
+
+    }
+
+
+
+    private string CapabilityText(string assetClass)
+
+    {
+
+        var state = SectionFor(assetClass);
+
+
+
+        if (state?.Supported == true)
+
+            return $"{DisplayAsset(assetClass)} automation supported";
+
+
+
+        return state?.Reason
+
+            ?? $"{DisplayAsset(assetClass)} automation unavailable";
+
+    }
+
+
+
+    private bool IsSupported(string assetClass)
+
+    {
+
+        return SectionFor(assetClass)?.Supported == true;
+
+    }
+
+
+
+    private SectionState? SectionFor(string assetClass)
+
+    {
+
+        return SectionStates.FirstOrDefault(x =>
+
+            string.Equals(
+
+                x.AssetClass,
+
+                assetClass,
+
+                StringComparison.OrdinalIgnoreCase));
+
+    }
+
+
+
+    private static string SectionDescription(string assetClass)
+
+    {
+
+        return assetClass.ToLowerInvariant() switch
+
+        {
+
+            "stocks" => "Automated stock strategies and execution.",
+
+            "options" => "Options strategy automation and monitoring.",
+
+            "crypto" => "Continuous cryptocurrency automation.",
+
+            "forex" => "Foreign exchange strategy automation.",
+
+            "futures" => "Automated futures strategy execution.",
+
+            "etfs" => "ETF scanning and automated execution.",
+
+            "bonds" => "Fixed-income automation and monitoring.",
+
+            _ => "Automated trading section."
+
+        };
+
+    }
+
+
+
+    private static string EngineAssetClass(
+
+        bool enabled,
+
+        bool running)
+
+    {
+
+        var classes = "auto-engine-asset";
+
+
+
+        if (enabled)
+
+            classes += " is-on";
+
+
+
+        if (running)
+
+            classes += " is-running";
+
+
+
+        return classes;
+
+    }
+
+
+
+    private static string SwitchClass(bool enabled)
+
+    {
+
+        return enabled
+
+            ? "auto-switch on"
+
+            : "auto-switch";
+
+    }
+
+
+
+    private async Task ToggleSection(string assetClass)
+
+    {
+
+        if (string.IsNullOrWhiteSpace(assetClass))
+
+            return;
+
+
+
+        var state = SectionFor(assetClass);
+
+
+
+        if (state?.Supported != true)
+
+        {
+
+            ErrorMessage = state?.Reason
+
+                ?? $"{DisplayAsset(assetClass)} automation is unavailable.";
+
+            return;
+
+        }
+
+
+
+        if (SectionBusy is not null)
+
+            return;
+
+
+
+        SectionBusy = assetClass;
+
+        ClearMessages();
+
+
+
+        try
+
+        {
+
+            if (state.Enabled)
+
+            {
+
+                await Api.DisableAutomationAssetSection(assetClass);
+
+                SuccessMessage = $"{DisplayAsset(assetClass)} automation disabled.";
+
+            }
+
+            else
+
+            {
+
+                await Api.EnableAutomationAssetSection(assetClass);
+
+                SuccessMessage = $"{DisplayAsset(assetClass)} automation enabled.";
+
+            }
+
+
+
+            await LoadData();
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            ErrorMessage = ex.Message;
+
+        }
+
+        finally
+
+        {
+
+            SectionBusy = null;
+
+        }
+
+    }
+
+
+
+    private IEnumerable<AutomationItem> AutomationsFor(string assetClass)
+
+    {
+
+        return AutomationItems.Where(x =>
+
+            string.Equals(x.AssetClass, assetClass, StringComparison.OrdinalIgnoreCase));
+
+    }
+
+
+
+    private AutomationItem? AutomationFor(string automationId)
+
+    {
+
+        return AutomationItems.FirstOrDefault(x =>
+
+            string.Equals(x.Id, automationId, StringComparison.OrdinalIgnoreCase));
+
+    }
+
+
+
+    private static bool IsRuntimeActive(RuntimeItem? runtime)
+
+    {
+
+        if (runtime is null)
+
+            return false;
+
+
+
+        return string.Equals(runtime.State, "RUNNING", StringComparison.OrdinalIgnoreCase) ||
+
+               string.Equals(runtime.State, "STARTING", StringComparison.OrdinalIgnoreCase);
+
+    }
+
+
+
+    private async Task EnableAndStartRuntime(string automationId)
+
+    {
+
+        if (Busy) return;
+
+        Busy = true;
+
+        ClearMessages();
+
+        try
+
+        {
+
+            await Api.EnableAutomation(automationId);
+
+            await Api.StartAutomation(automationId);
+
+            await LoadData();
+
+            SuccessMessage = "Automation enabled and runtime started.";
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            ErrorMessage = ex.Message;
+
+            await LoadData();
+
+        }
+
+        finally
+
+        {
+
+            Busy = false;
+
+        }
+
+    }
+
+
+
+    private async Task StartRuntime(string automationId)
+
+    {
+
+        if (Busy) return;
+
+        Busy = true;
+
+        ClearMessages();
+
+        try
+
+        {
+
+            await Api.StartAutomation(automationId);
+
+            await LoadData();
+
+            SuccessMessage = "Automation runtime started.";
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            ErrorMessage = ex.Message;
+
+        }
+
+        finally
+
+        {
+
+            Busy = false;
+
+        }
+
+    }
+
+
+
+    private async Task StopRuntime(string automationId)
+
+    {
+
+        if (Busy) return;
+
+        Busy = true;
+
+        ClearMessages();
+
+        try
+
+        {
+
+            await Api.StopAutomation(automationId);
+
+            await LoadData();
+
+            SuccessMessage = "Automation runtime stopped.";
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            ErrorMessage = ex.Message;
+
+        }
+
+        finally
+
+        {
+
+            Busy = false;
+
+        }
+
+    }
+
+
+
+    private RuntimeItem? RuntimeFor(string automationId)
+
+    {
+
+        return RuntimeItems.FirstOrDefault(x =>
+
+            string.Equals(
+
+                x.AutomationId,
+
+                automationId,
+
+                StringComparison.OrdinalIgnoreCase));
+
+    }
+
+
+
+    private static string RuntimeState(RuntimeItem? runtime)
+
+    {
+
+        if (runtime is null)
+
+            return "IDLE";
+
+
+
+        return string.IsNullOrWhiteSpace(runtime.State)
+
+            ? "IDLE"
+
+            : runtime.State.ToUpperInvariant();
+
+    }
+
+
+
+    private static string DisplayAsset(string? assetClass)
+
+    {
+
+        if (string.IsNullOrWhiteSpace(assetClass))
+
+            return "—";
+
+
+
+        return assetClass.ToLowerInvariant() switch
+
+        {
+
+            "stock" or "stocks" => "Stocks",
+
+            "option" or "options" => "Options",
+
+            "crypto" => "Crypto",
+
+            "forex" => "Forex",
+
+            "future" or "futures" => "Futures",
+
+            "etf" or "etfs" => "ETFs",
+
+            "bond" or "bonds" => "Bonds",
+
+            "index" or "indices" => "Indices",
+
+            "commodity" or "commodities" => "Commodities",
+
+            _ => CultureInfo.InvariantCulture.TextInfo
+
+                .ToTitleCase(assetClass.ToLowerInvariant())
+
+        };
+
+    }
+
+
+
+    private static string Dash(string? value)
+
+    {
+
+        return string.IsNullOrWhiteSpace(value)
+
+            ? "—"
+
+            : value;
+
+    }
+
+
+
+    private static string? GetString(JsonElement element, string propertyName)
+
+    {
+
+        if (!element.TryGetProperty(propertyName, out var value) ||
+
+            value.ValueKind == JsonValueKind.Null ||
+
+            value.ValueKind == JsonValueKind.Undefined)
+
+            return null;
+
+
+
+        return value.ValueKind == JsonValueKind.String
+
+            ? value.GetString()
+
+            : value.ToString();
+
+    }
+
+
+
+    private static bool? GetBool(JsonElement element, string propertyName)
+
+    {
+
+        if (!element.TryGetProperty(propertyName, out var value))
+
+            return null;
+
+
+
+        if (value.ValueKind == JsonValueKind.True)
+
+            return true;
+
+
+
+        if (value.ValueKind == JsonValueKind.False)
+
+            return false;
+
+
+
+        if (value.ValueKind == JsonValueKind.String &&
+
+            bool.TryParse(value.GetString(), out var parsed))
+
+            return parsed;
+
+
+
+        return null;
+
+    }
+
+
+
+    private static int GetInt(JsonElement element, string propertyName)
+
+    {
+
+        if (!element.TryGetProperty(propertyName, out var value))
+
+            return 0;
+
+
+
+        if (value.ValueKind == JsonValueKind.Number &&
+
+            value.TryGetInt32(out var number))
+
+            return number;
+
+
+
+        if (value.ValueKind == JsonValueKind.String &&
+
+            int.TryParse(value.GetString(), out number))
+
+            return number;
+
+
+
+        return 0;
+
+    }
+
+
+
+    private void ClearMessages()
+
+    {
+
+        ErrorMessage = null;
+
+        SuccessMessage = null;
+
+    }
+
+
+
+    private async Task EngineAction(
+
+        Func<Task<JsonElement?>> action,
+
+        string successMessage)
+
+    {
+
+        if (EngineBusy)
+
+            return;
+
+
+
+        EngineBusy = true;
+
+        ClearMessages();
+
+
+
+        try
+
+        {
+
+            var result = await action();
+
+
+
+            if (result is null)
+
+            {
+
+                throw new InvalidOperationException(
+
+                    "Backend did not confirm engine action.");
+
+            }
+
+
+
+            if (result.Value.ValueKind == JsonValueKind.Object)
+
+            {
+
+                var returnedState = GetString(result.Value, "state");
+
+                if (!string.IsNullOrWhiteSpace(returnedState))
+
+                    EngineState = returnedState.ToUpperInvariant();
+
+            }
+
+
+
+            await LoadData();
+
+            SuccessMessage = successMessage;
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            ErrorMessage = ex.Message;
+
+        }
+
+        finally
+
+        {
+
+            EngineBusy = false;
+
+        }
+
+    }
+
+
+
+    private Task StartEngine()
+
+    {
+
+        return EngineAction(
+
+            Api.StartAutomationEngine,
+
+            "Engine started. Enabled sections will run automatically.");
+
+    }
+
+
+
+    private Task StopEngine()
+
+    {
+
+        return EngineAction(
+
+            Api.StopAutomationEngine,
+
+            "Engine stopped.");
+
+    }
+
+
+
+    private Task EmergencyStop()
+
+    {
+
+        return EngineAction(
+
+            Api.EmergencyStopAutomationEngine,
+
+            "Emergency stop activated.");
+
+    }
+
+
+
+    private Task ClearEmergencyStop()
+
+    {
+
+        return EngineAction(
+
+            Api.ClearAutomationEngineEmergencyStop,
+
+            "Emergency stop cleared. Engine remains stopped until manually started.");
+
+    }
+
+
+
+    private static string AssetIconClass(string? assetClass)
+    {
+        return (assetClass ?? string.Empty).Trim().ToLowerInvariant() switch
+        {
+            "stocks" or "stock" => "ph ph-chart-line-up",
+            "options" => "ph ph-stack",
+            "crypto" => "ph ph-currency-btc",
+            "futures" => "ph ph-trend-up",
+            "etfs" or "etf" => "ph ph-chart-pie-slice",
+            "forex" => "ph ph-currency-circle-dollar",
+            "bonds" or "bond" => "ph ph-bank",
+            _ => "ph ph-activity"
+        };
+    }
+
+    private static string ActionIconClass(string? action)
+    {
+        var value = (action ?? string.Empty).Trim().ToUpperInvariant();
+
+        if (value.Contains("BUY"))
+            return "ph ph-arrow-circle-up";
+
+        if (value.Contains("SELL"))
+            return "ph ph-arrow-circle-down";
+
+        if (value.Contains("HOLD") || value.Contains("WAIT"))
+            return "ph ph-pause-circle";
+
+        return "ph ph-minus-circle";
+    }
+
+    private static string ActionClass(string? action)
+    {
+        var value = (action ?? string.Empty).Trim().ToUpperInvariant();
+
+        if (value.Contains("BUY"))
+            return "auto-runtime-action buy";
+
+        if (value.Contains("SELL"))
+            return "auto-runtime-action sell";
+
+        if (value.Contains("HOLD") || value.Contains("WAIT"))
+            return "auto-runtime-action hold";
+
+        return "auto-runtime-action neutral";
+    }
+
+    private static string DisplayActivityState(string? state)
+    {
+        var value = (state ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(value))
+            return "MONITORING";
+
+        var upper = value.ToUpperInvariant();
+
+        if (upper.Contains("CHAIN") && upper.Contains("FAIL"))
+            return "CHAIN FAILED";
+
+        if (upper.Contains("EXEC"))
+            return "EXECUTING";
+
+        if (upper.Contains("DECISION"))
+            return "DECISION";
+
+        if (upper.Contains("SCAN") && upper.Contains("COMP"))
+            return "SCAN COMPLETE";
+
+        if (upper.Contains("SCAN"))
+            return "SCANNING";
+
+        if (upper.Contains("RISK"))
+            return "RISK CHECK";
+
+        if (upper.Contains("ORDER") && upper.Contains("SUBMIT"))
+            return "ORDER SUBMITTED";
+
+        if (upper.Contains("ERROR") || upper.Contains("FAIL"))
+            return "FAILED";
+
+        return upper.Replace('_', ' ');
+    }
+
+    private static string StateClass(string? state)
+    {
+        var value = (state ?? string.Empty).Trim().ToUpperInvariant();
+
+        if (value.Contains("FAIL") || value.Contains("ERROR"))
+            return "failed";
+
+        if (value.Contains("EXEC") || value.Contains("ORDER"))
+            return "executing";
+
+        if (value.Contains("DECISION"))
+            return "decision";
+
+        if (value.Contains("SCAN"))
+            return "scanning";
+
+        if (value.Contains("RISK"))
+            return "risk";
+
+        return "monitoring";
+    }
+
+    private sealed class NavigationItem
+
+    {
+
+        public NavigationItem(
+
+            string key,
+
+            string label,
+
+            string icon,
+
+            string? assetClass = null)
+
+        {
+
+            Key = key;
+
+            Label = label;
+
+            Icon = icon;
+
+            AssetClass = assetClass;
+
+        }
+
+
+
+        public string Key { get; }
+
+        public string Label { get; }
+
+        public string Icon { get; }
+
+        public string? AssetClass { get; }
+
+    }
+
+
+
+    private sealed class SectionState
+
+    {
+
+        public string AssetClass { get; set; } = string.Empty;
+
+        public bool Enabled { get; set; }
+
+        public bool Supported { get; set; }
+
+        public int RunningAutomations { get; set; }
+
+        public int AutomationCount { get; set; }
+
+        public string? Reason { get; set; }
+
+    }
+
+
+
+    private sealed class AutomationItem
+
+    {
+
+        public string Id { get; set; } = string.Empty;
+
+        public string Name { get; set; } = string.Empty;
+
+        public string AssetClass { get; set; } = string.Empty;
+
+        public bool Enabled { get; set; }
+
+        public bool AutoSelectStrategy { get; set; } = true;
+
+        public string? Strategy { get; set; }
+
+        public List<string> Symbols { get; set; } = new();
+
+    }
+
+
+
+    private sealed class RuntimeItem
+
+    {
+
+        public string AutomationId { get; set; } = string.Empty;
+
+        public string State { get; set; } = "STOPPED";
+
+        public string? LastSymbol { get; set; }
+
+        public string? LastStrategy { get; set; }
+
+        public string? LastAction { get; set; }
+
+        public int Orders { get; set; }
+
+    }
+
+    private sealed class AssetActivityItem
+
+    {
+
+        public string AssetClass { get; set; } = string.Empty;
+
+        public string? Symbol { get; set; }
+
+        public string? Strategy { get; set; }
+
+        public string? Action { get; set; }
+
+        public string State { get; set; } = "MONITORING";
+
+        public string RuntimeState { get; set; } = "RUNNING";
+
+        public string? Message { get; set; }
+
+        public string? Timestamp { get; set; }
+
+    }
+
+
+
+    public async ValueTask DisposeAsync()
+
+    {
+
+        _liveRefreshCts.Cancel();
+
+        if (_liveRefreshTask is not null)
+
+        {
+
+            try { await _liveRefreshTask; }
+
+            catch (OperationCanceledException) { }
+
+        }
+
+        _liveRefreshCts.Dispose();
+
+    }
+
+
+
+}

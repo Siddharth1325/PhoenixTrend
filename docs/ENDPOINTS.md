@@ -1,0 +1,15 @@
+# Selected API endpoints
+- `GET /api/health`
+- `GET /api/market/{symbol}`
+- `GET /api/chart/{symbol}?range=5Y&timeframe=1D`
+- `GET /api/intelligence/{symbol}`
+- `GET /api/discover?symbols=NVDA,AAPL,MSFT`
+- `GET /api/strategies`
+- `GET /api/automations`
+- `POST /api/trade/intent`
+- `GET /api/positions`
+- `GET /api/analytics`
+- `GET /api/activity`
+- `POST /api/control/pause-new-entries`
+- `POST /api/control/emergency-stop`
+- `WS /ws/market/{symbol}`

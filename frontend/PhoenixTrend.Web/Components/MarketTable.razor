@@ -1,0 +1,200 @@
+<table class="data-table compact">
+
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Change</th>
+            <th>Volume</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @if (Data is null || Data.Count == 0)
+        {
+            <tr>
+                <td colspan="5" style="text-align:center;">
+                    No @Rows.ToLowerInvariant() market data available.
+                </td>
+            </tr>
+        }
+        else
+        {
+            @for (var i = 0; i < Data.Count; i++)
+            {
+                var row = Data[i];
+
+                <tr>
+                    <td>
+                        @(i + 1)
+                    </td>
+
+                    <td>
+                        <b>@row.Symbol</b>
+                    </td>
+
+                    <td>
+                        @FormatPrice(row.Price)
+                    </td>
+
+                    <td class="@GetChangeClass(row.ChangePercent)">
+                        @FormatChange(row.ChangePercent)
+                    </td>
+
+                    <td>
+                        @FormatVolume(row.Volume)
+                    </td>
+                </tr>
+            }
+        }
+
+    </tbody>
+
+</table>
+
+
+@code
+{
+    // =========================================================
+    // PARAMETERS
+    // =========================================================
+
+    /// <summary>
+    /// Used only as the table/category label.
+    /// Examples:
+    /// Gainers
+    /// Losers
+    /// Active
+    /// </summary>
+    [Parameter]
+    public string Rows { get; set; } = "Gainers";
+
+
+    /// <summary>
+    /// Real market rows supplied by the parent page.
+    ///
+    /// MarketTable does not generate prices internally.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<MarketTableRow> Data { get; set; }
+        = Array.Empty<MarketTableRow>();
+
+
+    // =========================================================
+    // FORMATTING
+    // =========================================================
+
+    private static string FormatPrice(
+        double? value)
+    {
+        if (value is null)
+        {
+            return "—";
+        }
+
+        return value.Value.ToString(
+            "$#,##0.00"
+        );
+    }
+
+
+    private static string FormatChange(
+        double? value)
+    {
+        if (value is null)
+        {
+            return "—";
+        }
+
+        /*
+         * ChangePercent is expected to already represent
+         * percentage points.
+         *
+         * Example:
+         *  2.17  => +2.17%
+         * -1.42  => -1.42%
+         */
+
+        return
+            $"{value.Value:+0.00;-0.00;0.00}%";
+    }
+
+
+    private static string FormatVolume(
+        double? value)
+    {
+        if (value is null)
+        {
+            return "—";
+        }
+
+
+        var volume =
+            value.Value;
+
+
+        if (volume >= 1_000_000_000)
+        {
+            return
+                $"{volume / 1_000_000_000:0.##}B";
+        }
+
+
+        if (volume >= 1_000_000)
+        {
+            return
+                $"{volume / 1_000_000:0.##}M";
+        }
+
+
+        if (volume >= 1_000)
+        {
+            return
+                $"{volume / 1_000:0.##}K";
+        }
+
+
+        return volume.ToString(
+            "#,##0"
+        );
+    }
+
+
+    private static string GetChangeClass(
+        double? value)
+    {
+        if (value is null)
+        {
+            return string.Empty;
+        }
+
+
+        if (value.Value > 0)
+        {
+            return "green";
+        }
+
+
+        if (value.Value < 0)
+        {
+            return "red";
+        }
+
+
+        return string.Empty;
+    }
+
+
+    // =========================================================
+    // PUBLIC ROW MODEL
+    // =========================================================
+
+    public sealed record MarketTableRow(
+        string Symbol,
+        double? Price,
+        double? ChangePercent,
+        double? Volume
+    );
+}

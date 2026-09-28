@@ -1,0 +1,2881 @@
+/* ============================================================
+   PHOENIXTREND
+   HOME / COMMAND CENTER V2
+   ============================================================ */
+
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+
+.pt-home-v2 {
+    --home-bg: #020812;
+    --home-card: rgba(4, 15, 27, .70);
+    --home-card-strong: rgba(5, 17, 29, .86);
+
+    --home-border: rgba(255, 255, 255, .09);
+    --home-border-hover: rgba(255, 171, 50, .30);
+
+    --home-text: #f4f7fb;
+    --home-muted: #8193a5;
+
+    --home-green: #00e6a7;
+    --home-red: #ff5269;
+    --home-orange: #ff971c;
+    --home-gold: #ffc35d;
+    --home-blue: #32b7ff;
+    --home-purple: #a974ff;
+
+    position: relative;
+
+    display: grid;
+
+    gap: 13px;
+
+    min-width: 0;
+}
+
+
+/* ============================================================
+   COMMAND CENTER / WELCOME HERO
+   ============================================================ */
+
+.home-welcome {
+    position: relative;
+
+    isolation: isolate;
+
+    overflow: hidden;
+
+    min-height: 205px;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 28px;
+
+    padding: 27px 28px 68px;
+
+    border:
+        1px solid rgba(255, 255, 255, .11);
+
+    border-radius: 18px;
+
+    background:
+        #06101a;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .11),
+        0 20px 45px rgba(0, 0, 0, .28);
+}
+
+
+/* ============================================================
+   HERO ART
+   ============================================================ */
+
+.home-welcome::before {
+    content: "";
+
+    position: absolute;
+
+    z-index: -2;
+
+    inset: -5px;
+
+    background-image:
+        url("/assets/phoenix-mountain-horizontal.png");
+
+    background-repeat:
+        no-repeat;
+
+    background-size:
+        cover;
+
+    background-position:
+        58% 47%;
+
+    filter:
+        brightness(.72)
+        saturate(.82)
+        contrast(1.08);
+
+    transform:
+        scale(1.02);
+}
+
+
+/* ============================================================
+   HERO OVERLAY
+   ============================================================ */
+
+.home-welcome::after {
+    content: "";
+
+    position: absolute;
+
+    z-index: -1;
+
+    inset: 0;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            rgba(1, 7, 14, .78) 0%,
+            rgba(2, 9, 17, .56) 27%,
+            rgba(2, 9, 17, .20) 56%,
+            rgba(2, 9, 17, .07) 76%,
+            rgba(2, 9, 17, .15) 100%
+        ),
+
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, .05) 0%,
+            rgba(0, 0, 0, .01) 45%,
+            rgba(0, 5, 10, .44) 100%
+        );
+}
+
+
+/* ============================================================
+   HERO COPY
+   ============================================================ */
+
+.home-welcome-copy {
+    position: relative;
+
+    z-index: 3;
+
+    max-width: 650px;
+
+    padding:
+        15px 18px 16px;
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    border-radius:
+        14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(3, 12, 22, .47),
+            rgba(5, 15, 26, .20)
+        );
+
+    backdrop-filter:
+        blur(17px)
+        saturate(125%);
+
+    -webkit-backdrop-filter:
+        blur(17px)
+        saturate(125%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .07),
+        0 12px 32px rgba(0, 0, 0, .18);
+}
+
+
+.home-welcome-copy::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    width: 45px;
+
+    height: 2px;
+
+    border-radius:
+        0 0 6px 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--home-orange),
+            rgba(255, 176, 66, .10)
+        );
+
+    box-shadow:
+        0 0 14px rgba(255, 143, 21, .28);
+}
+
+
+.home-eyebrow {
+    display: block;
+
+    color:
+        #ffb347;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        1.6px;
+
+    text-transform:
+        uppercase;
+
+    text-shadow:
+        0 2px 9px rgba(0, 0, 0, .65);
+}
+
+
+.home-welcome h1 {
+    margin:
+        9px 0 8px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        clamp(30px, 2.35vw, 40px);
+
+    line-height:
+        1;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -1.4px;
+
+    text-shadow:
+        0 3px 10px rgba(0, 0, 0, .65),
+        0 12px 30px rgba(0, 0, 0, .30);
+}
+
+
+.home-welcome h1 span {
+    color:
+        #ffb23c;
+}
+
+
+.home-welcome p {
+    max-width:
+        600px;
+
+    margin:
+        0;
+
+    color:
+        rgba(235, 241, 248, .82);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.55;
+
+    font-weight:
+        500;
+
+    text-shadow:
+        0 2px 9px rgba(0, 0, 0, .68);
+}
+
+
+/* ============================================================
+   HERO ACTIONS
+   ============================================================ */
+
+.home-welcome-actions {
+    position: relative;
+
+    z-index: 4;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+/* ============================================================
+   MARKET STATE
+   ============================================================ */
+
+.home-market-state {
+    min-height: 38px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid rgba(255, 255, 255, .10);
+
+    border-radius:
+        10px;
+
+    color:
+        #b9c5d0;
+
+    background:
+        rgba(3, 12, 22, .58);
+
+    backdrop-filter:
+        blur(16px);
+
+    -webkit-backdrop-filter:
+        blur(16px);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+
+.home-market-state .state-dot {
+    width:
+        6px;
+
+    height:
+        6px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--home-orange);
+
+    box-shadow:
+        0 0 8px rgba(255, 151, 28, .45);
+}
+
+
+.home-market-state.green .state-dot {
+    background:
+        var(--home-green);
+
+    box-shadow:
+        0 0 9px rgba(0, 230, 167, .55);
+}
+
+
+/* ============================================================
+   REFRESH
+   ============================================================ */
+
+.home-refresh-button {
+    position: relative;
+
+    overflow: hidden;
+
+    min-height:
+        38px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
+
+    padding:
+        0 15px;
+
+    border:
+        1px solid rgba(255, 193, 91, .30);
+
+    border-radius:
+        10px;
+
+    color:
+        #ffd17d;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 155, 28, .23),
+            rgba(255, 111, 5, .11)
+        );
+
+    backdrop-filter:
+        blur(17px);
+
+    -webkit-backdrop-filter:
+        blur(17px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.15),
+        0 8px 22px rgba(0,0,0,.20);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        background .18s ease;
+}
+
+
+.home-refresh-button i {
+    font-size:
+        14px;
+}
+
+
+.home-refresh-button:hover:not(:disabled) {
+    transform:
+        translateY(-2px);
+
+    border-color:
+        rgba(255, 199, 104, .52);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 169, 47, .30),
+            rgba(255, 118, 8, .16)
+        );
+}
+
+
+.home-refresh-button:disabled {
+    opacity:
+        .55;
+
+    cursor:
+        default;
+}
+
+
+/* ============================================================
+   KPI GRID
+   ============================================================ */
+
+.metric-grid.five.home-kpis {
+    position:
+        relative;
+
+    z-index:
+        8;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap:
+        10px;
+
+    margin:
+        -54px 14px 2px;
+
+    padding:
+        0;
+}
+
+
+/* ============================================================
+   KPI CARD
+   ============================================================ */
+
+.home-kpis > .metric-card {
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    min-width:
+        0;
+
+    min-height:
+        90px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        42px minmax(0, 1fr);
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    padding:
+        13px;
+
+    border:
+        1px solid rgba(255, 255, 255, .105);
+
+    border-radius:
+        15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(5, 18, 30, .68),
+            rgba(2, 11, 20, .49)
+        );
+
+    backdrop-filter:
+        blur(24px)
+        saturate(145%);
+
+    -webkit-backdrop-filter:
+        blur(24px)
+        saturate(145%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.10),
+        0 15px 32px rgba(0,0,0,.25);
+
+    transition:
+        transform .20s ease,
+        border-color .20s ease,
+        background .20s ease,
+        box-shadow .20s ease;
+}
+
+
+.home-kpis > .metric-card:hover {
+    transform:
+        translateY(-4px);
+
+    border-color:
+        var(--home-border-hover);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 23, 38, .75),
+            rgba(3, 13, 23, .54)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.14),
+        0 19px 38px rgba(0,0,0,.30);
+}
+
+
+/* ============================================================
+   KPI ICON
+   ============================================================ */
+
+.home-kpis .metric-icon {
+    width:
+        40px;
+
+    height:
+        40px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    border-radius:
+        11px;
+
+    color:
+        var(--home-green);
+
+    background:
+        rgba(0, 230, 167, .07);
+}
+
+
+.home-kpis .metric-icon i {
+    font-size:
+        20px;
+
+    line-height:
+        1;
+}
+
+
+.home-kpis .metric-card.blue .metric-icon {
+    color:
+        var(--home-blue);
+
+    background:
+        rgba(50, 183, 255, .08);
+}
+
+
+.home-kpis .metric-card.purple .metric-icon {
+    color:
+        var(--home-purple);
+
+    background:
+        rgba(169, 116, 255, .08);
+}
+
+
+.home-kpis .metric-card.orange .metric-icon {
+    color:
+        var(--home-orange);
+
+    background:
+        rgba(255, 151, 28, .08);
+}
+
+
+.home-kpis .metric-card.negative .metric-icon {
+    color:
+        var(--home-red);
+
+    background:
+        rgba(255, 82, 105, .08);
+}
+
+
+/* ============================================================
+   KPI TEXT
+   ============================================================ */
+
+.home-kpis .metric-copy {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+}
+
+
+.home-kpis .metric-label {
+    overflow:
+        hidden;
+
+    color:
+        #8495a6;
+
+    font-size:
+        8px;
+
+    font-weight:
+        700;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+.home-kpis .metric-value {
+    overflow:
+        hidden;
+
+    color:
+        #f3f7fb;
+
+    font-size:
+        15px;
+
+    line-height:
+        1.15;
+
+    font-weight:
+        800;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+.home-kpis .metric-detail {
+    overflow:
+        hidden;
+
+    color:
+        #65798c;
+
+    font-size:
+        7px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   PRIMARY DASHBOARD
+   ============================================================ */
+
+.home-primary-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(0, 1.65fr)
+        minmax(240px, .74fr)
+        minmax(240px, .70fr);
+
+    gap:
+        12px;
+
+    align-items:
+        stretch;
+
+    min-width:
+        0;
+}
+
+
+/* ============================================================
+   HOME PANEL GLASS
+   ============================================================ */
+
+.home-primary-grid > *,
+.home-secondary-grid > *,
+.home-right-column > * {
+    min-width:
+        0;
+}
+
+
+/* ============================================================
+   PORTFOLIO HEADER
+   ============================================================ */
+
+.portfolio-head {
+    min-height:
+        73px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    padding:
+        3px 4px 11px;
+}
+
+
+.portfolio-head > div:first-child {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        4px;
+}
+
+
+.portfolio-head span {
+    color:
+        var(--home-muted);
+
+    font-size:
+        9px;
+}
+
+
+.portfolio-head strong {
+    color:
+        #f4f7fb;
+
+    font-size:
+        25px;
+
+    line-height:
+        1;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -.5px;
+}
+
+
+.portfolio-head small {
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+}
+
+
+.portfolio-head-icon {
+    width:
+        50px;
+
+    height:
+        50px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        13px;
+
+    color:
+        var(--home-green);
+
+    background:
+        rgba(0, 230, 167, .065);
+}
+
+
+.portfolio-head-icon i {
+    font-size:
+        26px;
+}
+
+
+/* ============================================================
+   REAL PORTFOLIO CHART
+   ============================================================ */
+
+.portfolio-chart {
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    min-height:
+        190px;
+
+    border:
+        1px solid rgba(255,255,255,.04);
+
+    border-radius:
+        12px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(3, 13, 22, .42),
+            rgba(2, 9, 16, .16)
+        );
+
+    background-image:
+        linear-gradient(
+            rgba(119,148,171,.065) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(119,148,171,.065) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        20% 25%;
+}
+
+
+.portfolio-chart svg {
+    width:
+        100%;
+
+    height:
+        190px;
+
+    display:
+        block;
+
+    color:
+        var(--home-green);
+}
+
+
+.portfolio-line {
+    fill:
+        none;
+
+    stroke:
+        var(--home-green);
+
+    stroke-width:
+        2.4;
+
+    stroke-linecap:
+        round;
+
+    stroke-linejoin:
+        round;
+
+    vector-effect:
+        non-scaling-stroke;
+
+    filter:
+        drop-shadow(
+            0 0 5px rgba(0, 232, 168, .32)
+        );
+}
+
+
+.portfolio-area {
+    fill:
+        url("#portfolioAreaGradient");
+
+    stroke:
+        none;
+}
+
+
+/* ============================================================
+   EMPTY CHART
+   ============================================================ */
+
+.home-empty-chart {
+    min-height:
+        190px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        20px;
+
+    border:
+        1px dashed rgba(116, 151, 181, .15);
+
+    border-radius:
+        12px;
+
+    text-align:
+        center;
+
+    background:
+        rgba(1, 8, 15, .19);
+}
+
+
+.empty-chart-icon {
+    width:
+        42px;
+
+    height:
+        42px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    margin-bottom:
+        10px;
+
+    border-radius:
+        11px;
+
+    color:
+        var(--home-blue);
+
+    background:
+        rgba(50, 183, 255, .08);
+}
+
+
+.empty-chart-icon i {
+    font-size:
+        21px;
+}
+
+
+.home-empty-chart strong {
+    color:
+        #e7edf3;
+
+    font-size:
+        11px;
+}
+
+
+.home-empty-chart p {
+    max-width:
+        390px;
+
+    margin:
+        6px 0 0;
+
+    color:
+        #718498;
+
+    font-size:
+        9px;
+
+    line-height:
+        1.55;
+}
+
+
+/* ============================================================
+   ACCOUNT SUMMARY
+   ============================================================ */
+
+.account-main-value {
+    padding:
+        4px 3px 13px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.07);
+}
+
+
+.account-main-value span,
+.account-main-value strong,
+.account-main-value small {
+    display:
+        block;
+}
+
+
+.account-main-value span {
+    color:
+        var(--home-muted);
+
+    font-size:
+        9px;
+}
+
+
+.account-main-value strong {
+    margin-top:
+        5px;
+
+    color:
+        #f2f6fa;
+
+    font-size:
+        21px;
+
+    font-weight:
+        800;
+}
+
+
+.account-main-value small {
+    margin-top:
+        4px;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+}
+
+
+.account-info-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    margin-top:
+        7px;
+}
+
+
+.account-info-grid > div {
+    min-width:
+        0;
+
+    min-height:
+        57px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    gap:
+        4px;
+
+    padding:
+        7px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.055);
+}
+
+
+.account-info-grid > div:nth-child(odd) {
+    border-right:
+        1px solid rgba(255,255,255,.055);
+}
+
+
+.account-info-grid span {
+    color:
+        var(--home-muted);
+
+    font-size:
+        8px;
+}
+
+
+.account-info-grid strong {
+    overflow:
+        hidden;
+
+    color:
+        #e7edf3;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   ENGINE SUMMARY
+   ============================================================ */
+
+.engine-summary {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        11px;
+
+    padding:
+        4px 2px 13px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.07);
+}
+
+
+.engine-icon {
+    width:
+        44px;
+
+    height:
+        44px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border:
+        1px solid rgba(255, 158, 31, .18);
+
+    border-radius:
+        12px;
+
+    color:
+        var(--home-orange);
+
+    background:
+        rgba(255, 151, 28, .08);
+}
+
+
+.engine-icon i {
+    font-size:
+        22px;
+}
+
+
+.engine-summary > div:last-child {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+}
+
+
+.engine-summary span {
+    color:
+        var(--home-muted);
+
+    font-size:
+        8px;
+}
+
+
+.engine-summary strong {
+    overflow:
+        hidden;
+
+    color:
+        #edf2f7;
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   SYSTEM STATUS
+   ============================================================ */
+
+.home-status-list {
+    display:
+        grid;
+
+    margin-top:
+        7px;
+}
+
+
+.home-status-list > div {
+    min-height:
+        36px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    padding:
+        0 2px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.055);
+}
+
+
+.home-status-list > div:last-child {
+    border-bottom:
+        0;
+}
+
+
+.home-status-list span {
+    color:
+        #8192a4;
+
+    font-size:
+        9px;
+}
+
+
+.home-status-list strong {
+    overflow:
+        hidden;
+
+    max-width:
+        120px;
+
+    color:
+        #dce4ec;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    text-align:
+        right;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   MARKET STRIP
+   ============================================================ */
+
+.home-market-strip {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap:
+        9px;
+}
+
+
+/* ============================================================
+   MARKET CARD
+   ============================================================ */
+
+.home-market-card {
+    min-width:
+        0;
+
+    min-height:
+        72px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        9px;
+
+    padding:
+        10px;
+
+    border:
+        1px solid rgba(255,255,255,.085);
+
+    border-radius:
+        11px;
+
+    color:
+        inherit;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(5, 18, 30, .75),
+            rgba(2, 11, 20, .66)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.055),
+        0 8px 20px rgba(0,0,0,.12);
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        background .18s ease,
+        box-shadow .18s ease;
+}
+
+
+.home-market-card:hover {
+    transform:
+        translateY(-3px);
+
+    border-color:
+        rgba(255, 171, 50, .27);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 24, 39, .82),
+            rgba(4, 14, 25, .73)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        0 12px 25px rgba(0,0,0,.18);
+}
+
+
+/* ============================================================
+   COMPANY / STOCK LOGO
+   ============================================================ */
+
+.market-company {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+}
+
+
+.market-company > div:last-child {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+}
+
+
+.market-company strong {
+    color:
+        #f0f4f8;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+}
+
+
+.market-company small {
+    overflow:
+        hidden;
+
+    max-width:
+        80px;
+
+    color:
+        #718497;
+
+    font-size:
+        8px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   MARKET PRICE
+   ============================================================ */
+
+.market-quote {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        flex-end;
+
+    gap:
+        4px;
+}
+
+
+.market-quote strong {
+    color:
+        #edf2f7;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+}
+
+
+.market-quote span {
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   LOWER DASHBOARD
+   ============================================================ */
+
+.home-secondary-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(0, 1.65fr)
+        minmax(300px, .72fr);
+
+    gap:
+        12px;
+
+    min-width:
+        0;
+}
+
+
+.home-right-column {
+    display:
+        grid;
+
+    gap:
+        12px;
+
+    min-width:
+        0;
+}
+
+
+/* ============================================================
+   WATCHLIST
+   ============================================================ */
+
+.home-table-wrap {
+    width:
+        100%;
+
+    overflow-x:
+        auto;
+}
+
+
+.home-watchlist-table {
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+    table-layout:
+        fixed;
+}
+
+
+.home-watchlist-table thead th {
+    height:
+        39px;
+
+    padding:
+        0 8px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.085);
+
+    color:
+        #7f91a3;
+
+    text-align:
+        left;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        .25px;
+}
+
+
+.home-watchlist-table tbody td {
+    height:
+        51px;
+
+    padding:
+        0 8px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.055);
+
+    color:
+        #c8d2dc;
+
+    font-size:
+        9px;
+
+    vertical-align:
+        middle;
+}
+
+
+.home-watchlist-table tbody tr {
+    cursor:
+        pointer;
+
+    transition:
+        background .16s ease;
+}
+
+
+.home-watchlist-table tbody tr:hover {
+    background:
+        rgba(255,255,255,.023);
+}
+
+
+.home-watchlist-table tbody tr:last-child td {
+    border-bottom:
+        0;
+}
+
+
+.home-watchlist-table th:first-child,
+.home-watchlist-table td:first-child {
+    width:
+        40%;
+}
+
+
+.home-table-empty {
+    color:
+        #718497 !important;
+
+    text-align:
+        center;
+}
+
+
+/* ============================================================
+   WATCH SYMBOL
+   ============================================================ */
+
+.watch-symbol {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+}
+
+
+.watch-symbol > div:last-child {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        2px;
+}
+
+
+.watch-symbol strong {
+    color:
+        #edf2f7;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+}
+
+
+.watch-symbol small {
+    overflow:
+        hidden;
+
+    color:
+        #718497;
+
+    font-size:
+        7px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   QUOTE STATUS
+   ============================================================ */
+
+.quote-status {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    padding:
+        4px 7px;
+
+    border-radius:
+        999px;
+
+    font-size:
+        7px;
+
+    font-weight:
+        800;
+}
+
+
+.quote-status.live {
+    color:
+        var(--home-green);
+
+    background:
+        rgba(0, 230, 167, .07);
+}
+
+
+.quote-status.live > span {
+    width:
+        5px;
+
+    height:
+        5px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--home-green);
+
+    box-shadow:
+        0 0 6px rgba(0,230,167,.55);
+}
+
+
+.quote-status.unavailable {
+    color:
+        #8292a3;
+
+    background:
+        rgba(130,146,163,.07);
+}
+
+
+/* ============================================================
+   TRADING SYSTEM
+   ============================================================ */
+
+.trading-system-list {
+    display:
+        grid;
+
+    gap:
+        6px;
+}
+
+
+.trading-system-list > button {
+    width:
+        100%;
+
+    min-height:
+        54px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        36px minmax(0, 1fr) 16px;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    padding:
+        7px 8px;
+
+    border:
+        1px solid rgba(255,255,255,.065);
+
+    border-radius:
+        9px;
+
+    color:
+        inherit;
+
+    background:
+        rgba(255,255,255,.014);
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    transition:
+        border-color .16s ease,
+        background .16s ease,
+        transform .16s ease;
+}
+
+
+.trading-system-list > button:hover {
+    transform:
+        translateX(2px);
+
+    border-color:
+        rgba(255, 171, 50, .20);
+
+    background:
+        rgba(255,255,255,.024);
+}
+
+
+.system-item-icon {
+    width:
+        34px;
+
+    height:
+        34px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        8px;
+
+    font-size:
+        16px;
+}
+
+
+.system-item-icon.purple {
+    color:
+        var(--home-purple);
+
+    background:
+        rgba(169, 116, 255, .09);
+}
+
+
+.system-item-icon.orange {
+    color:
+        var(--home-orange);
+
+    background:
+        rgba(255, 151, 28, .09);
+}
+
+
+.system-item-icon.green {
+    color:
+        var(--home-green);
+
+    background:
+        rgba(0, 230, 167, .09);
+}
+
+
+.trading-system-list button > div {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        2px;
+}
+
+
+.trading-system-list small {
+    color:
+        #75889a;
+
+    font-size:
+        8px;
+}
+
+
+.trading-system-list strong {
+    color:
+        #e9eff5;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+}
+
+
+.trading-system-list button > i {
+    color:
+        #607487;
+
+    font-size:
+        12px;
+}
+
+
+/* ============================================================
+   ACTIVITY
+   ============================================================ */
+
+.home-activity-empty {
+    min-height:
+        82px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+    color:
+        #718497;
+
+    font-size:
+        9px;
+}
+
+
+.home-activity-empty i {
+    font-size:
+        17px;
+}
+
+
+.home-activity-list {
+    display:
+        grid;
+}
+
+
+.home-activity-list article {
+    min-height:
+        48px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        7px minmax(0, 1fr) auto;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.055);
+}
+
+
+.home-activity-list article:last-child {
+    border-bottom:
+        0;
+}
+
+
+.activity-marker {
+    width:
+        6px;
+
+    height:
+        6px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--home-orange);
+
+    box-shadow:
+        0 0 7px rgba(255,151,28,.30);
+}
+
+
+.home-activity-list article > div {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        2px;
+}
+
+
+.home-activity-list strong {
+    overflow:
+        hidden;
+
+    color:
+        #dfe7ef;
+
+    font-size:
+        9px;
+
+    font-weight:
+        700;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+.home-activity-list small {
+    overflow:
+        hidden;
+
+    color:
+        #718497;
+
+    font-size:
+        7px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+.home-activity-list time {
+    color:
+        #607487;
+
+    font-size:
+        7px;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   SHARED COLORS
+   ============================================================ */
+
+.pt-home-v2 .green {
+    color:
+        var(--home-green) !important;
+}
+
+
+.pt-home-v2 .red {
+    color:
+        var(--home-red) !important;
+}
+
+
+.pt-home-v2 .orange {
+    color:
+        var(--home-orange) !important;
+}
+
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+.home-table-wrap::-webkit-scrollbar {
+    height:
+        5px;
+}
+
+
+.home-table-wrap::-webkit-scrollbar-track {
+    background:
+        rgba(255,255,255,.02);
+}
+
+
+.home-table-wrap::-webkit-scrollbar-thumb {
+    border-radius:
+        999px;
+
+    background:
+        rgba(130,150,170,.25);
+}
+
+
+/* ============================================================
+   1350
+   ============================================================ */
+
+@media (max-width: 1350px) {
+
+    .home-primary-grid {
+        grid-template-columns:
+            minmax(0, 1.4fr)
+            minmax(220px, .72fr)
+            minmax(220px, .68fr);
+    }
+
+
+    .market-company small {
+        display:
+            none;
+    }
+
+}
+
+
+/* ============================================================
+   1200
+   ============================================================ */
+
+@media (max-width: 1200px) {
+
+    .metric-grid.five.home-kpis {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+
+    .home-primary-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .home-performance-panel {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .home-market-strip {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+
+/* ============================================================
+   980
+   ============================================================ */
+
+@media (max-width: 980px) {
+
+    .home-welcome {
+        min-height:
+            215px;
+
+        padding:
+            23px 22px 70px;
+    }
+
+
+    .metric-grid.five.home-kpis {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        margin-left:
+            10px;
+
+        margin-right:
+            10px;
+    }
+
+
+    .home-primary-grid,
+    .home-secondary-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .home-performance-panel {
+        grid-column:
+            auto;
+    }
+
+
+    .home-market-strip {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 650px) {
+
+    .home-welcome {
+        min-height:
+            255px;
+
+        flex-direction:
+            column;
+
+        justify-content:
+            flex-start;
+
+        gap:
+            14px;
+
+        padding:
+            20px 17px 72px;
+    }
+
+
+    .home-welcome::before {
+        background-position:
+            66% center;
+    }
+
+
+    .home-welcome-copy {
+        width:
+            100%;
+
+        padding:
+            14px;
+    }
+
+
+    .home-welcome h1 {
+        font-size:
+            27px;
+    }
+
+
+    .home-welcome-actions {
+        width:
+            100%;
+    }
+
+
+    .home-market-state {
+        flex:
+            1;
+    }
+
+
+    .metric-grid.five.home-kpis {
+        grid-template-columns:
+            1fr;
+
+        margin-top:
+            -48px;
+    }
+
+
+    .home-market-strip {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .home-watchlist-table {
+        min-width:
+            570px;
+    }
+
+
+    .portfolio-head strong {
+        font-size:
+            21px;
+    }
+
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .home-refresh-button,
+    .home-kpis > .metric-card,
+    .home-market-card,
+    .trading-system-list > button {
+        transition:
+            none;
+    }
+
+}
+
+/* ============================================================
+   APPROVED HOME COMPOSITION OVERRIDES
+   Single hero artwork + KPI glass row inside hero.
+   ============================================================ */
+
+.pt-home-v2 {
+    position: relative;
+    gap: 13px;
+    padding-bottom: 8px;
+}
+
+.home-welcome {
+    min-height: 306px;
+    padding: 30px 30px 126px;
+    margin: 0;
+}
+
+.home-welcome::before {
+    background-image: url("/assets/phoenix-mountain-horizontal.png");
+    background-size: cover;
+    background-position: 58% 47%;
+    filter: brightness(.78) saturate(.92) contrast(1.08);
+}
+
+.home-welcome::after {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(1, 7, 14, .84) 0%,
+            rgba(2, 9, 17, .58) 29%,
+            rgba(2, 9, 17, .17) 58%,
+            rgba(2, 9, 17, .07) 78%,
+            rgba(2, 9, 17, .14) 100%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, .02) 0%,
+            rgba(0, 0, 0, .02) 46%,
+            rgba(0, 5, 10, .82) 100%
+        );
+}
+
+.home-kpis {
+    position: absolute;
+    z-index: 8;
+    top: 198px;
+    left: 14px;
+    right: 14px;
+    margin: 0;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.home-kpis .metric-card {
+    min-height: 92px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(6, 20, 33, .88),
+            rgba(2, 10, 18, .82)
+        );
+    border-color: rgba(255, 255, 255, .11);
+    backdrop-filter: blur(20px) saturate(135%);
+    -webkit-backdrop-filter: blur(20px) saturate(135%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 12px 30px rgba(0, 0, 0, .24);
+}
+
+.home-primary-grid {
+    margin-top: 0;
+}
+
+.home-performance-panel .panel-body {
+    min-height: 284px;
+}
+
+.home-empty-chart {
+    min-height: 170px;
+}
+
+.home-market-strip {
+    margin-top: 0;
+}
+
+@media (max-width: 1280px) {
+    .home-kpis {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+
+
+/* ============================================================
+   FINAL HOME FIX — 2026-09
+   Fixes:
+   1. Phoenix face visibility
+   2. KPI overlap / excessive vertical gap
+   3. Home typography readability
+   4. Market quote readability
+   ============================================================ */
+
+/* Keep the page in normal document flow. */
+.pt-home-v2 {
+    position: relative !important;
+    display: grid !important;
+    gap: 16px !important;
+    min-width: 0 !important;
+}
+
+/* Taller hero gives the artwork enough vertical room. */
+.home-welcome {
+    min-height: 330px !important;
+    padding: 30px 30px 34px !important;
+    margin: 0 !important;
+    align-items: flex-start !important;
+}
+
+/*
+   The Phoenix is in the upper-right of the source artwork.
+   A slightly smaller image than "cover" preserves the head/face instead of
+   vertically cropping it out on ultra-wide desktop screens.
+*/
+.home-welcome::before {
+    inset: 0 !important;
+    background-image: url("/assets/phoenix-mountain-horizontal.png") !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% auto !important;
+    background-position: center top !important;
+    transform: none !important;
+    filter:
+        brightness(.82)
+        saturate(.98)
+        contrast(1.06) !important;
+}
+
+/* Preserve text contrast without hiding the bird. */
+.home-welcome::after {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(1, 7, 14, .82) 0%,
+            rgba(2, 9, 17, .52) 30%,
+            rgba(2, 9, 17, .12) 58%,
+            rgba(2, 9, 17, .02) 76%,
+            rgba(2, 9, 17, .06) 100%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, .02) 0%,
+            rgba(0, 0, 0, 0) 58%,
+            rgba(0, 5, 10, .55) 100%
+        ) !important;
+}
+
+/* Welcome card typography. */
+.home-welcome-copy {
+    max-width: 700px !important;
+    padding: 18px 20px 19px !important;
+}
+
+.home-eyebrow {
+    font-size: 11px !important;
+    letter-spacing: 1.55px !important;
+}
+
+.home-welcome h1 {
+    margin: 10px 0 10px !important;
+    font-size: clamp(36px, 2.65vw, 48px) !important;
+    line-height: 1.02 !important;
+}
+
+.home-welcome p {
+    max-width: 650px !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+}
+
+.home-market-state,
+.home-refresh-button {
+    min-height: 42px !important;
+    font-size: 12px !important;
+}
+
+/*
+   KPI cards are a separate section in Home.razor.
+   Keep them in normal flow. Never absolutely position them.
+*/
+.metric-grid.five.home-kpis,
+.home-kpis {
+    position: relative !important;
+    z-index: 4 !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+}
+
+.home-kpis > .metric-card {
+    min-height: 108px !important;
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 15px 16px !important;
+    border-radius: 14px !important;
+}
+
+.home-kpis .metric-icon {
+    width: 46px !important;
+    height: 46px !important;
+}
+
+.home-kpis .metric-icon i {
+    font-size: 22px !important;
+}
+
+.home-kpis .metric-label {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+}
+
+.home-kpis .metric-value {
+    font-size: 20px !important;
+    line-height: 1.15 !important;
+}
+
+.home-kpis .metric-detail {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+}
+
+/* Main cards now begin after the KPI section, with no overlap. */
+.home-primary-grid {
+    position: relative !important;
+    z-index: 1 !important;
+    margin: 0 !important;
+    gap: 14px !important;
+}
+
+/* Panel headings are supplied by the shared Panel component. */
+.pt-home-v2 .panel-title,
+.pt-home-v2 .panel-header h2,
+.pt-home-v2 .panel-header h3,
+.pt-home-v2 .panel-heading {
+    font-size: 16px !important;
+}
+
+.pt-home-v2 .panel-subtitle,
+.pt-home-v2 .panel-header p {
+    font-size: 11px !important;
+}
+
+/* Portfolio / account / engine values. */
+.portfolio-head span,
+.account-main-value span,
+.engine-summary span,
+.account-info-grid span,
+.home-status-list span {
+    font-size: 11px !important;
+}
+
+.portfolio-head strong {
+    font-size: 28px !important;
+}
+
+.portfolio-head small,
+.account-main-value small {
+    font-size: 11px !important;
+}
+
+.account-main-value strong {
+    font-size: 24px !important;
+}
+
+.account-info-grid strong,
+.home-status-list strong,
+.engine-summary strong {
+    font-size: 12px !important;
+}
+
+.home-empty-chart strong {
+    font-size: 13px !important;
+}
+
+.home-empty-chart p {
+    max-width: 520px !important;
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+}
+
+/* Market cards. */
+.home-market-strip {
+    gap: 12px !important;
+    margin: 0 !important;
+}
+
+.home-market-card {
+    min-height: 78px !important;
+    padding: 12px 14px !important;
+}
+
+.market-company strong {
+    font-size: 13px !important;
+}
+
+.market-company small {
+    font-size: 10px !important;
+}
+
+.market-quote strong {
+    font-size: 13px !important;
+}
+
+.market-quote span {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+/* Watchlist. */
+.home-watchlist-table th {
+    font-size: 11px !important;
+}
+
+.home-watchlist-table td {
+    font-size: 12px !important;
+}
+
+.watch-symbol strong {
+    font-size: 12px !important;
+}
+
+.watch-symbol small {
+    font-size: 10px !important;
+}
+
+.quote-status {
+    font-size: 10px !important;
+}
+
+/* Right column. */
+.trading-system-list small {
+    font-size: 10px !important;
+}
+
+.trading-system-list strong {
+    font-size: 14px !important;
+}
+
+.home-activity-empty,
+.home-activity-list article strong {
+    font-size: 11px !important;
+}
+
+.home-activity-list article small,
+.home-activity-list article time {
+    font-size: 10px !important;
+}
+
+/* Make positive/negative quote movement obvious. */
+.pt-home-v2 .green {
+    color: var(--home-green) !important;
+}
+
+.pt-home-v2 .red {
+    color: var(--home-red) !important;
+}
+
+.pt-home-v2 .orange {
+    color: var(--home-orange) !important;
+}
+
+/* Desktop compression without returning to tiny fonts. */
+@media (max-width: 1380px) {
+    .home-welcome {
+        min-height: 305px !important;
+    }
+
+    .home-welcome h1 {
+        font-size: 38px !important;
+    }
+
+    .home-welcome p {
+        font-size: 13px !important;
+    }
+
+    .home-kpis > .metric-card {
+        min-height: 100px !important;
+        padding: 13px !important;
+    }
+
+    .home-kpis .metric-label {
+        font-size: 11px !important;
+    }
+
+    .home-kpis .metric-value {
+        font-size: 18px !important;
+    }
+
+    .home-kpis .metric-detail {
+        font-size: 10px !important;
+    }
+}
+
+@media (max-width: 1180px) {
+    .home-welcome::before {
+        background-size: cover !important;
+        background-position: 68% top !important;
+    }
+
+    .metric-grid.five.home-kpis,
+    .home-kpis {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .home-welcome {
+        min-height: 360px !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+        padding: 20px !important;
+    }
+
+    .home-welcome::before {
+        background-size: cover !important;
+        background-position: 70% top !important;
+    }
+
+    .home-welcome h1 {
+        font-size: 32px !important;
+    }
+
+    .metric-grid.five.home-kpis,
+    .home-kpis {
+        grid-template-columns: 1fr !important;
+    }
+}

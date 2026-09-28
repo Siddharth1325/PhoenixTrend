@@ -1,0 +1,3572 @@
+@* ============================================================
+   PHOENIXTREND CHARTS
+   Pages/Charts.razor
+
+   Professional provider-backed chart workstation.
+
+   - Real OHLCV only
+   - No generated candles
+   - 5Y historical chart support
+   - Genuine Alpaca LIVE trade streaming
+   - EMA 9 / 20 / 50 / 200
+   - RSI 14
+   - MACD
+   - Support / Resistance
+   - Provider-backed candle updates
+   - Corporate/news event markers
+   - Strategy levels only when backend provides them
+   - Time/price anchored drawings
+   ============================================================ *@
+
+@page "/charts"
+
+@using System.Globalization
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+
+@implements IAsyncDisposable
+
+@inject PhoenixApi Api
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<PageTitle>PhoenixTrend | TradeDesk</PageTitle>
+
+<div class="pt-charts">
+
+    @* ========================================================
+       HERO
+       ======================================================== *@
+
+    <section class="charts-hero">
+        <div class="charts-hero-copy">
+            <h1>TradeDesk</h1>
+            <p>Professional charting, market analysis and broker-backed manual execution</p>
+        </div>
+
+        <!-- <div class="charts-hero-status">
+            <span class="status-dot @(Bars.Count > 0 ? "online" : "")"></span>
+
+            <div>
+                <strong>@Symbol</strong>
+                <small>@ProviderStatus</small>
+            </div>
+        </div> -->
+    </section>
+
+    @* ========================================================
+       QUICK TICKERS
+       ======================================================== *@
+
+    <section class="ticker-strip">
+
+        <div class="tradedesk-symbol-search">
+            <i class="ph ph-magnifying-glass"></i>
+            <input value="@SymbolSearch"
+                   @oninput="SymbolSearchChanged"
+                   @onkeydown="SymbolSearchKeyDown"
+                   autocomplete="off"
+                   spellcheck="false"
+                   placeholder="Search symbol — AAPL, NVDA, TSLA, MSFT, SPY..." />
+            <button type="button" @onclick="LoadSearchedSymbol" disabled="@Loading">
+                <i class="ph ph-arrow-right"></i>
+            </button>
+        </div>
+
+        @foreach (var ticker in Tickers)
+        {
+            <button class="ticker-card @(ticker.Symbol == Symbol ? "active" : "")"
+                    @onclick="() => SelectSymbol(ticker.Symbol)">
+
+                <StockLogo Symbol="@ticker.Symbol" Size="28" />
+
+                <span class="ticker-copy">
+                    <strong>@ticker.Symbol</strong>
+                    <small>@FormatPrice(ticker.Price)</small>
+                </span>
+
+                <span class="ticker-change @ChangeClass(ticker.ChangePercent)">
+                    @FormatPercent(ticker.ChangePercent)
+                </span>
+
+                <span class="ticker-spark @ChangeClass(ticker.ChangePercent)">
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                </span>
+
+            </button>
+        }
+
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="chart-alert">
+            <i class="ph ph-warning-circle"></i>
+            @ErrorMessage
+        </div>
+    }
+
+    @* ========================================================
+       WORKSPACE
+       ======================================================== *@
+
+    <section class="charts-workspace">
+
+        <div class="chart-column">
+
+            <div class="chart-shell">
+
+                @* ====================================================
+                   COMMAND BAR
+                   ==================================================== *@
+
+                <header class="chart-commandbar">
+
+                    <div class="symbol-command">
+                        <StockLogo Symbol="@Symbol" Size="30" />
+
+                        <div>
+                            <strong>@Symbol</strong>
+                            <small>@SymbolName</small>
+                        </div>
+                    </div>
+
+                    <div class="timeframe-group">
+
+                        <button class="@(LiveMode ? "active live-active" : "live-button")"
+                                disabled="@Loading"
+                                title="Stream genuine Alpaca market trades"
+                                @onclick="EnableLiveMode">
+                            <span class="live-dot"></span>
+                            LIVE
+                        </button>
+
+                        @foreach (var tf in Timeframes)
+                        {
+                            <button class="@(!LiveMode && SelectedTimeframe == tf.Key ? "active" : "")"
+                                    disabled="@Loading"
+                                    @onclick="() => ChangeTimeframe(tf.Key)">
+                                @tf.Label
+                            </button>
+                        }
+
+                    </div>
+
+                    <div class="chart-actions">
+
+                        <button class="icon-btn @(ShowIndicators ? "active" : "")"
+                                title="Indicators"
+                                @onclick="ToggleIndicators">
+
+                            <i class="ph ph-function"></i>
+
+                        </button>
+
+                        <button class="command-btn"
+                                title="Fit chart"
+                                @onclick="FitChart">
+
+                            <i class="ph ph-arrows-out-line-horizontal"></i>
+                            Fit
+
+                        </button>
+
+                        <button class="command-btn"
+                                title="Return to latest candle"
+                                @onclick="ScrollToRealtime">
+
+                            <i class="ph ph-skip-forward"></i>
+
+                        </button>
+
+                        <button class="command-btn"
+                                title="Screenshot"
+                                @onclick="TakeScreenshot">
+
+                            <i class="ph ph-camera"></i>
+
+                        </button>
+
+                        <button class="command-btn"
+                                title="Fullscreen"
+                                @onclick="ToggleFullscreen">
+
+                            <i class="ph ph-corners-out"></i>
+
+                        </button>
+
+                    </div>
+
+                </header>
+
+                @* ====================================================
+                   OHLC HEADER
+                   ==================================================== *@
+
+                <div class="ohlc-strip">
+
+                    <strong>
+                        @Symbol · @(LiveMode ? $"LIVE · {SelectedTimeframe}" : SelectedTimeframe)
+                    </strong>
+
+                    <span>
+                        O
+                        <b>@FormatPrice(DisplayBar?.Open)</b>
+                    </span>
+
+                    <span>
+                        H
+                        <b>@FormatPrice(DisplayBar?.High)</b>
+                    </span>
+
+                    <span>
+                        L
+                        <b>@FormatPrice(DisplayBar?.Low)</b>
+                    </span>
+
+                    <span>
+                        C
+                        <b>@FormatPrice(DisplayBar?.Close)</b>
+                    </span>
+
+                    <span>
+                        Vol
+                        <b>@FormatVolume(DisplayBar?.Volume)</b>
+                    </span>
+
+                    <span class="@ChangeClass(DisplayChangePercent)">
+                        @FormatPercent(DisplayChangePercent)
+                    </span>
+
+                    <span class="provider-label">
+                        <span class="live-dot"></span>
+                        @ProviderStatus
+                    </span>
+
+                </div>
+
+                @* ====================================================
+                   CHART STAGE
+                   ==================================================== *@
+
+                <div class="chart-stage">
+
+                    <aside class="drawing-rail">
+
+                        @foreach (var tool in DrawingTools)
+                        {
+                            <button class="@(SelectedDrawingTool == tool.Id ? "active" : "")"
+                                    title="@tool.Label"
+                                    @onclick="() => SelectDrawingTool(tool.Id)">
+
+                                <i class="@tool.Icon"></i>
+
+                            </button>
+                        }
+
+                    </aside>
+
+                    <div class="chart-area">
+
+                        @if (Loading)
+                        {
+                            <div class="chart-loading">
+                                <span></span>
+
+                                Loading real @SelectedRange / @SelectedTimeframe
+                                candles for @Symbol...
+                            </div>
+                        }
+
+                        <div id="phoenix-main-chart"
+                             class="phoenix-main-chart">
+                        </div>
+
+                        @if (ShowIndicators && Bars.Count > 0)
+                        {
+                            <div class="indicator-pane rsi-pane">
+
+                                <div class="indicator-pane-title">
+                                    <strong>RSI 14</strong>
+
+                                    <span>
+                                        @Rsi
+                                    </span>
+                                </div>
+
+                                <div id="phoenix-rsi-chart"
+                                     class="phoenix-indicator-chart">
+                                </div>
+
+                            </div>
+
+                            <div class="indicator-pane macd-pane">
+
+                                <div class="indicator-pane-title">
+                                    <strong>MACD 12 26 9</strong>
+                                </div>
+
+                                <div id="phoenix-macd-chart"
+                                     class="phoenix-indicator-chart">
+                                </div>
+
+                            </div>
+                        }
+
+                        @if (!Loading && Bars.Count == 0)
+                        {
+                            <div class="chart-no-data">
+
+                                <i class="ph ph-chart-line-down"></i>
+
+                                <strong>
+                                    Market data unavailable
+                                </strong>
+
+                                <span>
+                                    PhoenixTrend will not generate replacement candles.
+                                </span>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+                @* ====================================================
+                   RANGE / STATUS BAR
+                   ==================================================== *@
+
+                <footer class="chart-footer">
+
+                    <div class="range-group">
+
+                        @foreach (var range in Ranges)
+                        {
+                            <button class="@(SelectedRange == range ? "active" : "")"
+                                    disabled="@Loading"
+                                    @onclick="() => ChangeRange(range)">
+
+                                @range
+
+                            </button>
+                        }
+
+                    </div>
+
+                    <div class="chart-status">
+
+                        <span class="live-dot"></span>
+
+                        <span>
+                            @LastProviderUpdate
+                        </span>
+
+                        <button @onclick="ResetPriceScale">
+                            %
+                        </button>
+
+                        <button @onclick="FitChart">
+                            auto
+                        </button>
+
+                    </div>
+
+                </footer>
+
+            </div>
+
+            @* ========================================================
+               MARKET LEVELS
+               ======================================================== *@
+
+            <section class="chart-levels-grid">
+
+                <article class="chart-level-card support">
+
+                    <header>
+                        <span>
+                            <i class="ph ph-arrow-down-left"></i>
+                            Support
+                        </span>
+                    </header>
+
+                    @if (SupportLevels.Count == 0)
+                    {
+                        <strong>—</strong>
+                        <small>No confirmed level available</small>
+                    }
+                    else
+                    {
+                        <strong>@FormatPrice(SupportLevels.FirstOrDefault())</strong>
+
+                        <small>
+                            @string.Join(" · ", SupportLevels.Take(3).Select(x => FormatPrice(x)))
+                        </small>
+                    }
+
+                </article>
+
+                <article class="chart-level-card resistance">
+
+                    <header>
+                        <span>
+                            <i class="ph ph-arrow-up-right"></i>
+                            Resistance
+                        </span>
+                    </header>
+
+                    @if (ResistanceLevels.Count == 0)
+                    {
+                        <strong>—</strong>
+                        <small>No confirmed level available</small>
+                    }
+                    else
+                    {
+                        <strong>@FormatPrice(ResistanceLevels.FirstOrDefault())</strong>
+
+                        <small>
+                            @string.Join(" · ", ResistanceLevels.Take(3).Select(x => FormatPrice(x)))
+                        </small>
+                    }
+
+                </article>
+
+                <article class="chart-level-card entry">
+
+                    <header>
+                        <span>
+                            <i class="ph ph-sign-in"></i>
+                            Entry
+                        </span>
+                    </header>
+
+                    <strong>@FormatPrice(TradeLevels.Entry)</strong>
+
+                    <small>
+                        @(TradeLevels.Entry.HasValue
+                            ? "Phoenix analysis level"
+                            : "No backend entry signal")
+                    </small>
+
+                </article>
+
+                <article class="chart-level-card target">
+
+                    <header>
+                        <span>
+                            <i class="ph ph-target"></i>
+                            Target / Exit
+                        </span>
+                    </header>
+
+                    <strong>
+                        @FormatPrice(TradeLevels.Target ?? TradeLevels.Exit)
+                    </strong>
+
+                    <small>
+                        @if (TradeLevels.Stop.HasValue)
+                        {
+                            <span>
+                                Stop @FormatPrice(TradeLevels.Stop)
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                No backend target/stop signal
+                            </span>
+                        }
+                    </small>
+
+                </article>
+
+            </section>
+
+            @* ========================================================
+               LOWER INFORMATION PANELS
+               ======================================================== *@
+
+            <section class="bottom-grid">
+
+                <article class="data-panel">
+
+                    <header>
+
+                        <strong>
+                            Open Positions
+                        </strong>
+
+                        <button @onclick='() => Navigation.NavigateTo("/portfolio")'>
+                            View All
+                        </button>
+
+                    </header>
+
+                    <div class="mini-table">
+
+                        <div class="mini-table-head position-cols">
+                            <span>Symbol</span>
+                            <span>Qty</span>
+                            <span>Entry</span>
+                            <span>Current</span>
+                            <span>P&amp;L</span>
+                        </div>
+
+                        @if (Positions.Count == 0)
+                        {
+                            <div class="panel-empty">
+                                Connect Alpaca to show your real open positions.
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var p in Positions.Take(5))
+                            {
+                                <button class="mini-table-row position-cols"
+                                        @onclick="() => SelectSymbol(p.Symbol)">
+
+                                    <span class="symbol-cell">
+
+                                        <StockLogo Symbol="@p.Symbol"
+                                                   Size="20" />
+
+                                        <b>@p.Symbol</b>
+
+                                    </span>
+
+                                    <span>
+                                        @p.Qty
+                                    </span>
+
+                                    <span>
+                                        @FormatPrice(p.EntryPrice)
+                                    </span>
+
+                                    <span>
+                                        @FormatPrice(p.CurrentPrice)
+                                    </span>
+
+                                    <span class="@ChangeClass(p.Pnl)">
+                                        @FormatMoney(p.Pnl)
+                                    </span>
+
+                                </button>
+                            }
+                        }
+
+                    </div>
+
+                </article>
+
+                <article class="data-panel">
+
+                    <header>
+
+                        <strong>
+                            Market Context
+                        </strong>
+
+                        <button @onclick="Refresh">
+                            Refresh
+                        </button>
+
+                    </header>
+
+                    <div class="context-grid">
+
+                        <div>
+                            <span>RSI 14</span>
+                            <strong>@Rsi</strong>
+                        </div>
+
+                        <div>
+                            <span>EMA 20</span>
+                            <strong>@Ema20</strong>
+                        </div>
+
+                        <div>
+                            <span>EMA 50</span>
+                            <strong>@Ema50</strong>
+                        </div>
+
+                        <div>
+                            <span>VWAP</span>
+                            <strong>@Vwap</strong>
+                        </div>
+
+                        <div>
+                            <span>Volume Ratio</span>
+                            <strong>@VolumeRatio</strong>
+                        </div>
+
+                        <div>
+                            <span>Regime</span>
+                            <strong>@MarketRegime</strong>
+                        </div>
+
+                    </div>
+
+                </article>
+
+                <article class="data-panel ai-panel">
+
+                    <header>
+
+                        <strong>
+                            <i class="ph ph-sparkle"></i>
+                            Chart Insights (Trady AI)
+                        </strong>
+
+                    </header>
+
+                    <div class="ai-insights">
+
+                        @if (Insights.Count == 0)
+                        {
+                            <div class="panel-empty">
+                                Phoenix intelligence is waiting for market context.
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var insight in Insights.Take(6))
+                            {
+                                <p>
+                                    <i class="ph ph-dot-outline-fill"></i>
+                                    @insight
+                                </p>
+                            }
+                        }
+
+                    </div>
+
+                </article>
+
+            </section>
+
+        </div>
+
+        @* ============================================================
+           RIGHT COLUMN
+           ============================================================ *@
+
+        <aside class="right-column">
+
+            <section class="side-panel trade-panel">
+
+                <header>
+                    <strong>Trade</strong>
+                </header>
+
+                <div class="buy-sell-tabs">
+
+                    <button class="@((OrderSide == "buy") ? "buy active" : "")"
+                            @onclick='() => OrderSide = "buy"'>
+
+                        Buy
+
+                    </button>
+
+                    <button class="@((OrderSide == "sell") ? "sell active" : "")"
+                            @onclick='() => OrderSide = "sell"'>
+
+                        Sell
+
+                    </button>
+
+                </div>
+
+                <div class="order-type-tabs">
+
+                    @foreach (var type in OrderTypes)
+                    {
+                        <button class="@(OrderType == type ? "active" : "")"
+                                @onclick="() => OrderType = type">
+
+                            @type
+
+                        </button>
+                    }
+
+                </div>
+
+                <label>
+                    Symbol
+                </label>
+
+                <div class="trade-input symbol-input">
+
+                    <StockLogo Symbol="@Symbol"
+                               Size="20" />
+
+                    <input value="@Symbol"
+                           readonly />
+
+                </div>
+
+                <label>
+                    Quantity
+                </label>
+
+                <div class="trade-input">
+
+                    <input type="number"
+                           min="1"
+                           @bind="OrderQuantity" />
+
+                </div>
+
+                <div class="order-value">
+
+                    <span>
+                        Estimated value
+                    </span>
+
+                    <strong>
+                        @FormatMoney((Price ?? 0) * OrderQuantity)
+                    </strong>
+
+                </div>
+
+                <div class="quick-qty">
+
+                    @foreach (var qty in QuickQuantities)
+                    {
+                        <button class="@(OrderQuantity == qty ? "active" : "")"
+                                @onclick="() => OrderQuantity = qty">
+
+                            @qty
+
+                        </button>
+                    }
+
+                </div>
+
+                @if (OrderType is "Limit" or "Stop Limit")
+                {
+                    <label>Limit price</label>
+                    <div class="trade-input">
+                        <input type="number" min="0" step="0.01" @bind="OrderLimitPrice" />
+                    </div>
+                }
+
+                @if (OrderType is "Stop" or "Stop Limit")
+                {
+                    <label>Stop price</label>
+                    <div class="trade-input">
+                        <input type="number" min="0" step="0.01" @bind="OrderStopPrice" />
+                    </div>
+                }
+
+                <button class="trade-submit @(OrderSide)"
+                        disabled="@(!BrokerConnected || OrderBusy || OrderQuantity <= 0)"
+                        @onclick="SubmitManualOrder">
+
+                    @if (OrderBusy)
+                    {
+                        <i class="ph ph-spinner-gap ph-spin"></i>
+                        <span>Submitting...</span>
+                    }
+                    else
+                    {
+                        @(BrokerConnected
+                            ? $"{CultureInfo.InvariantCulture.TextInfo.ToTitleCase(OrderSide)} {Symbol}"
+                            : "Connect broker to trade")
+                    }
+
+                </button>
+
+                @if (!string.IsNullOrWhiteSpace(OrderMessage))
+                {
+                    <small class="trade-note @OrderMessageClass">@OrderMessage</small>
+                }
+                else
+                {
+                    <small class="trade-note">
+                        Orders are analyzed, confirmed and submitted through the connected broker.
+                    </small>
+                }
+
+            </section>
+
+            <section class="side-panel watchlist-panel">
+
+                <header>
+
+                    <strong>
+                        Watchlist
+                    </strong>
+
+                    <button class="outline-action"
+                            @onclick="AddCurrentToWatchlist">
+
+                        <i class="ph ph-plus"></i>
+                        Add
+
+                    </button>
+
+                </header>
+
+                <div class="watch-head">
+                    <span>Symbol</span>
+                    <span>Last</span>
+                    <span>%</span>
+                </div>
+
+                @foreach (var item in Watchlist)
+                {
+                    <button class="watch-row @(item.Symbol == Symbol ? "active" : "")"
+                            @onclick="() => SelectSymbol(item.Symbol)">
+
+                        <span class="symbol-cell">
+
+                            <StockLogo Symbol="@item.Symbol"
+                                       Size="20" />
+
+                            <b>
+                                @item.Symbol
+                            </b>
+
+                        </span>
+
+                        <span>
+                            @FormatPrice(item.Price)
+                        </span>
+
+                        <span class="@ChangeClass(item.ChangePercent)">
+                            @FormatPercent(item.ChangePercent)
+                        </span>
+
+                    </button>
+                }
+
+            </section>
+
+            <section class="side-panel tools-panel">
+
+                <header>
+                    <strong>
+                        Chart Tools
+                    </strong>
+                </header>
+
+                <div class="tool-grid">
+
+                    @foreach (var tool in DrawingTools.Take(8))
+                    {
+                        <button class="@(SelectedDrawingTool == tool.Id ? "active" : "")"
+                                @onclick="() => SelectDrawingTool(tool.Id)">
+
+                            <i class="@tool.Icon"></i>
+
+                            <span>
+                                @tool.Label
+                            </span>
+
+                        </button>
+                    }
+
+                </div>
+
+                <div class="tool-secondary-actions">
+
+                    <button @onclick="UndoDrawing">
+                        <i class="ph ph-arrow-counter-clockwise"></i>
+                        Undo
+                    </button>
+
+                    <button @onclick="ClearDrawings">
+                        <i class="ph ph-trash"></i>
+                        Clear
+                    </button>
+
+                </div>
+
+            </section>
+
+            <section class="side-panel market-data-panel">
+
+                <header>
+                    <strong>Market Data</strong>
+                </header>
+
+                <div class="market-data-status">
+
+                    <div>
+                        <span>Provider</span>
+                        <strong>@(LiveMode ? "Alpaca" : "Yahoo Finance")</strong>
+                    </div>
+
+                    <div>
+                        <span>Mode</span>
+                        <strong>@(LiveMode ? "LIVE stream" : "Provider polling")</strong>
+                    </div>
+
+                    <div>
+                        <span>Range</span>
+                        <strong>@SelectedRange</strong>
+                    </div>
+
+                    <div>
+                        <span>Interval</span>
+                        <strong>@(LiveMode ? $"{SelectedTimeframe} LIVE" : SelectedTimeframe)</strong>
+                    </div>
+
+                    <div>
+                        <span>Candles</span>
+                        <strong>@Bars.Count.ToString("N0")</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </aside>
+
+    </section>
+
+</div>
+
+@code {
+
+    [SupplyParameterFromQuery(Name = "symbol")]
+    public string? QuerySymbol { get; set; }
+
+    private string Symbol = "AAPL";
+    private string SymbolName = "Apple Inc.";
+
+    private string SelectedTimeframe = "15m";
+    private string SelectedRange = "5D";
+    private string SelectedDrawingTool = "crosshair";
+
+    private string OrderSide = "buy";
+    private string OrderType = "Market";
+
+    private int OrderQuantity = 100;
+    private double? OrderLimitPrice;
+    private double? OrderStopPrice;
+    private bool OrderBusy;
+    private string OrderMessage = string.Empty;
+    private string OrderMessageClass = string.Empty;
+    private string SymbolSearch = string.Empty;
+
+    private bool Loading = true;
+    private bool ShowIndicators = true;
+    private bool BrokerConnected;
+    private bool LiveMode;
+
+    private string ErrorMessage = "";
+
+    private string ProviderStatus =
+        "Yahoo Finance · provider polling";
+
+    private string LastProviderUpdate =
+        "Waiting for provider";
+
+    private double? Price;
+    private double? ChangePercent;
+
+    private string Rsi = "—";
+    private string Ema20 = "—";
+    private string Ema50 = "—";
+    private string Vwap = "—";
+    private string VolumeRatio = "—";
+    private string MarketRegime = "—";
+
+    private readonly List<BarView> Bars = new();
+    private readonly List<TickerView> Tickers = new();
+    private readonly List<TickerView> Watchlist = new();
+    private readonly List<PositionView> Positions = new();
+    private readonly List<string> Insights = new();
+    private readonly List<double> SupportLevels = new();
+    private readonly List<double> ResistanceLevels = new();
+    private readonly List<ChartEventView> ChartEvents = new();
+
+    private TradeLevelView TradeLevels = new();
+
+    private BarView? CrosshairBar;
+    private double? CrosshairChangePercent;
+
+    private bool _chartReady;
+    private bool _disposed;
+
+    private BarView? LastBar =>
+        Bars.Count == 0
+            ? null
+            : Bars[^1];
+
+    private BarView? DisplayBar =>
+        CrosshairBar ?? LastBar;
+
+    private double? DisplayChangePercent =>
+        CrosshairBar is not null
+            ? CrosshairChangePercent
+            : ChangePercent;
+
+    private readonly TimeframeView[] Timeframes =
+    {
+        new("1m", "1m"),
+        new("5m", "5m"),
+        new("15m", "15m"),
+        new("30m", "30m"),
+        new("1h", "1h"),
+        new("1d", "D"),
+        new("1wk", "W")
+    };
+
+    private readonly string[] Ranges =
+    {
+        "1D",
+        "5D",
+        "1M",
+        "3M",
+        "6M",
+        "1Y",
+        "5Y",
+        "MAX"
+    };
+
+    private readonly string[] OrderTypes =
+    {
+        "Market",
+        "Limit",
+        "Stop",
+        "Stop Limit"
+    };
+
+    private readonly int[] QuickQuantities =
+    {
+        25,
+        50,
+        100,
+        250
+    };
+
+    private readonly DrawingToolView[] DrawingTools =
+    {
+        new(
+            "crosshair",
+            "Crosshair",
+            "ph ph-crosshair"
+        ),
+
+        new(
+            "trend",
+            "Trend Line",
+            "ph ph-trend-up"
+        ),
+
+        new(
+            "horizontal",
+            "Horizontal",
+            "ph ph-minus"
+        ),
+
+        new(
+            "vertical",
+            "Vertical",
+            "ph ph-line-vertical"
+        ),
+
+        new(
+            "fib",
+            "Fibonacci",
+            "ph ph-list-dashes"
+        ),
+
+        new(
+            "rectangle",
+            "Rectangle",
+            "ph ph-rectangle"
+        ),
+
+        new(
+            "text",
+            "Text",
+            "ph ph-text-t"
+        ),
+
+        new(
+            "arrow",
+            "Arrow",
+            "ph ph-arrow-up-right"
+        ),
+
+        new(
+            "measure",
+            "Measure",
+            "ph ph-ruler"
+        ),
+
+        new(
+            "clear",
+            "Clear Drawings",
+            "ph ph-trash"
+        )
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(QuerySymbol))
+        {
+            Symbol =
+                QuerySymbol
+                    .Trim()
+                    .ToUpperInvariant();
+        }
+
+        SeedWatchlist();
+
+        await LoadWorkspace();
+    }
+
+    private async Task LoadWorkspace()
+    {
+        Loading = true;
+        ErrorMessage = "";
+
+        CrosshairBar = null;
+        CrosshairChangePercent = null;
+
+        try
+        {
+            var quoteTask =
+                Api.Quote(Symbol);
+
+            var contextTask =
+                Api.Context(Symbol);
+
+            var patternsTask =
+                Api.Patterns(Symbol);
+
+            var brokerTask =
+                Api.BrokerStatus();
+
+            var positionsTask =
+                Api.BrokerPositions();
+
+            var analysisTask =
+                Api.Analyze(Symbol);
+
+            var levelsTask =
+                Api.ChartLevels(
+                    Symbol,
+                    SelectedRange,
+                    SelectedTimeframe,
+                    120
+                );
+
+            var eventsTask =
+                Api.ChartEvents(
+                    Symbol,
+                    SelectedRange
+                );
+
+            await LoadChartData();
+
+            await Task.WhenAll(
+                quoteTask,
+                contextTask,
+                patternsTask,
+                brokerTask,
+                positionsTask,
+                analysisTask,
+                levelsTask,
+                eventsTask
+            );
+
+            ApplyQuote(
+                await quoteTask
+            );
+
+            ApplyContext(
+                await contextTask
+            );
+
+            ApplyPatterns(
+                await patternsTask
+            );
+
+            ApplyBroker(
+                await brokerTask
+            );
+
+            ApplyPositions(
+                await positionsTask
+            );
+
+            ApplyAnalysis(
+                await analysisTask
+            );
+
+            ApplyLevels(
+                await levelsTask
+            );
+
+            ApplyEvents(
+                await eventsTask
+            );
+
+            await LoadTickerQuotes();
+
+            await LoadWatchlistQuotes();
+
+            Loading = false;
+
+            await InvokeAsync(
+                StateHasChanged
+            );
+
+            await RenderChart(
+                true
+            );
+        }
+        catch (Exception ex)
+        {
+            Loading = false;
+
+            ErrorMessage =
+                $"Unable to load {Symbol} chart data: {ex.Message}";
+        }
+    }
+
+    private async Task LoadChartData()
+    {
+        Bars.Clear();
+
+        var normalized =
+            NormalizeRangeTimeframe(
+                SelectedRange,
+                SelectedTimeframe
+            );
+
+        SelectedRange =
+            normalized.Range;
+
+        SelectedTimeframe =
+            normalized.Timeframe;
+
+        var root =
+            await Api.ChartRange(
+                Symbol,
+                normalized.Range,
+                normalized.Timeframe
+            );
+
+        if (root is null)
+        {
+            LastProviderUpdate =
+                "Market data unavailable";
+
+            return;
+        }
+
+        var array =
+            FindArray(
+                root.Value,
+                "bars",
+                "candles",
+                "history",
+                "results",
+                "items",
+                "data"
+            );
+
+        if (!array.HasValue)
+        {
+            LastProviderUpdate =
+                "Market data unavailable";
+
+            return;
+        }
+
+        foreach (
+            var item
+            in array.Value.EnumerateArray()
+        )
+        {
+            if (
+                item.ValueKind !=
+                JsonValueKind.Object
+            )
+            {
+                continue;
+            }
+
+            var time =
+                FirstString(
+                    item,
+                    "timestamp",
+                    "time",
+                    "datetime",
+                    "date"
+                );
+
+            var open =
+                FirstNumber(
+                    item,
+                    "open",
+                    "o"
+                );
+
+            var high =
+                FirstNumber(
+                    item,
+                    "high",
+                    "h"
+                );
+
+            var low =
+                FirstNumber(
+                    item,
+                    "low",
+                    "l"
+                );
+
+            var close =
+                FirstNumber(
+                    item,
+                    "close",
+                    "c"
+                );
+
+            var volume =
+                FirstNumber(
+                    item,
+                    "volume",
+                    "v"
+                );
+
+            if (
+                string.IsNullOrWhiteSpace(time) ||
+                !open.HasValue ||
+                !high.HasValue ||
+                !low.HasValue ||
+                !close.HasValue
+            )
+            {
+                continue;
+            }
+
+            Bars.Add(
+                new BarView(
+                    time,
+                    open.Value,
+                    high.Value,
+                    low.Value,
+                    close.Value,
+                    volume
+                )
+            );
+        }
+
+        if (Bars.Count > 0)
+        {
+            Price =
+                Bars[^1].Close;
+
+            LastProviderUpdate =
+                $"Provider data {DateTime.Now:h:mm:ss tt}";
+        }
+        else
+        {
+            LastProviderUpdate =
+                "Market data unavailable";
+        }
+    }
+
+    private async Task RenderChart(
+        bool fit
+    )
+    {
+        if (
+            Bars.Count == 0 ||
+            _disposed
+        )
+        {
+            return;
+        }
+
+        var payload =
+            Bars
+                .Select(
+                    x => new
+                    {
+                        time =
+                            x.Time,
+
+                        open =
+                            x.Open,
+
+                        high =
+                            x.High,
+
+                        low =
+                            x.Low,
+
+                        close =
+                            x.Close,
+
+                        volume =
+                            x.Volume
+                    }
+                )
+                .ToArray();
+
+        var levels =
+            new
+            {
+                support =
+                    SupportLevels.ToArray(),
+
+                resistance =
+                    ResistanceLevels.ToArray()
+            };
+
+        var tradeLevels =
+            new
+            {
+                entry =
+                    TradeLevels.Entry,
+
+                stop =
+                    TradeLevels.Stop,
+
+                target =
+                    TradeLevels.Target,
+
+                exit =
+                    TradeLevels.Exit
+            };
+
+        var events =
+            ChartEvents
+                .Select(
+                    x => new
+                    {
+                        time =
+                            x.Time,
+
+                        type =
+                            x.Type,
+
+                        title =
+                            x.Title
+                    }
+                )
+                .ToArray();
+
+        var escapedSymbol =
+            Uri.EscapeDataString(
+                Symbol
+            );
+
+        var escapedTimeframe =
+            Uri.EscapeDataString(
+                SelectedTimeframe
+            );
+
+        var currentUri =
+            new Uri(
+                Navigation.Uri
+            );
+
+        var wsScheme =
+            currentUri.Scheme.Equals(
+                "https",
+                StringComparison.OrdinalIgnoreCase
+            )
+                ? "wss"
+                : "ws";
+
+        var wsUrl =
+            $"{wsScheme}://{currentUri.Host}:8000" +
+            $"/ws/chart/{escapedSymbol}" +
+            $"?timeframe={escapedTimeframe}" +
+            (LiveMode ? "&live=true" : "");
+
+        var pollUrl =
+            $"/api/chart/{escapedSymbol}/latest" +
+            $"?timeframe={escapedTimeframe}";
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.render",
+            "phoenix-main-chart",
+            payload,
+            new
+            {
+                symbol =
+                    Symbol,
+
+                timeframe =
+                    SelectedTimeframe,
+
+                range =
+                    SelectedRange,
+
+                indicators =
+                    ShowIndicators,
+
+                fitContent =
+                    fit,
+
+                levels,
+
+                tradeLevels,
+
+                events,
+
+                rsiContainerId =
+                    ShowIndicators
+                        ? "phoenix-rsi-chart"
+                        : null,
+
+                macdContainerId =
+                    ShowIndicators
+                        ? "phoenix-macd-chart"
+                        : null,
+
+                wsUrl,
+
+                pollUrl,
+
+                pollInterval =
+                    2000
+            }
+        );
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.setDrawingTool",
+            SelectedDrawingTool
+        );
+
+        _chartReady = true;
+    }
+
+    private async Task ReloadChartOnly()
+    {
+        Loading = true;
+        ErrorMessage = "";
+
+        CrosshairBar = null;
+        CrosshairChangePercent = null;
+
+        try
+        {
+            var levelsTask =
+                Api.ChartLevels(
+                    Symbol,
+                    SelectedRange,
+                    SelectedTimeframe,
+                    120
+                );
+
+            var eventsTask =
+                Api.ChartEvents(
+                    Symbol,
+                    SelectedRange
+                );
+
+            var analysisTask =
+                Api.Analyze(Symbol);
+
+            await LoadChartData();
+
+            await Task.WhenAll(
+                levelsTask,
+                eventsTask,
+                analysisTask
+            );
+
+            ApplyLevels(
+                await levelsTask
+            );
+
+            ApplyEvents(
+                await eventsTask
+            );
+
+            ApplyAnalysis(
+                await analysisTask
+            );
+
+            Loading = false;
+
+            await InvokeAsync(
+                StateHasChanged
+            );
+
+            await RenderChart(
+                true
+            );
+        }
+        catch (Exception ex)
+        {
+            Loading = false;
+
+            ErrorMessage =
+                $"Unable to load {SelectedRange} chart history: {ex.Message}";
+        }
+    }
+
+    private async Task EnableLiveMode()
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+        if (!BrokerConnected)
+        {
+            ErrorMessage =
+                "Connect Alpaca before starting LIVE chart mode.";
+
+            ProviderStatus =
+                "LIVE unavailable · Alpaca not connected";
+
+            return;
+        }
+
+        if (
+            SelectedTimeframe is not
+                ("1m" or "5m" or "15m" or "30m" or "1h")
+        )
+        {
+            SelectedTimeframe =
+                "1m";
+        }
+
+        LiveMode =
+            true;
+
+        SelectedRange =
+            DefaultRangeFor(
+                SelectedTimeframe
+            );
+
+        ErrorMessage =
+            "";
+
+        ProviderStatus =
+            "Alpaca · LIVE stream requested";
+
+        LastProviderUpdate =
+            "Connecting to Alpaca LIVE";
+
+        await ReloadChartOnly();
+
+        await ScrollToRealtime();
+    }
+
+    private async Task ChangeTimeframe(
+        string timeframe
+    )
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+        if (
+            LiveMode &&
+            timeframe is
+                "1m" or
+                "5m" or
+                "15m" or
+                "30m" or
+                "1h"
+        )
+        {
+            SelectedTimeframe =
+                timeframe;
+
+            SelectedRange =
+                DefaultRangeFor(
+                    timeframe
+                );
+
+            ProviderStatus =
+                "Alpaca · LIVE stream requested";
+
+            await ReloadChartOnly();
+
+            await ScrollToRealtime();
+
+            return;
+        }
+
+        if (
+            !LiveMode &&
+            SelectedTimeframe == timeframe
+        )
+        {
+            return;
+        }
+
+        LiveMode =
+            false;
+
+        ProviderStatus =
+            "Yahoo Finance · provider polling";
+
+        SelectedTimeframe =
+            timeframe;
+
+        SelectedRange =
+            DefaultRangeFor(
+                timeframe
+            );
+
+        await ReloadChartOnly();
+    }
+
+    private async Task ChangeRange(
+        string range
+    )
+    {
+        if (
+            Loading ||
+            SelectedRange == range
+        )
+        {
+            return;
+        }
+
+        LiveMode =
+            false;
+
+        ProviderStatus =
+            "Yahoo Finance · provider polling";
+
+        SelectedRange =
+            range;
+
+        var normalized =
+            NormalizeRangeTimeframe(
+                SelectedRange,
+                SelectedTimeframe
+            );
+
+        SelectedRange =
+            normalized.Range;
+
+        SelectedTimeframe =
+            normalized.Timeframe;
+
+        await ReloadChartOnly();
+    }
+
+    private async Task SelectSymbol(
+        string symbol
+    )
+    {
+        symbol =
+            symbol
+                .Trim()
+                .ToUpperInvariant();
+
+        if (
+            string.IsNullOrWhiteSpace(
+                symbol
+            )
+        )
+        {
+            return;
+        }
+
+        if (
+            Symbol.Equals(
+                symbol,
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            return;
+        }
+
+        Symbol =
+            symbol;
+
+        SymbolName =
+            symbol;
+
+        _chartReady =
+            false;
+
+        CrosshairBar =
+            null;
+
+        CrosshairChangePercent =
+            null;
+
+        await LoadWorkspace();
+    }
+
+    private async Task Refresh()
+    {
+        await LoadWorkspace();
+    }
+
+    private async Task ToggleIndicators()
+    {
+        ShowIndicators =
+            !ShowIndicators;
+
+        await InvokeAsync(
+            StateHasChanged
+        );
+
+        await Task.Yield();
+
+        if (!_chartReady)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.setIndicators",
+            ShowIndicators
+        );
+
+        if (ShowIndicators)
+        {
+            await JS.InvokeVoidAsync(
+                "PhoenixChart.attachRsi",
+                "phoenix-rsi-chart"
+            );
+
+            await JS.InvokeVoidAsync(
+                "PhoenixChart.attachMacd",
+                "phoenix-macd-chart"
+            );
+        }
+    }
+
+    private async Task FitChart()
+    {
+        if (!_chartReady)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.fit"
+        );
+    }
+
+    private async Task ResetPriceScale()
+    {
+        if (!_chartReady)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.resetPriceScale"
+        );
+    }
+
+    private async Task ScrollToRealtime()
+    {
+        if (!_chartReady)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.scrollToRealtime"
+        );
+    }
+
+    private async Task TakeScreenshot()
+    {
+        if (!_chartReady)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.screenshot",
+            $"{Symbol}-{SelectedRange}-{SelectedTimeframe}"
+        );
+    }
+
+    private async Task ToggleFullscreen()
+    {
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.toggleFullscreen",
+            "phoenix-main-chart"
+        );
+    }
+
+    private async Task SelectDrawingTool(
+        string tool
+    )
+    {
+        if (tool == "clear")
+        {
+            await ClearDrawings();
+            return;
+        }
+
+        SelectedDrawingTool =
+            tool;
+
+        if (_chartReady)
+        {
+            await JS.InvokeVoidAsync(
+                "PhoenixChart.setDrawingTool",
+                tool
+            );
+        }
+    }
+
+    private async Task UndoDrawing()
+    {
+        if (!_chartReady)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "PhoenixChart.undoDrawing"
+        );
+    }
+
+    private async Task ClearDrawings()
+    {
+        if (_chartReady)
+        {
+            await JS.InvokeVoidAsync(
+                "PhoenixChart.clearDrawings"
+            );
+        }
+
+        SelectedDrawingTool =
+            "crosshair";
+
+        if (_chartReady)
+        {
+            await JS.InvokeVoidAsync(
+                "PhoenixChart.setDrawingTool",
+                "crosshair"
+            );
+        }
+    }
+
+    private void SymbolSearchChanged(ChangeEventArgs e)
+    {
+        SymbolSearch = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task SymbolSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadSearchedSymbol();
+        }
+    }
+
+    private async Task LoadSearchedSymbol()
+    {
+        var symbol = (SymbolSearch ?? string.Empty).Trim().ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(symbol))
+            return;
+
+        SymbolSearch = symbol;
+        await SelectSymbol(symbol);
+    }
+
+    private async Task SubmitManualOrder()
+    {
+        if (OrderBusy)
+            return;
+
+        OrderMessage = string.Empty;
+        OrderMessageClass = string.Empty;
+
+        if (!BrokerConnected)
+        {
+            OrderMessage = "Connect the broker before submitting an order.";
+            OrderMessageClass = "error";
+            return;
+        }
+
+        if (OrderQuantity <= 0)
+        {
+            OrderMessage = "Quantity must be greater than zero.";
+            OrderMessageClass = "error";
+            return;
+        }
+
+        if ((OrderType is "Limit" or "Stop Limit") &&
+            (!OrderLimitPrice.HasValue || OrderLimitPrice.Value <= 0))
+        {
+            OrderMessage = "Enter a valid limit price.";
+            OrderMessageClass = "error";
+            return;
+        }
+
+        if ((OrderType is "Stop" or "Stop Limit") &&
+            (!OrderStopPrice.HasValue || OrderStopPrice.Value <= 0))
+        {
+            OrderMessage = "Enter a valid stop price.";
+            OrderMessageClass = "error";
+            return;
+        }
+
+        try
+        {
+            OrderBusy = true;
+
+            // Keep the existing intelligence pipeline in front of manual execution.
+            var analysis = await Api.ManualAnalyze(Symbol);
+            if (analysis is null)
+                throw new InvalidOperationException("PhoenixTrend analysis is unavailable for this symbol.");
+
+            var estimated = (Price ?? 0d) * OrderQuantity;
+            var sideText = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(OrderSide);
+            var typeText = OrderType;
+            var priceText = estimated > 0
+                ? FormatMoney(estimated)
+                : "the current market value";
+
+            var confirmed = await JS.InvokeAsync<bool>(
+                "confirm",
+                $"Confirm {sideText} {OrderQuantity} {Symbol} as a {typeText} order? Estimated value: {priceText}.");
+
+            if (!confirmed)
+            {
+                OrderMessage = "Order cancelled.";
+                OrderMessageClass = "";
+                return;
+            }
+
+            var normalizedType = OrderType switch
+            {
+                "Limit" => "limit",
+                "Stop" => "stop",
+                "Stop Limit" => "stop_limit",
+                _ => "market"
+            };
+
+            var result = await Api.ManualOrder(
+                Symbol,
+                OrderSide,
+                OrderQuantity,
+                normalizedType,
+                normalizedType is "limit" or "stop_limit" ? OrderLimitPrice : null,
+                normalizedType is "stop" or "stop_limit" ? OrderStopPrice : null,
+                "day");
+
+            if (result is null)
+                throw new InvalidOperationException("The broker did not confirm the order.");
+
+            var executionState = PhoenixApi.Text(result, "state", "").Trim().ToUpperInvariant();
+            var executionError = PhoenixApi.Text(result, "error", "");
+            var hasBrokerOrder = result.Value.ValueKind == JsonValueKind.Object &&
+                result.Value.TryGetProperty("order", out var brokerOrder) &&
+                brokerOrder.ValueKind == JsonValueKind.Object;
+
+            if (!hasBrokerOrder)
+            {
+                throw new InvalidOperationException(
+                    !string.IsNullOrWhiteSpace(executionError)
+                        ? executionError
+                        : string.IsNullOrWhiteSpace(executionState)
+                            ? "The broker did not confirm the order."
+                            : $"Order was not submitted. Execution state: {executionState}.");
+            }
+
+            OrderMessage = $"{sideText} order submitted successfully ({executionState}).";
+            OrderMessageClass = "success";
+
+            var brokerTask = Api.BrokerStatus();
+            var positionsTask = Api.BrokerPositions();
+            await Task.WhenAll(brokerTask, positionsTask);
+            ApplyBroker(await brokerTask);
+            ApplyPositions(await positionsTask);
+        }
+        catch (Exception ex)
+        {
+            OrderMessage = ex.Message;
+            OrderMessageClass = "error";
+        }
+        finally
+        {
+            OrderBusy = false;
+        }
+    }
+
+    private void AddCurrentToWatchlist()
+    {
+        if (
+            Watchlist.Any(
+                x =>
+                    x.Symbol.Equals(
+                        Symbol,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+            )
+        )
+        {
+            return;
+        }
+
+        Watchlist.Insert(
+            0,
+            new TickerView(
+                Symbol,
+                Price,
+                ChangePercent
+            )
+        );
+    }
+
+    private async Task LoadTickerQuotes()
+    {
+        Tickers.Clear();
+
+        var symbols =
+            new[]
+            {
+                "AAPL",
+                "TSLA",
+                "NVDA",
+                "AMZN",
+                "MSFT"
+            };
+
+        var tasks =
+            symbols.Select(
+                async symbol =>
+                {
+                    var quote =
+                        await Api.Quote(
+                            symbol
+                        );
+
+                    return new TickerView(
+                        symbol,
+
+                        quote is null
+                            ? null
+                            : ReadNumberRecursive(
+                                quote.Value,
+                                "price",
+                                "regularMarketPrice",
+                                "close"
+                            ),
+
+                        quote is null
+                            ? null
+                            : ReadNumberRecursive(
+                                quote.Value,
+                                "change_percent",
+                                "changePercent",
+                                "regularMarketChangePercent"
+                            )
+                    );
+                }
+            );
+
+        Tickers.AddRange(
+            await Task.WhenAll(
+                tasks
+            )
+        );
+    }
+
+    private void SeedWatchlist()
+    {
+        if (Watchlist.Count > 0)
+        {
+            return;
+        }
+
+        foreach (
+            var symbol
+            in new[]
+            {
+                "AAPL",
+                "TSLA",
+                "NVDA",
+                "MSFT",
+                "AMZN",
+                "GOOGL",
+                "META",
+                "AMD",
+                "NFLX",
+                "QQQ"
+            }
+        )
+        {
+            Watchlist.Add(
+                new TickerView(
+                    symbol,
+                    null,
+                    null
+                )
+            );
+        }
+    }
+
+    private async Task LoadWatchlistQuotes()
+    {
+        var tasks =
+            Watchlist.Select(
+                async item =>
+                {
+                    var quote =
+                        await Api.Quote(
+                            item.Symbol
+                        );
+
+                    item.Price =
+                        quote is null
+                            ? null
+                            : ReadNumberRecursive(
+                                quote.Value,
+                                "price",
+                                "regularMarketPrice",
+                                "close"
+                            );
+
+                    item.ChangePercent =
+                        quote is null
+                            ? null
+                            : ReadNumberRecursive(
+                                quote.Value,
+                                "change_percent",
+                                "changePercent",
+                                "regularMarketChangePercent"
+                            );
+                }
+            );
+
+        await Task.WhenAll(
+            tasks
+        );
+    }
+
+    private void ApplyQuote(
+        JsonElement? root
+    )
+    {
+        if (root is null)
+        {
+            return;
+        }
+
+        Price =
+            ReadNumberRecursive(
+                root.Value,
+                "price",
+                "regularMarketPrice",
+                "current_price",
+                "close"
+            ) ?? Price;
+
+        ChangePercent =
+            ReadNumberRecursive(
+                root.Value,
+                "change_percent",
+                "changePercent",
+                "regularMarketChangePercent",
+                "percent_change"
+            );
+
+        SymbolName =
+            ReadStringRecursive(
+                root.Value,
+                "name",
+                "shortName",
+                "longName",
+                "company_name"
+            ) ?? Symbol;
+
+        var source =
+            ReadStringRecursive(
+                root.Value,
+                "source"
+            );
+
+        var providerMode =
+            ReadStringRecursive(
+                root.Value,
+                "provider_mode"
+            );
+
+        if (
+            !LiveMode &&
+            !string.IsNullOrWhiteSpace(
+                source
+            )
+        )
+        {
+            ProviderStatus =
+                source.Contains(
+                    "yahoo",
+                    StringComparison.OrdinalIgnoreCase
+                )
+                    ? "Yahoo Finance · provider polling"
+                    : $"{source} · {providerMode ?? "provider data"}";
+        }
+    }
+
+    private void ApplyContext(
+        JsonElement? root
+    )
+    {
+        if (root is null)
+        {
+            return;
+        }
+
+        Rsi =
+            FormatNumber(
+                ReadNumberRecursive(
+                    root.Value,
+                    "rsi",
+                    "rsi14"
+                ),
+                "0.00"
+            );
+
+        Ema20 =
+            FormatNumber(
+                ReadNumberRecursive(
+                    root.Value,
+                    "ema20",
+                    "ema_20"
+                ),
+                "0.00"
+            );
+
+        Ema50 =
+            FormatNumber(
+                ReadNumberRecursive(
+                    root.Value,
+                    "ema50",
+                    "ema_50"
+                ),
+                "0.00"
+            );
+
+        Vwap =
+            FormatNumber(
+                ReadNumberRecursive(
+                    root.Value,
+                    "vwap"
+                ),
+                "0.00"
+            );
+
+        VolumeRatio =
+            FormatRatio(
+                ReadNumberRecursive(
+                    root.Value,
+                    "volume_ratio",
+                    "volumeRatio"
+                )
+            );
+
+        MarketRegime =
+            ReadStringRecursive(
+                root.Value,
+                "market_regime",
+                "regime",
+                "trend"
+            ) ?? "—";
+
+        Insights.Clear();
+
+        if (
+            MarketRegime != "—"
+        )
+        {
+            Insights.Add(
+                $"{Symbol} market regime is {MarketRegime.ToLowerInvariant()}."
+            );
+        }
+
+        var rsi =
+            ReadNumberRecursive(
+                root.Value,
+                "rsi",
+                "rsi14"
+            );
+
+        if (rsi.HasValue)
+        {
+            Insights.Add(
+                $"RSI 14 is {rsi.Value:0.0}."
+            );
+        }
+
+        var ema20 =
+            ReadNumberRecursive(
+                root.Value,
+                "ema20",
+                "ema_20"
+            );
+
+        var ema50 =
+            ReadNumberRecursive(
+                root.Value,
+                "ema50",
+                "ema_50"
+            );
+
+        if (
+            Price.HasValue &&
+            ema20.HasValue &&
+            ema50.HasValue
+        )
+        {
+            if (
+                Price.Value > ema20.Value &&
+                ema20.Value > ema50.Value
+            )
+            {
+                Insights.Add(
+                    "Price is trading above EMA 20 and EMA 50."
+                );
+            }
+            else if (
+                Price.Value < ema20.Value &&
+                ema20.Value < ema50.Value
+            )
+            {
+                Insights.Add(
+                    "Price is trading below EMA 20 and EMA 50."
+                );
+            }
+            else
+            {
+                Insights.Add(
+                    "Moving averages are mixed."
+                );
+            }
+        }
+
+        var dayHigh =
+            ReadNumberRecursive(
+                root.Value,
+                "day_high",
+                "dayHigh"
+            );
+
+        var dayLow =
+            ReadNumberRecursive(
+                root.Value,
+                "day_low",
+                "dayLow"
+            );
+
+        if (
+            dayHigh.HasValue &&
+            dayLow.HasValue
+        )
+        {
+            Insights.Add(
+                $"Session reference range: {dayLow.Value:0.00} – {dayHigh.Value:0.00}."
+            );
+        }
+    }
+
+    private void ApplyPatterns(
+        JsonElement? root
+    )
+    {
+        if (root is null)
+        {
+            return;
+        }
+
+        var array =
+            FindArray(
+                root.Value,
+                "patterns",
+                "results",
+                "items",
+                "data"
+            );
+
+        if (!array.HasValue)
+        {
+            return;
+        }
+
+        foreach (
+            var pattern
+            in array.Value.EnumerateArray()
+        )
+        {
+            var name =
+                FirstString(
+                    pattern,
+                    "name",
+                    "pattern",
+                    "type"
+                );
+
+            if (
+                !string.IsNullOrWhiteSpace(
+                    name
+                )
+            )
+            {
+                Insights.Add(
+                    $"Pattern intelligence detected {name}."
+                );
+            }
+        }
+    }
+
+    private void ApplyLevels(
+        JsonElement? root
+    )
+    {
+        SupportLevels.Clear();
+        ResistanceLevels.Clear();
+
+        if (root is null)
+        {
+            return;
+        }
+
+        ExtractLevelArray(
+            root.Value,
+            SupportLevels,
+            "support",
+            "supports"
+        );
+
+        ExtractLevelArray(
+            root.Value,
+            ResistanceLevels,
+            "resistance",
+            "resistances"
+        );
+    }
+
+    private static void ExtractLevelArray(
+        JsonElement root,
+        List<double> destination,
+        params string[] names
+    )
+    {
+        if (
+            root.ValueKind !=
+            JsonValueKind.Object
+        )
+        {
+            return;
+        }
+
+        foreach (var name in names)
+        {
+            if (
+                !root.TryGetProperty(
+                    name,
+                    out var value
+                )
+            )
+            {
+                continue;
+            }
+
+            if (
+                value.ValueKind ==
+                JsonValueKind.Number &&
+                value.TryGetDouble(
+                    out var single
+                )
+            )
+            {
+                destination.Add(
+                    single
+                );
+
+                continue;
+            }
+
+            if (
+                value.ValueKind !=
+                JsonValueKind.Array
+            )
+            {
+                continue;
+            }
+
+            foreach (
+                var item
+                in value.EnumerateArray()
+            )
+            {
+                if (
+                    item.ValueKind ==
+                        JsonValueKind.Number &&
+                    item.TryGetDouble(
+                        out var number
+                    )
+                )
+                {
+                    destination.Add(
+                        number
+                    );
+
+                    continue;
+                }
+
+                if (
+                    item.ValueKind ==
+                    JsonValueKind.Object
+                )
+                {
+                    var price =
+                        FirstNumber(
+                            item,
+                            "price",
+                            "value",
+                            "level"
+                        );
+
+                    if (price.HasValue)
+                    {
+                        destination.Add(
+                            price.Value
+                        );
+                    }
+                }
+            }
+        }
+
+        destination.Sort();
+    }
+
+    private void ApplyAnalysis(
+        JsonElement? root
+    )
+    {
+        TradeLevels =
+            new TradeLevelView();
+
+        if (root is null)
+        {
+            return;
+        }
+
+        TradeLevels.Entry =
+            ReadNumberRecursive(
+                root.Value,
+                "entry",
+                "entry_price",
+                "entryPrice"
+            );
+
+        TradeLevels.Stop =
+            ReadNumberRecursive(
+                root.Value,
+                "stop",
+                "stop_loss",
+                "stop_price",
+                "stopLoss"
+            );
+
+        TradeLevels.Target =
+            ReadNumberRecursive(
+                root.Value,
+                "target",
+                "target_price",
+                "take_profit",
+                "takeProfit"
+            );
+
+        TradeLevels.Exit =
+            ReadNumberRecursive(
+                root.Value,
+                "exit",
+                "exit_price",
+                "exitPrice"
+            );
+
+        var action =
+            ReadStringRecursive(
+                root.Value,
+                "action",
+                "signal",
+                "decision"
+            );
+
+        var confidence =
+            ReadNumberRecursive(
+                root.Value,
+                "confidence",
+                "score",
+                "probability"
+            );
+
+        if (
+            !string.IsNullOrWhiteSpace(
+                action
+            )
+        )
+        {
+            var message =
+                $"Phoenix analysis action: {action}";
+
+            if (confidence.HasValue)
+            {
+                message +=
+                    $" ({confidence.Value:0.##})";
+            }
+
+            message += ".";
+
+            Insights.Add(
+                message
+            );
+        }
+    }
+
+    private void ApplyEvents(
+        JsonElement? root
+    )
+    {
+        ChartEvents.Clear();
+
+        if (root is null)
+        {
+            return;
+        }
+
+        var array =
+            FindArray(
+                root.Value,
+                "events",
+                "items",
+                "results",
+                "data"
+            );
+
+        if (!array.HasValue)
+        {
+            return;
+        }
+
+        foreach (
+            var item
+            in array.Value.EnumerateArray()
+        )
+        {
+            if (
+                item.ValueKind !=
+                JsonValueKind.Object
+            )
+            {
+                continue;
+            }
+
+            var time =
+                FirstString(
+                    item,
+                    "timestamp",
+                    "time",
+                    "date",
+                    "datetime"
+                );
+
+            if (
+                string.IsNullOrWhiteSpace(
+                    time
+                )
+            )
+            {
+                continue;
+            }
+
+            var type =
+                FirstString(
+                    item,
+                    "type",
+                    "event_type",
+                    "eventType"
+                ) ?? "event";
+
+            var title =
+                FirstString(
+                    item,
+                    "title",
+                    "label",
+                    "name"
+                ) ?? type;
+
+            ChartEvents.Add(
+                new ChartEventView(
+                    time,
+                    type,
+                    title
+                )
+            );
+        }
+    }
+
+    private void ApplyBroker(
+        JsonElement? root
+    )
+    {
+        if (root is null)
+        {
+            return;
+        }
+
+        var connected =
+            ReadStringRecursive(
+                root.Value,
+                "connected"
+            );
+
+        BrokerConnected =
+            string.Equals(
+                connected,
+                "true",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+        if (
+            !BrokerConnected &&
+            root.Value.ValueKind ==
+                JsonValueKind.Object &&
+            root.Value.TryGetProperty(
+                "connected",
+                out var property
+            ) &&
+            (
+                property.ValueKind ==
+                    JsonValueKind.True ||
+                property.ValueKind ==
+                    JsonValueKind.False
+            )
+        )
+        {
+            BrokerConnected =
+                property.GetBoolean();
+        }
+    }
+
+    private void ApplyPositions(
+        JsonElement? root
+    )
+    {
+        Positions.Clear();
+
+        if (root is null)
+        {
+            return;
+        }
+
+        var array =
+            root.Value.ValueKind ==
+                JsonValueKind.Array
+                ? root.Value
+                : FindArray(
+                    root.Value,
+                    "positions",
+                    "data",
+                    "items"
+                ) ?? default;
+
+        if (
+            array.ValueKind !=
+            JsonValueKind.Array
+        )
+        {
+            return;
+        }
+
+        foreach (
+            var position
+            in array.EnumerateArray()
+        )
+        {
+            var symbol =
+                FirstString(
+                    position,
+                    "symbol"
+                ) ?? "";
+
+            if (
+                string.IsNullOrWhiteSpace(
+                    symbol
+                )
+            )
+            {
+                continue;
+            }
+
+            Positions.Add(
+                new PositionView(
+                    symbol,
+
+                    FirstNumber(
+                        position,
+                        "qty",
+                        "quantity"
+                    )
+                    ?.ToString(
+                        "0.####",
+                        CultureInfo.InvariantCulture
+                    ) ?? "—",
+
+                    FirstNumber(
+                        position,
+                        "avg_entry_price",
+                        "entry_price",
+                        "average_entry_price"
+                    ),
+
+                    FirstNumber(
+                        position,
+                        "current_price",
+                        "price"
+                    ),
+
+                    FirstNumber(
+                        position,
+                        "unrealized_pl",
+                        "pnl",
+                        "profit_loss"
+                    )
+                )
+            );
+        }
+    }
+
+    private static (
+        string Range,
+        string Timeframe
+    ) NormalizeRangeTimeframe(
+        string range,
+        string timeframe
+    )
+    {
+        return range switch
+        {
+            "1D" =>
+                (
+                    "1D",
+                    timeframe is
+                        "1m" or
+                        "2m" or
+                        "5m" or
+                        "15m" or
+                        "30m" or
+                        "1h"
+                            ? timeframe
+                            : "5m"
+                ),
+
+            "5D" =>
+                (
+                    "5D",
+                    timeframe is
+                        "1m" or
+                        "2m" or
+                        "5m" or
+                        "15m" or
+                        "30m" or
+                        "1h"
+                            ? timeframe
+                            : "15m"
+                ),
+
+            "1M" =>
+                (
+                    "1M",
+                    timeframe is
+                        "5m" or
+                        "15m" or
+                        "30m" or
+                        "1h"
+                            ? timeframe
+                            : "30m"
+                ),
+
+            "3M" =>
+                (
+                    "3M",
+                    timeframe is
+                        "1h" or
+                        "1d"
+                            ? timeframe
+                            : "1h"
+                ),
+
+            "6M" =>
+                (
+                    "6M",
+                    "1d"
+                ),
+
+            "1Y" =>
+                (
+                    "1Y",
+                    "1d"
+                ),
+
+            "5Y" =>
+                (
+                    "5Y",
+                    "1d"
+                ),
+
+            "MAX" =>
+                (
+                    "MAX",
+                    "1wk"
+                ),
+
+            _ =>
+                (
+                    range,
+                    timeframe
+                )
+        };
+    }
+
+    private static string DefaultRangeFor(
+        string timeframe
+    )
+    {
+        return timeframe switch
+        {
+            "1m" =>
+                "1D",
+
+            "5m" =>
+                "5D",
+
+            "15m" =>
+                "5D",
+
+            "30m" =>
+                "1M",
+
+            "1h" =>
+                "3M",
+
+            "1d" =>
+                "1Y",
+
+            "1wk" =>
+                "5Y",
+
+            _ =>
+                "5D"
+        };
+    }
+
+    private static JsonElement? FindArray(
+        JsonElement root,
+        params string[] names
+    )
+    {
+        if (
+            root.ValueKind ==
+            JsonValueKind.Array
+        )
+        {
+            return root;
+        }
+
+        if (
+            root.ValueKind ==
+            JsonValueKind.Object
+        )
+        {
+            foreach (var name in names)
+            {
+                if (
+                    root.TryGetProperty(
+                        name,
+                        out var value
+                    ) &&
+                    value.ValueKind ==
+                        JsonValueKind.Array
+                )
+                {
+                    return value;
+                }
+            }
+
+            foreach (
+                var property
+                in root.EnumerateObject()
+            )
+            {
+                var nested =
+                    FindArray(
+                        property.Value,
+                        names
+                    );
+
+                if (nested.HasValue)
+                {
+                    return nested;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static double? FirstNumber(
+        JsonElement root,
+        params string[] names
+    )
+    {
+        if (
+            root.ValueKind !=
+            JsonValueKind.Object
+        )
+        {
+            return null;
+        }
+
+        foreach (var name in names)
+        {
+            if (
+                !root.TryGetProperty(
+                    name,
+                    out var value
+                )
+            )
+            {
+                continue;
+            }
+
+            if (
+                value.ValueKind ==
+                    JsonValueKind.Number &&
+                value.TryGetDouble(
+                    out var number
+                )
+            )
+            {
+                return number;
+            }
+
+            if (
+                value.ValueKind ==
+                    JsonValueKind.String &&
+                double.TryParse(
+                    value.GetString(),
+                    NumberStyles.Float |
+                    NumberStyles.AllowThousands,
+                    CultureInfo.InvariantCulture,
+                    out number
+                )
+            )
+            {
+                return number;
+            }
+        }
+
+        return null;
+    }
+
+    private static string? FirstString(
+        JsonElement root,
+        params string[] names
+    )
+    {
+        if (
+            root.ValueKind !=
+            JsonValueKind.Object
+        )
+        {
+            return null;
+        }
+
+        foreach (var name in names)
+        {
+            if (
+                !root.TryGetProperty(
+                    name,
+                    out var value
+                )
+            )
+            {
+                continue;
+            }
+
+            if (
+                value.ValueKind ==
+                JsonValueKind.String
+            )
+            {
+                return value.GetString();
+            }
+
+            if (
+                value.ValueKind ==
+                JsonValueKind.Number
+            )
+            {
+                return value.ToString();
+            }
+        }
+
+        return null;
+    }
+
+    private static double? ReadNumberRecursive(
+        JsonElement root,
+        params string[] names
+    )
+    {
+        var direct =
+            FirstNumber(
+                root,
+                names
+            );
+
+        if (direct.HasValue)
+        {
+            return direct;
+        }
+
+        if (
+            root.ValueKind ==
+            JsonValueKind.Object
+        )
+        {
+            foreach (
+                var property
+                in root.EnumerateObject()
+            )
+            {
+                var nested =
+                    ReadNumberRecursive(
+                        property.Value,
+                        names
+                    );
+
+                if (nested.HasValue)
+                {
+                    return nested;
+                }
+            }
+        }
+
+        if (
+            root.ValueKind ==
+            JsonValueKind.Array
+        )
+        {
+            foreach (
+                var item
+                in root.EnumerateArray()
+            )
+            {
+                var nested =
+                    ReadNumberRecursive(
+                        item,
+                        names
+                    );
+
+                if (nested.HasValue)
+                {
+                    return nested;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static string? ReadStringRecursive(
+        JsonElement root,
+        params string[] names
+    )
+    {
+        var direct =
+            FirstString(
+                root,
+                names
+            );
+
+        if (
+            !string.IsNullOrWhiteSpace(
+                direct
+            )
+        )
+        {
+            return direct;
+        }
+
+        if (
+            root.ValueKind ==
+            JsonValueKind.Object
+        )
+        {
+            foreach (
+                var property
+                in root.EnumerateObject()
+            )
+            {
+                var nested =
+                    ReadStringRecursive(
+                        property.Value,
+                        names
+                    );
+
+                if (
+                    !string.IsNullOrWhiteSpace(
+                        nested
+                    )
+                )
+                {
+                    return nested;
+                }
+            }
+        }
+
+        if (
+            root.ValueKind ==
+            JsonValueKind.Array
+        )
+        {
+            foreach (
+                var item
+                in root.EnumerateArray()
+            )
+            {
+                var nested =
+                    ReadStringRecursive(
+                        item,
+                        names
+                    );
+
+                if (
+                    !string.IsNullOrWhiteSpace(
+                        nested
+                    )
+                )
+                {
+                    return nested;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static string FormatPrice(
+        double? value
+    )
+    {
+        return value.HasValue
+            ? value.Value.ToString(
+                "N2",
+                CultureInfo.InvariantCulture
+            )
+            : "—";
+    }
+
+    private static string FormatMoney(
+        double? value
+    )
+    {
+        return value.HasValue
+            ? value.Value.ToString(
+                "C2",
+                CultureInfo.GetCultureInfo(
+                    "en-US"
+                )
+            )
+            : "—";
+    }
+
+    private static string FormatNumber(
+        double? value,
+        string format
+    )
+    {
+        return value.HasValue
+            ? value.Value.ToString(
+                format,
+                CultureInfo.InvariantCulture
+            )
+            : "—";
+    }
+
+    private static string FormatRatio(
+        double? value
+    )
+    {
+        return value.HasValue
+            ? $"{value.Value:0.00}x"
+            : "—";
+    }
+
+    private static string FormatPercent(
+        double? value
+    )
+    {
+        return value.HasValue
+            ? $"{(value.Value >= 0 ? "+" : "")}{value.Value:0.00}%"
+            : "—";
+    }
+
+    private static string ChangeClass(
+        double? value
+    )
+    {
+        if (!value.HasValue)
+        {
+            return "";
+        }
+
+        return value.Value >= 0
+            ? "positive"
+            : "negative";
+    }
+
+    private static string FormatVolume(
+        double? value
+    )
+    {
+        if (!value.HasValue)
+        {
+            return "—";
+        }
+
+        var number =
+            value.Value;
+
+        if (Math.Abs(number) >= 1_000_000_000)
+        {
+            return
+                $"{number / 1_000_000_000:0.00}B";
+        }
+
+        if (Math.Abs(number) >= 1_000_000)
+        {
+            return
+                $"{number / 1_000_000:0.00}M";
+        }
+
+        if (Math.Abs(number) >= 1_000)
+        {
+            return
+                $"{number / 1_000:0.0}K";
+        }
+
+        return number.ToString(
+            "N0",
+            CultureInfo.InvariantCulture
+        );
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed =
+            true;
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "PhoenixChart.destroy"
+            );
+        }
+        catch
+        {
+        }
+    }
+
+    private sealed record BarView(
+        string Time,
+        double Open,
+        double High,
+        double Low,
+        double Close,
+        double? Volume
+    );
+
+    private sealed record TimeframeView(
+        string Key,
+        string Label
+    );
+
+    private sealed record DrawingToolView(
+        string Id,
+        string Label,
+        string Icon
+    );
+
+    private sealed record ChartEventView(
+        string Time,
+        string Type,
+        string Title
+    );
+
+    private sealed class TradeLevelView
+    {
+        public double? Entry { get; set; }
+
+        public double? Stop { get; set; }
+
+        public double? Target { get; set; }
+
+        public double? Exit { get; set; }
+    }
+
+    private sealed class TickerView
+    {
+        public TickerView(
+            string symbol,
+            double? price,
+            double? changePercent
+        )
+        {
+            Symbol =
+                symbol;
+
+            Price =
+                price;
+
+            ChangePercent =
+                changePercent;
+        }
+
+        public string Symbol { get; }
+
+        public double? Price { get; set; }
+
+        public double? ChangePercent { get; set; }
+    }
+
+    private sealed record PositionView(
+        string Symbol,
+        string Qty,
+        double? EntryPrice,
+        double? CurrentPrice,
+        double? Pnl
+    );
+}

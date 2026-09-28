@@ -1,0 +1,1824 @@
+@page "/risk"
+
+@inject PhoenixApi Api
+@inject NavigationManager Navigation
+
+<PageTitle>PhoenixTrend | Risk</PageTitle>
+
+<div class="pt-risk">
+
+<section class="pt-market-hero">
+    <div class="pt-market-hero-copy">
+        <h1>Risk</h1>
+        <p>Protect your capital with real-time portfolio monitoring and PhoenixTrend risk controls.</p>
+    </div>
+    <button class="pt-market-refresh" type="button" @onclick="Load" disabled="@Loading">
+        <i class="ph ph-arrows-clockwise"></i>
+        @(Loading ? "Refreshing" : "Refresh")
+    </button>
+</section>
+
+
+<!-- =========================================================
+     TABS
+     ========================================================= -->
+
+<div class="tabbar">
+
+    @foreach (var tab in Tabs)
+    {
+        <button
+            class="@(ActiveTab == tab ? "active" : "")"
+            @onclick="() => SelectTab(tab)">
+
+            <i class="ph-duotone @GetTabIcon(tab)"></i>
+            <span>@tab</span>
+
+        </button>
+    }
+
+</div>
+
+
+@if (Loading)
+{
+    <div class="connect-message">
+        Loading risk data...
+    </div>
+}
+
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="connect-message">
+        @ErrorMessage
+    </div>
+}
+
+
+<!-- =========================================================
+     METRICS
+     ========================================================= -->
+
+<div class="metric-grid five">
+
+    <MetricCard
+        Icon="ph ph-shield-check"
+        Label="Risk Engine"
+        Value="@RiskEngineState"
+        Detail="@RiskEngineDetail" />
+
+    <MetricCard
+        Icon="ph ph-warning"
+        Label="Unrealized P&L"
+        Value="@TotalUnrealizedPnl"
+        Detail="Open positions"
+        Tone="@PnlTone" />
+
+    <MetricCard
+        Icon="ph ph-gauge"
+        Label="Max Drawdown"
+        Value="@MaxDrawdown"
+        Detail="Analytics"
+        Tone="negative" />
+
+    <MetricCard
+        Icon="ph ph-chart-donut"
+        Label="Largest Position"
+        Value="@LargestPositionPercent"
+        Detail="@LargestPositionSymbol"
+        Tone="blue" />
+
+    <MetricCard
+        Icon="ph ph-sigma"
+        Label="Total Exposure"
+        Value="@TotalExposure"
+        Detail="@($"{Positions.Count} open positions")"
+        Tone="purple" />
+
+</div>
+
+
+<!-- =========================================================
+     OVERVIEW
+     ========================================================= -->
+
+@if (ActiveTab == "Overview")
+{
+    <div class="risk-layout">
+
+        <Panel
+            Title="Equity & Risk Overview"
+            Class="span-2">
+
+            <div class="hero-chart risk-chart">
+
+                <div class="chart-grid"></div>
+
+                @if (EquityPoints.Count > 1)
+                {
+                    <svg viewBox="0 0 900 260" preserveAspectRatio="none">
+                        <polyline class="line" fill="none" points="@BuildPolyline(EquityPoints, 900, 260)" />
+                    </svg>
+                }
+                else
+                {
+                    <div class="portfolio-chart-empty">
+                        Historical equity-series data is not currently available.
+                    </div>
+                }
+
+            </div>
+
+
+            <div class="performance-kpis">
+
+                <span>
+
+                    <b>
+                        @PortfolioValue
+                    </b>
+
+                    Portfolio
+
+                </span>
+
+
+                <span>
+
+                    <b>
+                        @TotalExposure
+                    </b>
+
+                    Exposure
+
+                </span>
+
+
+                <span>
+
+                    <b class="@GetValueClass(TotalUnrealizedPnl)">
+                        @TotalUnrealizedPnl
+                    </b>
+
+                    Unrealized P&amp;L
+
+                </span>
+
+
+                <span>
+
+                    <b>
+                        @MaxDrawdown
+                    </b>
+
+                    Max Drawdown
+
+                </span>
+
+
+                <span>
+
+                    <b>
+                        @LargestPositionPercent
+                    </b>
+
+                    Largest Position
+
+                </span>
+
+            </div>
+
+        </Panel>
+
+
+        <!-- =================================================
+             EXPOSURE
+             ================================================= -->
+
+        <Panel Title="Risk Distribution">
+
+            @if (ExposureRows.Count > 0 && TotalExposureRaw > 0)
+            {
+                <div class="donut riskdonut">
+                    <div>
+                        <b>@TotalExposureShort</b>
+                        <small>Total Exposure</small>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="allocation-empty">
+                    <i class="ph ph-shield-check"></i>
+                    <strong>No current exposure</strong>
+                    <small>Risk distribution will appear when broker positions are open.</small>
+                </div>
+            }
+
+
+            <div class="legend">
+
+                @for (var i = 0; i < ExposureRows.Count; i++)
+                {
+                    var row = ExposureRows[i];
+
+                    <span>
+
+                        <i class="@GetLegendClass(i)">
+                        </i>
+
+                        @row.Symbol
+
+                        <b>
+                            @row.Percent
+                        </b>
+
+                    </span>
+                }
+
+            </div>
+
+        </Panel>
+
+
+        <!-- =================================================
+             LIVE ALERTS
+             ================================================= -->
+
+        <Panel Title="Live Risk Alerts">
+
+            <div class="alert-list">
+
+                @if (RiskAlerts.Count == 0)
+                {
+                    <article>
+
+                        <b>
+                            No portfolio alerts detected
+                        </b>
+
+                        <span>
+                            Current position data does not trigger a UI-level concentration alert.
+                        </span>
+
+                    </article>
+                }
+                else
+                {
+                    @foreach (var alert in RiskAlerts)
+                    {
+                        <article class="@alert.Level">
+
+                            <b>
+                                @alert.Title
+                            </b>
+
+                            <span>
+                                @alert.Detail
+                            </span>
+
+                        </article>
+                    }
+                }
+
+            </div>
+
+        </Panel>
+
+
+        <!-- =================================================
+             POSITION EXPOSURE
+             ================================================= -->
+
+        <Panel Title="Position Exposure">
+
+            <div class="bar-list">
+
+                @foreach (var position in ExposureRows.Take(6))
+                {
+                    <div>
+
+                        <span>
+                            @position.Symbol
+                        </span>
+
+                        <i style="@($"--w:{position.BarWidth}%")">
+                        </i>
+
+                        <b>
+                            @position.Percent
+                        </b>
+
+                    </div>
+                }
+
+            </div>
+
+        </Panel>
+
+
+        <!-- =================================================
+             POSITION RISK TABLE
+             ================================================= -->
+
+        <Panel
+            Title="Position Risk"
+            Class="span-2">
+
+            <table class="data-table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Quantity</th>
+            <th>Market Value</th>
+            <th>Portfolio %</th>
+            <th>Unrealized P&amp;L</th>
+            <th>Risk</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Positions.Count == 0)
+        {
+            <tr>
+                <td colspan="6">No open positions.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var position in Positions)
+            {
+                <tr>
+                    <td><strong>@position.Symbol</strong></td>
+                    <td>@position.Quantity</td>
+                    <td>@position.MarketValue</td>
+                    <td>@position.PortfolioPercent</td>
+                    <td class="@GetValueClass(position.Pnl)">@position.Pnl</td>
+                    <td>
+                        <span class="@GetConcentrationClass(position.PortfolioPercentRaw)">
+                            @GetConcentrationStatus(position.PortfolioPercentRaw)
+                        </span>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     RISK RULES
+     ========================================================= -->
+
+@if (ActiveTab == "Risk Rules")
+{
+    <Panel
+        Title="Risk Rules"
+        Subtitle="PhoenixTrend execution protection">
+
+        <div class="status-list">
+
+            <div>
+
+                <span>
+                    Risk Engine
+                </span>
+
+                <b class="@(
+                    RiskEngineOnline
+                        ? "green"
+                        : "red")">
+
+                    @RiskEngineState
+
+                </b>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    TradeDesk Confirmation
+                </span>
+
+                <b class="green">
+                    Required
+                </b>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Execution Pipeline
+                </span>
+
+                <b class="green">
+                    Risk Controlled
+                </b>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Broker
+                </span>
+
+                <b class="@(
+                    BrokerConnected
+                        ? "green"
+                        : "red")">
+
+                    @(BrokerConnected
+                        ? "Connected"
+                        : "Disconnected")
+
+                </b>
+
+            </div>
+
+        </div>
+
+
+        <div class="connect-message">
+
+            Risk-rule configuration is controlled by the backend Risk Engine.
+            Your current PhoenixApi does not expose endpoints for changing
+            risk thresholds from the UI.
+
+        </div>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     POSITION LIMITS
+     ========================================================= -->
+
+@if (ActiveTab == "Position Limits")
+{
+    <Panel
+        Title="Position Limits"
+        Subtitle="Current portfolio concentration">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+                    <th>Symbol</th>
+                    <th>Quantity</th>
+                    <th>Market Value</th>
+                    <th>Portfolio %</th>
+                    <th>P&amp;L</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @foreach (var position in Positions)
+                {
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                @position.Symbol
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            @position.Quantity
+                        </td>
+
+
+                        <td>
+                            @position.MarketValue
+                        </td>
+
+
+                        <td>
+                            @position.PortfolioPercent
+                        </td>
+
+
+                        <td class="@GetValueClass(position.Pnl)">
+                            @position.Pnl
+                        </td>
+
+
+                        <td>
+
+                            <span class="@GetConcentrationClass(position.PortfolioPercentRaw)">
+
+                                @GetConcentrationStatus(position.PortfolioPercentRaw)
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     EXPOSURE
+     ========================================================= -->
+
+@if (ActiveTab == "Exposure")
+{
+    <div class="dashboard-grid">
+
+        <Panel Title="Portfolio Exposure">
+
+            @if (ExposureRows.Count > 0 && TotalExposureRaw > 0)
+            {
+                <div class="donut riskdonut">
+                    <div>
+                        <b>@TotalExposureShort</b>
+                        <small>Total Exposure</small>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="allocation-empty">
+                    <i class="ph ph-shield-check"></i>
+                    <strong>No current exposure</strong>
+                    <small>Risk distribution will appear when broker positions are open.</small>
+                </div>
+            }
+
+        </Panel>
+
+
+        <Panel
+            Title="Exposure by Position"
+            Class="span-2">
+
+            <div class="bar-list">
+
+                @foreach (var row in ExposureRows)
+                {
+                    <div>
+
+                        <span>
+                            @row.Symbol
+                        </span>
+
+                        <i style="@($"--w:{row.BarWidth}%")">
+                        </i>
+
+                        <b>
+                            @row.Percent
+                        </b>
+
+                    </div>
+                }
+
+            </div>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     DRAWDOWN
+     ========================================================= -->
+
+@if (ActiveTab == "Drawdown")
+{
+    <Panel
+        Title="Drawdown"
+        Subtitle="Portfolio drawdown reported by PhoenixTrend analytics">
+
+        <div class="metric-grid three">
+
+            <MetricCard
+                Icon="ph ph-trend-down"
+                Label="Maximum Drawdown"
+                Value="@MaxDrawdown"
+                Detail="Analytics"
+                Tone="negative" />
+
+            <MetricCard
+                Icon="ph ph-currency-dollar"
+                Label="Total P&L"
+                Value="@TotalPnl"
+                Detail="@TotalReturn"
+                Tone="@PnlTone" />
+
+            <MetricCard
+                Icon="ph ph-target"
+                Label="Win Rate"
+                Value="@WinRate"
+                Detail="Trading performance" />
+
+        </div>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     ALERTS
+     ========================================================= -->
+
+@if (ActiveTab == "Alerts")
+{
+    <Panel Title="Risk Alerts">
+
+        <div class="alert-list">
+
+            @if (RiskAlerts.Count == 0)
+            {
+                <article>
+
+                    <b>
+                        No current portfolio alerts
+                    </b>
+
+                    <span>
+                        No concentration alerts were generated from the available position data.
+                    </span>
+
+                </article>
+            }
+            else
+            {
+                @foreach (var alert in RiskAlerts)
+                {
+                    <article class="@alert.Level">
+
+                        <b>
+                            @alert.Title
+                        </b>
+
+                        <span>
+                            @alert.Detail
+                        </span>
+
+                    </article>
+                }
+            }
+
+        </div>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     STRESS TEST
+     ========================================================= -->
+
+@if (ActiveTab == "Stress Test")
+{
+    <Panel Title="Stress Test">
+
+        <div class="connect-message">
+
+            A dedicated stress-test endpoint is not currently exposed by
+            PhoenixApi. This tab is ready to connect once the backend
+            Risk Engine exposes stress-testing scenarios.
+
+        </div>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     SCENARIO ANALYSIS
+     ========================================================= -->
+
+@if (ActiveTab == "Scenario Analysis")
+{
+    <Panel Title="Scenario Analysis">
+
+        <div class="connect-message">
+
+            Scenario-analysis data is not currently exposed through
+            PhoenixApi. We should connect this directly to the Risk Engine
+            rather than calculating trading risk only in the browser.
+
+        </div>
+
+    </Panel>
+}
+
+
+</div>
+
+@code
+{
+    private bool Loading;
+    private readonly List<double> EquityPoints = new();
+
+    private bool RiskEngineOnline;
+
+    private bool BrokerConnected;
+
+
+    private string ErrorMessage = string.Empty;
+
+    private string ActiveTab = "Overview";
+
+
+    private string PortfolioValue = "—";
+
+    private string TotalExposure = "—";
+
+    private string TotalExposureShort = "—";
+
+    private string TotalUnrealizedPnl = "—";
+
+    private string MaxDrawdown = "—";
+
+    private string TotalPnl = "—";
+
+    private string TotalReturn = "—";
+
+    private string WinRate = "—";
+
+    private string LargestPositionPercent = "—";
+
+    private string LargestPositionSymbol = "—";
+
+    private string RiskEngineState = "Unknown";
+
+    private string RiskEngineDetail = "Phoenix Risk Engine";
+
+
+    private double PortfolioValueRaw;
+
+    private double TotalExposureRaw;
+
+    private double TotalUnrealizedPnlRaw;
+
+
+    private readonly List<RiskPosition> Positions = new();
+
+    private readonly List<ExposureRow> ExposureRows = new();
+
+    private readonly List<RiskAlert> RiskAlerts = new();
+
+
+    private readonly string[] Tabs =
+    {
+        "Overview",
+        "Risk Rules",
+        "Position Limits",
+        "Exposure",
+        "Drawdown",
+        "Alerts",
+        "Stress Test",
+        "Scenario Analysis"
+    };
+
+
+    private string PnlTone =>
+        TotalUnrealizedPnlRaw < 0
+            ? "negative"
+            : "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+
+    private void SelectTab(
+        string tab)
+    {
+        ActiveTab = tab;
+    }
+
+
+    private async Task Load()
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+
+        try
+        {
+            Loading = true;
+
+            ErrorMessage = string.Empty;
+
+
+            await Task.WhenAll(
+                LoadAccount(),
+                LoadPositions(),
+                LoadAnalytics(),
+                LoadEngine(),
+                LoadBroker()
+            );
+
+
+            BuildRiskMetrics();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage =
+                "Unable to load risk information.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+    // =========================================================
+    // ACCOUNT
+    // =========================================================
+
+    private async Task LoadAccount()
+    {
+        var account =
+            await Api.BrokerAccount();
+
+
+        if (account is null)
+        {
+            PortfolioValue = "—";
+
+            PortfolioValueRaw = 0;
+
+            return;
+        }
+
+
+        PortfolioValueRaw =
+            ReadNumber(
+                account,
+                "portfolio_value"
+            );
+
+
+        if (double.IsNaN(
+            PortfolioValueRaw))
+        {
+            PortfolioValueRaw =
+                ReadNumber(
+                    account,
+                    "equity"
+                );
+        }
+
+
+        if (double.IsNaN(
+            PortfolioValueRaw))
+        {
+            PortfolioValueRaw = 0;
+        }
+
+
+        PortfolioValue =
+            FormatMoney(
+                PortfolioValueRaw
+            );
+    }
+
+
+    // =========================================================
+    // POSITIONS
+    // =========================================================
+
+    private async Task LoadPositions()
+    {
+        Positions.Clear();
+
+
+        var result =
+            await Api.BrokerPositions();
+
+
+        if (result is null)
+        {
+            result =
+                await Api.Positions();
+        }
+
+
+        if (result is null)
+        {
+            return;
+        }
+
+
+        if (!TryGetArray(
+            result.Value,
+            out var items))
+        {
+            return;
+        }
+
+
+        foreach (var item in
+                 items.EnumerateArray())
+        {
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var symbol =
+                ReadString(
+                    item,
+                    "symbol",
+                    ""
+                );
+
+
+            if (string.IsNullOrWhiteSpace(
+                symbol))
+            {
+                continue;
+            }
+
+
+            var quantity =
+                ReadNumber(
+                    item,
+                    "qty"
+                );
+
+
+            if (double.IsNaN(quantity))
+            {
+                quantity =
+                    ReadNumber(
+                        item,
+                        "quantity"
+                    );
+            }
+
+
+            var marketValue =
+                ReadNumber(
+                    item,
+                    "market_value"
+                );
+
+
+            var pnl =
+                ReadNumber(
+                    item,
+                    "unrealized_pl"
+                );
+
+
+            if (double.IsNaN(pnl))
+            {
+                pnl =
+                    ReadNumber(
+                        item,
+                        "pnl"
+                    );
+            }
+
+
+            if (double.IsNaN(quantity))
+            {
+                quantity = 0;
+            }
+
+
+            if (double.IsNaN(marketValue))
+            {
+                marketValue = 0;
+            }
+
+
+            if (double.IsNaN(pnl))
+            {
+                pnl = 0;
+            }
+
+
+            Positions.Add(
+                new RiskPosition(
+                    symbol,
+                    quantity,
+                    marketValue,
+                    pnl
+                )
+            );
+        }
+    }
+
+
+    // =========================================================
+    // ANALYTICS
+    // =========================================================
+
+    private async Task LoadAnalytics()
+    {
+        var analytics =
+            await Api.Analytics();
+
+
+        EquityPoints.Clear();
+
+        if (analytics is null)
+        {
+            return;
+        }
+
+        ExtractEquityCurve(analytics.Value);
+
+
+        var maxDrawdown =
+            ReadNumber(
+                analytics,
+                "max_drawdown"
+            );
+
+
+        MaxDrawdown =
+            FormatPercentAuto(
+                maxDrawdown
+            );
+
+
+        var totalPnl =
+            ReadNumber(
+                analytics,
+                "total_pnl"
+            );
+
+
+        TotalPnl =
+            FormatSignedMoney(
+                totalPnl
+            );
+
+
+        var totalReturn =
+            ReadNumber(
+                analytics,
+                "total_return"
+            );
+
+
+        if (double.IsNaN(totalReturn))
+        {
+            totalReturn =
+                ReadNumber(
+                    analytics,
+                    "return_percent"
+                );
+        }
+
+
+        TotalReturn =
+            FormatPercentAuto(
+                totalReturn
+            );
+
+
+        var winRate =
+            ReadNumber(
+                analytics,
+                "win_rate"
+            );
+
+
+        WinRate =
+            FormatPercentAuto(
+                winRate
+            );
+    }
+
+
+    // =========================================================
+    // ENGINE
+    // =========================================================
+
+    private async Task LoadEngine()
+    {
+        var engine =
+            await Api.EngineStatus();
+
+
+        if (engine is null)
+        {
+            RiskEngineOnline = false;
+
+            RiskEngineState = "Unavailable";
+
+            RiskEngineDetail =
+                "Engine status unavailable";
+
+            return;
+        }
+
+
+        var status =
+            PhoenixApi.Text(
+                engine,
+                "status",
+                ""
+            );
+
+
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            status =
+                PhoenixApi.Text(
+                    engine,
+                    "state",
+                    "Online"
+                );
+        }
+
+
+        RiskEngineState = status;
+
+
+        RiskEngineOnline =
+            !status.Equals(
+                "offline",
+                StringComparison.OrdinalIgnoreCase
+            ) &&
+            !status.Equals(
+                "error",
+                StringComparison.OrdinalIgnoreCase
+            ) &&
+            !status.Equals(
+                "unavailable",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+
+        var mode =
+            PhoenixApi.Text(
+                engine,
+                "mode",
+                ""
+            );
+
+
+        RiskEngineDetail =
+            string.IsNullOrWhiteSpace(mode)
+                ? "Phoenix Risk Engine"
+                : $"Mode: {mode}";
+    }
+
+
+    // =========================================================
+    // BROKER
+    // =========================================================
+
+    private async Task LoadBroker()
+    {
+        var broker =
+            await Api.BrokerStatus();
+
+
+        BrokerConnected =
+            PhoenixApi.Text(
+                broker,
+                "connected",
+                "false"
+            )
+            .Equals(
+                "true",
+                StringComparison.OrdinalIgnoreCase
+            );
+    }
+
+
+    // =========================================================
+    // CALCULATED RISK
+    // =========================================================
+
+    private void BuildRiskMetrics()
+    {
+        ExposureRows.Clear();
+
+        RiskAlerts.Clear();
+
+
+        TotalExposureRaw =
+            Positions.Sum(
+                x => Math.Abs(
+                    x.MarketValueRaw
+                )
+            );
+
+
+        TotalUnrealizedPnlRaw =
+            Positions.Sum(
+                x => x.PnlRaw
+            );
+
+
+        TotalExposure =
+            FormatMoney(
+                TotalExposureRaw
+            );
+
+
+        TotalExposureShort =
+            FormatShortMoney(
+                TotalExposureRaw
+            );
+
+
+        TotalUnrealizedPnl =
+            FormatSignedMoney(
+                TotalUnrealizedPnlRaw
+            );
+
+
+        var denominator =
+            PortfolioValueRaw > 0
+                ? PortfolioValueRaw
+                : TotalExposureRaw;
+
+
+        foreach (var position in Positions)
+        {
+            var percentage =
+                denominator > 0
+                    ? Math.Abs(
+                        position.MarketValueRaw
+                    ) /
+                    denominator *
+                    100
+                    : 0;
+
+
+            position.PortfolioPercentRaw =
+                percentage;
+
+
+            position.PortfolioPercent =
+                $"{percentage:0.0}%";
+
+
+            ExposureRows.Add(
+                new ExposureRow(
+                    position.Symbol,
+                    $"{percentage:0.0}%",
+                    Math.Clamp(
+                        percentage,
+                        0,
+                        100
+                    )
+                )
+            );
+        }
+
+
+        ExposureRows.Sort(
+            (a, b) =>
+                b.BarWidth.CompareTo(
+                    a.BarWidth
+                )
+        );
+
+
+        var largest =
+            Positions
+                .OrderByDescending(
+                    x =>
+                        x.PortfolioPercentRaw
+                )
+                .FirstOrDefault();
+
+
+        if (largest is not null)
+        {
+            LargestPositionSymbol =
+                largest.Symbol;
+
+
+            LargestPositionPercent =
+                largest.PortfolioPercent;
+        }
+        else
+        {
+            LargestPositionSymbol = "—";
+
+            LargestPositionPercent = "—";
+        }
+
+
+        BuildAlerts();
+    }
+
+
+    private void BuildAlerts()
+    {
+        foreach (var position in Positions)
+        {
+            if (position.PortfolioPercentRaw >= 20)
+            {
+                RiskAlerts.Add(
+                    new RiskAlert(
+                        "high",
+                        "High position concentration",
+                        $"{position.Symbol} represents {position.PortfolioPercent} of portfolio value."
+                    )
+                );
+            }
+            else if (
+                position.PortfolioPercentRaw >= 10)
+            {
+                RiskAlerts.Add(
+                    new RiskAlert(
+                        "medium",
+                        "Position concentration",
+                        $"{position.Symbol} represents {position.PortfolioPercent} of portfolio value."
+                    )
+                );
+            }
+
+
+            if (position.PnlRaw < 0)
+            {
+                RiskAlerts.Add(
+                    new RiskAlert(
+                        "",
+                        $"{position.Symbol} unrealized loss",
+                        FormatSignedMoney(
+                            position.PnlRaw
+                        )
+                    )
+                );
+            }
+        }
+
+
+        if (!BrokerConnected)
+        {
+            RiskAlerts.Add(
+                new RiskAlert(
+                    "high",
+                    "Broker disconnected",
+                    "Trading execution is unavailable until the broker is connected."
+                )
+            );
+        }
+
+
+        if (!RiskEngineOnline)
+        {
+            RiskAlerts.Add(
+                new RiskAlert(
+                    "high",
+                    "Risk engine unavailable",
+                    "PhoenixTrend could not confirm the current engine status."
+                )
+            );
+        }
+    }
+
+
+    // =========================================================
+    // POSITION TABLE
+    // =========================================================
+
+    private void ExtractEquityCurve(JsonElement root)
+    {
+        if (root.ValueKind != JsonValueKind.Object) return;
+
+        foreach (var name in new[] { "equity_curve", "equity", "performance_history", "history" })
+        {
+            if (!root.TryGetProperty(name, out var series) || series.ValueKind != JsonValueKind.Array) continue;
+
+            foreach (var item in series.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.Number && item.TryGetDouble(out var direct))
+                {
+                    if (double.IsFinite(direct)) EquityPoints.Add(direct);
+                    continue;
+                }
+
+                if (item.ValueKind != JsonValueKind.Object) continue;
+
+                foreach (var key in new[] { "equity", "value", "portfolio_value", "balance" })
+                {
+                    if (item.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.Number &&
+                        value.TryGetDouble(out var parsed) && double.IsFinite(parsed))
+                    {
+                        EquityPoints.Add(parsed);
+                        break;
+                    }
+                }
+            }
+
+            if (EquityPoints.Count > 0) return;
+        }
+    }
+
+
+    private static string BuildPolyline(List<double> values, double width, double height)
+    {
+        if (values.Count < 2) return string.Empty;
+        var min = values.Min();
+        var max = values.Max();
+        var range = max - min;
+        if (range <= 0) range = 1;
+        var output = new List<string>(values.Count);
+
+        for (var i = 0; i < values.Count; i++)
+        {
+            var x = i / (double)(values.Count - 1) * width;
+            var normalized = (values[i] - min) / range;
+            var y = height - 20 - normalized * (height - 40);
+            output.Add($"{x:0.##},{y:0.##}");
+        }
+
+        return string.Join(" ", output);
+    }
+
+
+    // =========================================================
+    // JSON HELPERS
+    // =========================================================
+
+    private static bool TryGetArray(
+        JsonElement root,
+        out JsonElement array)
+    {
+        if (root.ValueKind ==
+            JsonValueKind.Array)
+        {
+            array = root;
+
+            return true;
+        }
+
+
+        if (root.ValueKind ==
+            JsonValueKind.Object)
+        {
+            var names =
+                new[]
+                {
+                    "positions",
+                    "data",
+                    "items",
+                    "results"
+                };
+
+
+            foreach (var name in names)
+            {
+                if (root.TryGetProperty(
+                        name,
+                        out var candidate) &&
+                    candidate.ValueKind ==
+                        JsonValueKind.Array)
+                {
+                    array = candidate;
+
+                    return true;
+                }
+            }
+        }
+
+
+        array = default;
+
+        return false;
+    }
+
+
+    private static double ReadNumber(
+        JsonElement? element,
+        string property)
+    {
+        if (element is null)
+        {
+            return double.NaN;
+        }
+
+
+        return ReadNumber(
+            element.Value,
+            property
+        );
+    }
+
+
+    private static double ReadNumber(
+        JsonElement element,
+        string property)
+    {
+        if (!element.TryGetProperty(
+                property,
+                out var value))
+        {
+            return double.NaN;
+        }
+
+
+        if (value.ValueKind ==
+                JsonValueKind.Number &&
+            value.TryGetDouble(
+                out var number))
+        {
+            return number;
+        }
+
+
+        return double.TryParse(
+            value.ToString(),
+            out number)
+                ? number
+                : double.NaN;
+    }
+
+
+    private static string ReadString(
+        JsonElement element,
+        string property,
+        string fallback)
+    {
+        if (!element.TryGetProperty(
+                property,
+                out var value))
+        {
+            return fallback;
+        }
+
+
+        return value.ValueKind ==
+               JsonValueKind.String
+            ? value.GetString()
+              ?? fallback
+            : value.ToString();
+    }
+
+
+    // =========================================================
+    // FORMATTING
+    // =========================================================
+
+    private static string FormatMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00"
+            );
+    }
+
+
+    private static string FormatSignedMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "+$#,##0.00;-$#,##0.00;$0.00"
+            );
+    }
+
+
+    private static string FormatShortMoney(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) >=
+            1_000_000)
+        {
+            return
+                $"${value / 1_000_000:0.00}M";
+        }
+
+
+        if (Math.Abs(value) >=
+            1_000)
+        {
+            return
+                $"${value / 1_000:0.00}K";
+        }
+
+
+        return
+            $"${value:0.00}";
+    }
+
+
+    private static string FormatPercentAuto(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) <= 1)
+        {
+            value *= 100;
+        }
+
+
+        return
+            $"{value:+0.00;-0.00;0.00}%";
+    }
+
+
+    private static string GetValueClass(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(
+                value) ||
+            value == "—")
+        {
+            return "";
+        }
+
+
+        return value
+            .TrimStart()
+            .StartsWith("-")
+                ? "red"
+                : "green";
+    }
+
+
+    private static string GetConcentrationStatus(
+        double percentage)
+    {
+        if (percentage >= 20)
+        {
+            return "High";
+        }
+
+
+        if (percentage >= 10)
+        {
+            return "Watch";
+        }
+
+
+        return "Normal";
+    }
+
+
+    private static string GetConcentrationClass(
+        double percentage)
+    {
+        if (percentage >= 20)
+        {
+            return "pill red";
+        }
+
+
+        if (percentage >= 10)
+        {
+            return "pill orange";
+        }
+
+
+        return "pill green";
+    }
+
+
+    private static string GetLegendClass(
+        int index)
+    {
+        return (index % 4) switch
+        {
+            0 => "c1",
+            1 => "c2",
+            2 => "c3",
+            _ => "c4"
+        };
+    }
+
+
+    // =========================================================
+    // MODELS
+    // =========================================================
+
+    private sealed class RiskPosition
+    {
+        public RiskPosition(
+            string symbol,
+            double quantityRaw,
+            double marketValueRaw,
+            double pnlRaw)
+        {
+            Symbol = symbol;
+
+            QuantityRaw = quantityRaw;
+
+            MarketValueRaw = marketValueRaw;
+
+            PnlRaw = pnlRaw;
+        }
+
+
+        public string Symbol { get; }
+
+
+        public double QuantityRaw { get; }
+
+
+        public double MarketValueRaw { get; }
+
+
+        public double PnlRaw { get; }
+
+
+        public double PortfolioPercentRaw { get; set; }
+
+
+        public string Quantity =>
+            QuantityRaw.ToString(
+                "0.####"
+            );
+
+
+        public string MarketValue =>
+            FormatMoney(
+                MarketValueRaw
+            );
+
+
+        public string Pnl =>
+            FormatSignedMoney(
+                PnlRaw
+            );
+
+
+        public string PortfolioPercent { get; set; } = "—";
+    }
+
+
+    private sealed record ExposureRow(
+        string Symbol,
+        string Percent,
+        double BarWidth
+    );
+
+
+    private sealed record RiskAlert(
+        string Level,
+        string Title,
+        string Detail
+    );
+
+    private static string GetTabIcon(string tab) =>
+        tab switch
+        {
+            "Overview" => "ph-shield-check",
+            "Risk Rules" => "ph-sliders-horizontal",
+            "Position Limits" => "ph-arrows-out-line-horizontal",
+            "Exposure" => "ph-chart-pie-slice",
+            "Drawdown" => "ph-trend-down",
+            "Alerts" => "ph-bell-ringing",
+            "Stress Test" => "ph-pulse",
+            "Scenario Analysis" => "ph-git-branch",
+            _ => "ph-circle"
+        };
+
+}

@@ -1,0 +1,5388 @@
+/* frontend/wwwroot/css/automations.css */
+
+
+
+/* ============================================================
+
+   PHOENIXTREND AUTOMATIONS
+
+   APPROVED PREMIUM UI
+
+   ============================================================ */
+
+
+
+.pt-automations {
+
+    --auto-bg: rgba(3, 13, 24, .88);
+
+    --auto-bg-2: rgba(5, 20, 34, .88);
+
+    --auto-bg-3: rgba(8, 28, 46, .78);
+
+
+
+    --auto-line: rgba(31, 143, 225, .40);
+
+    --auto-line-soft: rgba(94, 177, 238, .18);
+
+
+
+    --auto-text: #f5f8fc;
+
+    --auto-muted: #91a8bd;
+
+    --auto-soft: #667f95;
+
+
+
+    --auto-orange: #ff9d16;
+
+    --auto-orange-2: #ffc35a;
+
+    --auto-green: #00ef9b;
+
+    --auto-red: #ff455b;
+
+    --auto-blue: #19a9ff;
+
+
+
+    width: 100%;
+
+    min-width: 0;
+
+
+
+    display: grid;
+
+    gap: 12px;
+
+
+
+    color: var(--auto-text);
+
+}
+
+
+
+.pt-automations *,
+
+.pt-automations *::before,
+
+.pt-automations *::after {
+
+    box-sizing: border-box;
+
+}
+
+
+
+.pt-automations button {
+
+    font: inherit;
+
+    color: inherit;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   HERO — APPROVED IMAGE MUST NOT CHANGE
+
+   ============================================================ */
+
+
+
+.auto-hero {
+
+    position: relative;
+
+
+
+    width: 100%;
+
+    min-height: 210px;
+
+
+
+    overflow: hidden;
+
+
+
+    border: 1px solid rgba(30, 143, 230, .55);
+
+    border-radius: 16px;
+
+
+
+    background:
+
+        url('/assets/phoenixtrend-page-banner.png')
+
+        center 48% / cover
+
+        no-repeat;
+
+
+
+    box-shadow:
+
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+
+        0 0 24px rgba(0, 126, 255, .08),
+
+        0 18px 45px rgba(0, 0, 0, .30);
+
+}
+
+
+
+.auto-hero::before {
+
+    content: "";
+
+
+
+    position: absolute;
+
+    inset: 0;
+
+
+
+    background:
+
+        linear-gradient(
+
+            90deg,
+
+            rgba(1, 8, 16, .97) 0%,
+
+            rgba(2, 11, 21, .88) 32%,
+
+            rgba(2, 10, 18, .35) 62%,
+
+            rgba(2, 9, 16, .14) 100%
+
+        );
+
+
+
+    pointer-events: none;
+
+}
+
+
+
+.auto-hero::after {
+
+    content: "";
+
+
+
+    position: absolute;
+
+    inset: 0;
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(0, 0, 0, .02),
+
+            rgba(1, 7, 13, .10) 52%,
+
+            rgba(1, 7, 13, .62)
+
+        );
+
+
+
+    pointer-events: none;
+
+}
+
+
+
+.auto-hero-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+
+
+    z-index: 1;
+
+
+
+    background:
+
+        radial-gradient(
+
+            circle at 76% 42%,
+
+            rgba(255, 145, 30, .06),
+
+            transparent 36%
+
+        );
+
+
+
+    pointer-events: none;
+
+}
+
+
+
+.auto-hero-content {
+
+    position: relative;
+
+    z-index: 2;
+
+
+
+    width: 100%;
+
+    min-height: 210px;
+
+
+
+    padding: 24px 26px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 26px;
+
+}
+
+
+
+.auto-hero-copy {
+
+    width: min(720px, 68%);
+
+    max-width: 720px;
+
+}
+
+
+
+.auto-eyebrow {
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 8px;
+
+
+
+    color: #bdd0e1;
+
+
+
+    font-size: 11px;
+
+    font-weight: 850;
+
+    letter-spacing: .15em;
+
+}
+
+
+
+.auto-eyebrow i {
+
+    color: var(--auto-orange);
+
+    font-size: 18px;
+
+}
+
+
+
+.auto-hero h1 {
+
+    margin: 7px 0 5px;
+
+
+
+    color: #fff;
+
+
+
+    font-size: clamp(40px, 3.4vw, 56px);
+
+    line-height: .98;
+
+
+
+    font-weight: 900;
+
+    letter-spacing: -.045em;
+
+
+
+    text-shadow:
+
+        0 4px 20px rgba(0, 0, 0, .38);
+
+}
+
+
+
+.auto-hero p {
+
+    max-width: 680px;
+
+
+
+    margin: 0;
+
+
+
+    color: #c1d0de;
+
+
+
+    font-size: 14px;
+
+    line-height: 1.45;
+
+}
+
+
+
+.auto-hero-pills {
+
+    margin-top: 15px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+
+
+    gap: 8px;
+
+}
+
+
+
+.auto-pill {
+
+    min-height: 29px;
+
+
+
+    padding: 5px 11px;
+
+
+
+    display: inline-flex;
+
+    align-items: center;
+
+
+
+    gap: 7px;
+
+
+
+    border: 1px solid rgba(73, 158, 220, .40);
+
+    border-radius: 999px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(255, 255, 255, .07),
+
+            rgba(2, 12, 22, .70)
+
+        );
+
+
+
+    backdrop-filter: blur(14px);
+
+    -webkit-backdrop-filter: blur(14px);
+
+
+
+    color: #e8f1f8;
+
+
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+
+
+    white-space: nowrap;
+
+
+
+    box-shadow:
+
+        inset 0 1px 0 rgba(255, 255, 255, .07);
+
+}
+
+
+
+.auto-pill i {
+
+    width: 7px;
+
+    height: 7px;
+
+
+
+    flex: 0 0 7px;
+
+
+
+    border-radius: 50%;
+
+
+
+    background: var(--auto-green);
+
+
+
+    box-shadow:
+
+        0 0 10px var(--auto-green);
+
+}
+
+
+
+
+
+/* ============================================================
+
+   HERO RIGHT CARD
+
+   ============================================================ */
+
+
+
+.auto-hero-card {
+
+    width: 255px;
+
+    flex: 0 0 255px;
+
+
+
+    padding: 18px;
+
+
+
+    border: 1px solid rgba(46, 151, 226, .48);
+
+    border-radius: 14px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(5, 22, 39, .86),
+
+            rgba(4, 14, 27, .72)
+
+        );
+
+
+
+    backdrop-filter: blur(18px);
+
+    -webkit-backdrop-filter: blur(18px);
+
+
+
+    box-shadow:
+
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+
+        0 0 28px rgba(0, 126, 255, .08);
+
+}
+
+
+
+.auto-hero-card-title {
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 10px;
+
+
+
+    color: #fff;
+
+
+
+    font-size: 16px;
+
+    font-weight: 850;
+
+}
+
+
+
+.auto-hero-card-title i {
+
+    width: 39px;
+
+    height: 39px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 39px;
+
+
+
+    border: 1px solid rgba(255, 159, 26, .60);
+
+    border-radius: 50%;
+
+
+
+    color: #fff;
+
+
+
+    background: rgba(255, 139, 13, .18);
+
+
+
+    box-shadow:
+
+        0 0 18px rgba(255, 132, 0, .25);
+
+}
+
+
+
+.auto-hero-card p {
+
+    margin: 10px 0 14px;
+
+
+
+    color: #9db2c5;
+
+
+
+    font-size: 11px;
+
+    line-height: 1.45;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   BUTTONS
+
+   ============================================================ */
+
+
+
+.auto-btn,
+
+.auto-refresh {
+
+    min-height: 38px;
+
+
+
+    padding: 0 14px;
+
+
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+
+    gap: 7px;
+
+
+
+    border: 1px solid rgba(0, 160, 255, .55);
+
+    border-radius: 8px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(0, 113, 188, .18),
+
+            rgba(0, 58, 106, .15)
+
+        );
+
+
+
+    color: #f4f8fc;
+
+
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+
+
+    white-space: nowrap;
+
+
+
+    cursor: pointer;
+
+
+
+    box-shadow:
+
+        inset 0 1px 0 rgba(255, 255, 255, .05);
+
+
+
+    transition:
+
+        transform .18s ease,
+
+        border-color .18s ease,
+
+        background .18s ease,
+
+        box-shadow .18s ease;
+
+}
+
+
+
+.auto-refresh {
+
+    width: 100%;
+
+}
+
+
+
+.auto-btn:hover:not(:disabled),
+
+.auto-refresh:hover:not(:disabled) {
+
+    transform: translateY(-1px);
+
+
+
+    border-color: #20b8ff;
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(0, 129, 211, .26),
+
+            rgba(0, 69, 123, .20)
+
+        );
+
+
+
+    box-shadow:
+
+        0 0 18px rgba(0, 154, 255, .18);
+
+}
+
+
+
+.auto-btn:disabled,
+
+.auto-refresh:disabled {
+
+    opacity: .48;
+
+    cursor: default;
+
+    transform: none;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   ALERTS
+
+   ============================================================ */
+
+
+
+.auto-alert {
+
+    min-height: 42px;
+
+
+
+    padding: 8px 12px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 16px;
+
+
+
+    border-radius: 9px;
+
+
+
+    font-size: 12px;
+
+}
+
+
+
+.auto-alert.error {
+
+    border: 1px solid rgba(255, 64, 88, .35);
+
+    background: rgba(255, 64, 88, .08);
+
+    color: #ffc3cb;
+
+}
+
+
+
+.auto-alert.success {
+
+    border: 1px solid rgba(0, 229, 139, .30);
+
+    background: rgba(0, 229, 139, .07);
+
+    color: #a9ffd9;
+
+}
+
+
+
+.auto-alert button {
+
+    width: 28px;
+
+    height: 28px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 auto;
+
+
+
+    padding: 0;
+
+
+
+    border: 0;
+
+
+
+    background: transparent;
+
+
+
+    color: inherit;
+
+
+
+    font-size: 20px;
+
+
+
+    cursor: pointer;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   GLASS SURFACES
+
+   ============================================================ */
+
+
+
+.auto-section-nav,
+
+.auto-panel,
+
+.auto-engine-command,
+
+.auto-engine-metrics article,
+
+.auto-asset-status-grid article,
+
+.auto-performance-grid article,
+
+.auto-side-card {
+
+    border: 1px solid var(--auto-line);
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(7, 25, 42, .86),
+
+            rgba(3, 14, 25, .74)
+
+        );
+
+
+
+    box-shadow:
+
+        inset 0 1px 0 rgba(255, 255, 255, .04),
+
+        0 12px 30px rgba(0, 0, 0, .14);
+
+
+
+    backdrop-filter: blur(18px);
+
+    -webkit-backdrop-filter: blur(18px);
+
+}
+
+
+
+
+
+/* ============================================================
+
+   NAVIGATION
+
+   ============================================================ */
+
+
+
+.auto-section-nav {
+
+    min-height: 58px;
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns:
+
+        repeat(10, minmax(82px, 1fr));
+
+
+
+    gap: 8px;
+
+
+
+    padding: 6px;
+
+
+
+    border-radius: 12px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(5, 20, 34, .94),
+
+            rgba(2, 12, 22, .94)
+
+        );
+
+}
+
+
+
+.auto-nav-item {
+
+    position: relative;
+
+
+
+    min-width: 0;
+
+    min-height: 44px;
+
+
+
+    padding: 0 8px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+
+    gap: 8px;
+
+
+
+    border: 1px solid rgba(26, 105, 160, .25);
+
+    border-radius: 8px;
+
+
+
+    background: rgba(4, 18, 31, .50);
+
+
+
+    color: #d6e2ec;
+
+
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+
+
+    white-space: nowrap;
+
+
+
+    cursor: pointer;
+
+
+
+    transition:
+
+        border-color .18s ease,
+
+        background .18s ease,
+
+        box-shadow .18s ease,
+
+        color .18s ease;
+
+}
+
+
+
+.auto-nav-item:hover {
+
+    border-color: rgba(34, 153, 235, .55);
+
+    background: rgba(11, 38, 60, .70);
+
+    color: #fff;
+
+}
+
+
+
+.auto-nav-item.active {
+
+    border-color: rgba(255, 159, 26, .78);
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(255, 151, 26, .20),
+
+            rgba(255, 117, 0, .08)
+
+        );
+
+
+
+    color: #fff;
+
+
+
+    box-shadow:
+
+        inset 0 1px 0 rgba(255, 210, 135, .12),
+
+        0 0 16px rgba(255, 130, 0, .12);
+
+}
+
+
+
+.auto-nav-icon {
+
+    width: 27px;
+
+    height: 27px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 27px;
+
+
+
+    border-radius: 7px;
+
+
+
+    background: rgba(12, 48, 74, .62);
+
+
+
+    color: #bfe5ff;
+
+
+
+    font-size: 15px;
+
+}
+
+
+
+.auto-nav-item.active .auto-nav-icon {
+
+    color: #ffc35a;
+
+    background: rgba(255, 159, 26, .12);
+
+}
+
+
+
+.auto-nav-cap {
+
+    position: absolute;
+
+
+
+    top: 6px;
+
+    right: 7px;
+
+
+
+    width: 5px;
+
+    height: 5px;
+
+
+
+    border-radius: 50%;
+
+}
+
+
+
+.auto-nav-cap.supported {
+
+    background: var(--auto-green);
+
+
+
+    box-shadow:
+
+        0 0 7px var(--auto-green);
+
+}
+
+
+
+.auto-nav-cap.unsupported {
+
+    background: #53687a;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   SECTION
+
+   ============================================================ */
+
+
+
+.auto-section {
+
+    min-width: 0;
+
+
+
+    display: grid;
+
+
+
+    gap: 10px;
+
+}
+
+
+
+.auto-section-header {
+
+    min-height: 57px;
+
+
+
+    padding: 2px 3px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 20px;
+
+}
+
+
+
+.auto-section-header > div:first-child {
+
+    min-width: 0;
+
+}
+
+
+
+.auto-section-header > div:first-child > span {
+
+    color: var(--auto-orange);
+
+
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+    letter-spacing: .12em;
+
+}
+
+
+
+.auto-section-header h2 {
+
+    margin: 3px 0 2px;
+
+
+
+    color: #f7faff;
+
+
+
+    font-size: 22px;
+
+    line-height: 1.1;
+
+
+
+    letter-spacing: -.025em;
+
+}
+
+
+
+.auto-section-header p {
+
+    max-width: 830px;
+
+
+
+    margin: 0;
+
+
+
+    color: var(--auto-muted);
+
+
+
+    font-size: 11px;
+
+    line-height: 1.45;
+
+}
+
+
+
+.auto-engine-state {
+
+    min-width: 86px;
+
+
+
+    padding: 6px 11px;
+
+
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+
+    flex: 0 0 auto;
+
+
+
+    border: 1px solid rgba(255, 159, 26, .25);
+
+    border-radius: 999px;
+
+
+
+    background: rgba(255, 159, 26, .06);
+
+
+
+    color: #ffba57;
+
+
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+
+
+    letter-spacing: .07em;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   ENGINE SHELL
+
+   ============================================================ */
+
+
+
+.auto-engine-shell {
+
+    min-width: 0;
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns:
+
+        minmax(0, 1fr)
+
+        285px;
+
+
+
+    gap: 12px;
+
+
+
+    align-items: start;
+
+}
+
+
+
+.auto-engine-main {
+
+    min-width: 0;
+
+
+
+    display: grid;
+
+
+
+    gap: 10px;
+
+}
+
+
+
+.auto-side-stack {
+
+    min-width: 0;
+
+
+
+    display: grid;
+
+
+
+    gap: 12px;
+
+
+
+    align-content: start;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   MASTER CONTROL CENTER
+
+   ============================================================ */
+
+
+
+.auto-engine-command {
+
+    min-height: 92px;
+
+
+
+    padding: 15px 16px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 16px;
+
+
+
+    border-radius: 11px;
+
+
+
+    background:
+
+        radial-gradient(
+
+            circle at 48% 0,
+
+            rgba(0, 119, 200, .08),
+
+            transparent 40%
+
+        ),
+
+        linear-gradient(
+
+            110deg,
+
+            rgba(7, 24, 40, .93),
+
+            rgba(4, 15, 27, .82)
+
+        );
+
+}
+
+
+
+.auto-engine-command-copy {
+
+    min-width: 0;
+
+
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+
+.auto-engine-command-copy > span {
+
+    color: var(--auto-orange);
+
+
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+
+
+    letter-spacing: .10em;
+
+}
+
+
+
+.auto-engine-command-copy > strong {
+
+    display: block;
+
+
+
+    margin: 2px 0;
+
+
+
+    color: #f7faff;
+
+
+
+    font-size: 21px;
+
+    line-height: 1.1;
+
+}
+
+
+
+.auto-engine-command-copy > small {
+
+    color: var(--auto-muted);
+
+    font-size: 10px;
+
+}
+
+
+
+.auto-master-action {
+
+    min-width: 330px;
+
+
+
+    padding: 11px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 12px;
+
+
+
+    border: 1px solid rgba(44, 126, 183, .30);
+
+    border-radius: 10px;
+
+
+
+    background: rgba(5, 21, 36, .70);
+
+}
+
+
+
+.auto-master-state {
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 10px;
+
+}
+
+
+
+.auto-master-state > i {
+
+    width: 36px;
+
+    height: 36px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 36px;
+
+
+
+    border: 1px solid rgba(255, 64, 88, .35);
+
+    border-radius: 50%;
+
+
+
+    background: rgba(255, 64, 88, .12);
+
+
+
+    color: var(--auto-red);
+
+
+
+    font-size: 18px;
+
+}
+
+
+
+.auto-master-state b {
+
+    display: block;
+
+    font-size: 11px;
+
+}
+
+
+
+.auto-master-state small {
+
+    display: block;
+
+
+
+    margin-top: 2px;
+
+
+
+    color: #748da2;
+
+
+
+    font-size: 8px;
+
+}
+
+
+
+.auto-start-btn {
+
+    height: 38px;
+
+
+
+    padding: 0 16px;
+
+
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+
+    gap: 7px;
+
+
+
+    border: 1px solid #19a9ff;
+
+    border-radius: 8px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            #087ac4,
+
+            #075488
+
+        );
+
+
+
+    color: #fff;
+
+
+
+    font-size: 11px;
+
+    font-weight: 850;
+
+
+
+    cursor: pointer;
+
+
+
+    box-shadow:
+
+        0 0 15px rgba(0, 161, 255, .28);
+
+}
+
+
+
+.auto-start-btn.stop {
+
+    border-color: rgba(255, 159, 26, .65);
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(255, 145, 15, .35),
+
+            rgba(130, 66, 0, .35)
+
+        );
+
+}
+
+
+
+.auto-start-btn:disabled {
+
+    opacity: .45;
+
+    cursor: default;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   LEGACY ENGINE BUTTONS
+
+   ============================================================ */
+
+
+
+.auto-engine-buttons {
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 8px;
+
+}
+
+
+
+.auto-engine-btn {
+
+    min-width: 188px;
+
+    min-height: 46px;
+
+
+
+    padding: 7px 10px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 9px;
+
+
+
+    border: 1px solid rgba(255, 64, 88, .27);
+
+    border-radius: 8px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(51, 12, 22, .55),
+
+            rgba(20, 8, 15, .50)
+
+        );
+
+
+
+    cursor: pointer;
+
+}
+
+
+
+.auto-engine-btn > i,
+
+.auto-engine-btn i {
+
+    width: 30px;
+
+    height: 30px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 30px;
+
+
+
+    border-radius: 7px;
+
+
+
+    background: rgba(255, 64, 88, .08);
+
+
+
+    color: var(--auto-red);
+
+
+
+    font-size: 17px;
+
+}
+
+
+
+.auto-engine-btn > span,
+
+.auto-engine-btn span {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+
+    text-align: left;
+
+}
+
+
+
+.auto-engine-btn b {
+
+    color: #ff8998;
+
+    font-size: 11px;
+
+}
+
+
+
+.auto-engine-btn small {
+
+    margin-top: 1px;
+
+
+
+    color: #a67c83;
+
+
+
+    font-size: 8px;
+
+}
+
+
+
+.auto-engine-btn.start {
+
+    border-color: rgba(0, 229, 139, .25);
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(5, 48, 35, .45),
+
+            rgba(3, 22, 18, .48)
+
+        );
+
+}
+
+
+
+.auto-engine-btn.start i {
+
+    color: var(--auto-green);
+
+    background: rgba(0, 229, 139, .08);
+
+}
+
+
+
+.auto-engine-btn.start b {
+
+    color: #6dffc0;
+
+}
+
+
+
+.auto-engine-btn.stop {
+
+    border-color: rgba(255, 159, 26, .25);
+
+}
+
+
+
+.auto-engine-btn.stop i {
+
+    color: var(--auto-orange);
+
+}
+
+
+
+.auto-engine-btn.stop b {
+
+    color: #ffc166;
+
+}
+
+
+
+.auto-engine-btn:disabled {
+
+    opacity: .45;
+
+    cursor: default;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   METRICS
+
+   ============================================================ */
+
+
+
+.auto-engine-metrics,
+
+.auto-asset-status-grid,
+
+.auto-performance-grid {
+
+    display: grid;
+
+
+
+    grid-template-columns:
+
+        repeat(5, minmax(0, 1fr));
+
+
+
+    gap: 9px;
+
+}
+
+
+
+.auto-asset-status-grid {
+
+    grid-template-columns:
+
+        repeat(4, minmax(0, 1fr));
+
+}
+
+
+
+.auto-engine-metrics article,
+
+.auto-asset-status-grid article,
+
+.auto-performance-grid article {
+
+    min-width: 0;
+
+    min-height: 64px;
+
+
+
+    padding: 9px 11px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 10px;
+
+
+
+    border-radius: 9px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(7, 25, 42, .84),
+
+            rgba(3, 14, 25, .72)
+
+        );
+
+
+
+    transition:
+
+        border-color .18s ease,
+
+        background .18s ease;
+
+}
+
+
+
+.auto-engine-metrics article:hover,
+
+.auto-asset-status-grid article:hover,
+
+.auto-performance-grid article:hover {
+
+    border-color: rgba(41, 160, 239, .55);
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(10, 34, 55, .90),
+
+            rgba(4, 17, 29, .78)
+
+        );
+
+}
+
+
+
+.auto-metric-icon {
+
+    width: 35px;
+
+    height: 35px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 35px;
+
+
+
+    border: 1px solid rgba(30, 143, 225, .38);
+
+    border-radius: 8px;
+
+
+
+    background: rgba(9, 53, 83, .45);
+
+
+
+    color: #bfe5ff;
+
+
+
+    font-size: 18px;
+
+}
+
+
+
+.auto-metric-copy {
+
+    min-width: 0;
+
+
+
+    display: flex;
+
+    flex-direction: column;
+
+
+
+    gap: 2px;
+
+}
+
+
+
+.auto-engine-metrics article span,
+
+.auto-asset-status-grid article span,
+
+.auto-performance-grid article span,
+
+.auto-metric-copy span {
+
+    color: #879db0;
+
+    font-size: 9px;
+
+}
+
+
+
+.auto-engine-metrics article strong,
+
+.auto-asset-status-grid article strong,
+
+.auto-performance-grid article strong,
+
+.auto-metric-copy strong {
+
+    color: #f3f7fb;
+
+    font-size: 14px;
+
+}
+
+
+
+.good {
+
+    color: var(--auto-green) !important;
+
+}
+
+
+
+.bad {
+
+    color: var(--auto-red) !important;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   ENGINE WORKSPACE
+
+   ============================================================ */
+
+
+
+.auto-engine-layout {
+
+    min-width: 0;
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns:
+
+        minmax(330px, .72fr)
+
+        minmax(540px, 1.28fr);
+
+
+
+    gap: 12px;
+
+
+
+    align-items: stretch;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   PANELS
+
+   ============================================================ */
+
+
+
+.auto-panel {
+
+    min-width: 0;
+
+
+
+    overflow: hidden;
+
+
+
+    border-radius: 11px;
+
+}
+
+
+
+.auto-panel-header {
+
+    min-height: 55px;
+
+
+
+    padding: 10px 13px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 12px;
+
+
+
+    border-bottom:
+
+        1px solid rgba(77, 154, 211, .16);
+
+}
+
+
+
+.auto-panel-header > div {
+
+    min-width: 0;
+
+}
+
+
+
+.auto-panel-header > div > span {
+
+    color: #71889e;
+
+
+
+    font-size: 8px;
+
+    font-weight: 850;
+
+
+
+    letter-spacing: .14em;
+
+}
+
+
+
+.auto-panel-header h3 {
+
+    margin: 2px 0 0;
+
+
+
+    color: #f1f6fb;
+
+
+
+    font-size: 15px;
+
+    line-height: 1.1;
+
+}
+
+
+
+.auto-panel-header > small,
+
+.auto-panel-header small {
+
+    color: #7c94a8;
+
+    font-size: 9px;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   ASSET ENGINES
+
+   ============================================================ */
+
+
+
+.auto-engine-assets {
+
+    display: grid;
+
+}
+
+
+
+.auto-engine-asset {
+
+    min-height: 48px;
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns:
+
+        minmax(0, 1fr)
+
+        auto;
+
+
+
+    align-items: center;
+
+
+
+    border-bottom:
+
+        1px solid rgba(70, 145, 198, .12);
+
+
+
+    transition:
+
+        background .18s ease,
+
+        box-shadow .18s ease;
+
+}
+
+
+
+.auto-engine-asset:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+
+.auto-engine-asset:hover {
+
+    background: rgba(255, 255, 255, .018);
+
+}
+
+
+
+.auto-engine-asset.is-on {
+
+    background:
+
+        linear-gradient(
+
+            90deg,
+
+            rgba(0, 229, 139, .035),
+
+            transparent 70%
+
+        );
+
+}
+
+
+
+.auto-engine-asset.is-running {
+
+    box-shadow:
+
+        inset 2px 0 0 var(--auto-green);
+
+}
+
+
+
+.auto-engine-asset-main {
+
+    min-width: 0;
+
+    min-height: 47px;
+
+
+
+    padding: 7px 10px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 9px;
+
+
+
+    border: 0;
+
+
+
+    background: transparent;
+
+
+
+    text-align: left;
+
+
+
+    cursor: pointer;
+
+}
+
+
+
+.auto-engine-asset-icon {
+
+    width: 31px;
+
+    height: 31px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 31px;
+
+
+
+    border: 1px solid rgba(41, 133, 196, .25);
+
+    border-radius: 7px;
+
+
+
+    background: rgba(12, 45, 68, .50);
+
+
+
+    color: #a8bdd0;
+
+
+
+    font-size: 16px;
+
+}
+
+
+
+.auto-engine-asset:nth-child(1) .auto-engine-asset-icon {
+
+    color: #f8ad3b;
+
+    border-color: rgba(248, 173, 59, .25);
+
+    background: rgba(248, 173, 59, .08);
+
+}
+
+
+
+.auto-engine-asset:nth-child(2) .auto-engine-asset-icon {
+
+    color: #a888ff;
+
+    border-color: rgba(168, 136, 255, .25);
+
+    background: rgba(168, 136, 255, .08);
+
+}
+
+
+
+.auto-engine-asset:nth-child(3) .auto-engine-asset-icon {
+
+    color: #ffb33c;
+
+    border-color: rgba(255, 179, 60, .25);
+
+    background: rgba(255, 179, 60, .08);
+
+}
+
+
+
+.auto-engine-asset:nth-child(4) .auto-engine-asset-icon {
+
+    color: #4bb8ff;
+
+    border-color: rgba(75, 184, 255, .25);
+
+    background: rgba(75, 184, 255, .08);
+
+}
+
+
+
+.auto-engine-asset:nth-child(5) .auto-engine-asset-icon {
+
+    color: #38dbc7;
+
+    border-color: rgba(56, 219, 199, .25);
+
+    background: rgba(56, 219, 199, .08);
+
+}
+
+
+
+.auto-engine-asset:nth-child(6) .auto-engine-asset-icon {
+
+    color: #5fe68d;
+
+    border-color: rgba(95, 230, 141, .25);
+
+    background: rgba(95, 230, 141, .08);
+
+}
+
+
+
+.auto-engine-asset-copy {
+
+    min-width: 0;
+
+
+
+    display: flex;
+
+    flex-direction: column;
+
+
+
+    gap: 1px;
+
+}
+
+
+
+.auto-engine-asset-copy strong {
+
+    overflow: hidden;
+
+
+
+    color: #eaf1f8;
+
+
+
+    font-size: 11px;
+
+
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+}
+
+
+
+.auto-engine-asset-copy small {
+
+    overflow: hidden;
+
+
+
+    color: #71869a;
+
+
+
+    font-size: 8px;
+
+
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   SECTION TOGGLE
+
+   ============================================================ */
+
+
+
+.auto-section-toggle-wrap {
+
+    padding: 0 11px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 7px;
+
+}
+
+
+
+.auto-section-toggle-label {
+
+    min-width: 54px;
+
+
+
+    color: #71889d;
+
+
+
+    font-size: 7px;
+
+    font-weight: 850;
+
+
+
+    text-align: right;
+
+
+
+    letter-spacing: .05em;
+
+}
+
+
+
+.auto-switch {
+
+    position: relative;
+
+
+
+    width: 36px;
+
+    height: 20px;
+
+
+
+    flex: 0 0 36px;
+
+
+
+    padding: 0;
+
+
+
+    border: 1px solid #31536d;
+
+    border-radius: 999px;
+
+
+
+    background: #081827;
+
+
+
+    cursor: pointer;
+
+
+
+    box-shadow:
+
+        inset 0 2px 5px rgba(0, 0, 0, .30);
+
+
+
+    transition:
+
+        background .18s ease,
+
+        border-color .18s ease,
+
+        box-shadow .18s ease;
+
+}
+
+
+
+.auto-switch > span,
+
+.auto-switch span {
+
+    position: absolute;
+
+
+
+    top: 2px;
+
+    left: 2px;
+
+
+
+    width: 14px;
+
+    height: 14px;
+
+
+
+    margin: 0;
+
+
+
+    border-radius: 50%;
+
+
+
+    background: #9bb1c3;
+
+
+
+    box-shadow: none;
+
+
+
+    transform: none;
+
+
+
+    transition:
+
+        left .18s ease,
+
+        background .18s ease,
+
+        box-shadow .18s ease;
+
+}
+
+
+
+.auto-switch.on {
+
+    border-color: rgba(0, 229, 139, .55);
+
+
+
+    background: rgba(0, 229, 139, .16);
+
+
+
+    box-shadow:
+
+        0 0 12px rgba(0, 229, 139, .08);
+
+}
+
+
+
+.auto-switch.on > span,
+
+.auto-switch.on span {
+
+    left: 18px;
+
+
+
+    background: var(--auto-green);
+
+
+
+    box-shadow:
+
+        0 0 7px rgba(0, 229, 139, .60);
+
+}
+
+
+
+.auto-switch:disabled {
+
+    opacity: .36;
+
+    cursor: default;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   RUNTIME TABLE
+
+   ============================================================ */
+
+
+
+.auto-runtime-table {
+
+    width: 100%;
+
+    min-width: 0;
+
+
+
+    overflow-x: auto;
+
+    overflow-y: hidden;
+
+}
+
+
+
+.auto-runtime-row {
+
+    min-width: 690px;
+
+    min-height: 42px;
+
+
+
+    padding: 0 11px;
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns:
+
+        1.30fr
+
+        .68fr
+
+        .68fr
+
+        .96fr
+
+        .68fr
+
+        .64fr
+
+        .72fr;
+
+
+
+    align-items: center;
+
+
+
+    gap: 8px;
+
+
+
+    border-bottom:
+
+        1px solid rgba(70, 145, 198, .10);
+
+
+
+    color: #b9c8d6;
+
+
+
+    font-size: 9px;
+
+}
+
+
+
+.auto-runtime-row:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+
+.auto-runtime-row.head {
+
+    min-height: 32px;
+
+
+
+    background: rgba(13, 42, 63, .35);
+
+
+
+    color: #718aa0;
+
+
+
+    font-size: 7px;
+
+    font-weight: 850;
+
+
+
+    text-transform: uppercase;
+
+
+
+    letter-spacing: .07em;
+
+}
+
+
+
+.auto-runtime-row:not(.head):hover {
+
+    background: rgba(255, 255, 255, .018);
+
+}
+
+
+
+.auto-runtime-row > span {
+
+    min-width: 0;
+
+
+
+    overflow: hidden;
+
+
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   EMPTY STATE
+
+   ============================================================ */
+
+
+
+.auto-empty {
+
+    min-height: 175px;
+
+
+
+    padding: 22px;
+
+
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+
+    gap: 6px;
+
+
+
+    color: #60768b;
+
+
+
+    font-size: 10px;
+
+
+
+    text-align: center;
+
+}
+
+
+
+.auto-empty i {
+
+    color: #587995;
+
+    font-size: 38px;
+
+}
+
+
+
+.auto-empty strong {
+
+    color: #9fb3c5;
+
+    font-size: 12px;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   RIGHT COLUMN
+
+   ============================================================ */
+
+
+
+.auto-side-card {
+
+    overflow: hidden;
+
+
+
+    border-radius: 11px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(7, 22, 37, .90),
+
+            rgba(3, 13, 23, .80)
+
+        );
+
+}
+
+
+
+.auto-side-card.emergency {
+
+    background:
+
+        radial-gradient(
+
+            circle at 100% 0,
+
+            rgba(125, 25, 35, .22),
+
+            transparent 45%
+
+        ),
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(7, 22, 37, .90),
+
+            rgba(3, 13, 23, .80)
+
+        );
+
+}
+
+
+
+.auto-side-title {
+
+    padding: 13px 14px;
+
+
+
+    border-bottom:
+
+        1px solid rgba(66, 143, 199, .16);
+
+
+
+    color: var(--auto-orange);
+
+
+
+    font-size: 13px;
+
+    font-weight: 850;
+
+}
+
+
+
+.auto-emergency-body {
+
+    margin: 11px;
+
+    padding: 13px;
+
+
+
+    border: 1px solid rgba(255, 64, 88, .24);
+
+    border-radius: 10px;
+
+
+
+    background: rgba(55, 10, 20, .22);
+
+}
+
+
+
+.auto-emergency-head {
+
+    display: flex;
+
+    align-items: flex-start;
+
+
+
+    gap: 10px;
+
+}
+
+
+
+.auto-emergency-head i {
+
+    width: 36px;
+
+    height: 36px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    flex: 0 0 36px;
+
+
+
+    border: 1px solid rgba(255, 64, 88, .35);
+
+    border-radius: 50%;
+
+
+
+    background: rgba(255, 64, 88, .12);
+
+
+
+    color: var(--auto-red);
+
+
+
+    font-size: 18px;
+
+}
+
+
+
+.auto-emergency-head b {
+
+    display: block;
+
+    font-size: 11px;
+
+}
+
+
+
+.auto-emergency-head small {
+
+    display: block;
+
+
+
+    margin-top: 3px;
+
+
+
+    color: #93a7b9;
+
+
+
+    font-size: 8px;
+
+    line-height: 1.45;
+
+}
+
+
+
+.auto-emergency-btn {
+
+    width: 100%;
+
+    height: 37px;
+
+
+
+    margin-top: 12px;
+
+
+
+    border: 1px solid #ff4058;
+
+    border-radius: 7px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(214, 28, 51, .55),
+
+            rgba(117, 11, 25, .50)
+
+        );
+
+
+
+    color: #fff;
+
+
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+
+
+    cursor: pointer;
+
+
+
+    box-shadow:
+
+        0 0 15px rgba(255, 45, 68, .18);
+
+}
+
+
+
+.auto-emergency-btn.reset {
+
+    border-color: rgba(255, 159, 26, .72);
+
+
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(255, 145, 15, .35),
+
+            rgba(130, 66, 0, .35)
+
+        );
+
+}
+
+
+
+.auto-emergency-btn:hover:not(:disabled) {
+
+    border-color: #ff6678;
+
+
+
+    box-shadow:
+
+        0 0 20px rgba(255, 45, 68, .28);
+
+}
+
+
+
+.auto-emergency-btn:disabled {
+
+    opacity: .45;
+
+    cursor: default;
+
+}
+
+
+
+.auto-system-head {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+}
+
+
+
+.auto-live {
+
+    color: var(--auto-green);
+
+    font-size: 10px;
+
+}
+
+
+
+.auto-status-row {
+
+    min-height: 38px;
+
+
+
+    padding: 0 13px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    border-top:
+
+        1px solid rgba(65, 145, 203, .16);
+
+
+
+    font-size: 9px;
+
+}
+
+
+
+.auto-status-label {
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 8px;
+
+
+
+    color: #9eb1c2;
+
+}
+
+
+
+.auto-status-label i {
+
+    width: 25px;
+
+    height: 25px;
+
+
+
+    display: grid;
+
+    place-items: center;
+
+
+
+    border-radius: 50%;
+
+
+
+    background: rgba(15, 54, 80, .55);
+
+
+
+    color: #a9d8f8;
+
+}
+
+
+
+.auto-status-row b {
+
+    font-size: 9px;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   ASSET SECTION HEADER TOGGLE
+
+   ============================================================ */
+
+
+
+.section-header-toggle {
+
+    padding: 6px 9px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+
+
+    gap: 9px;
+
+
+
+    flex: 0 0 auto;
+
+
+
+    border: 1px solid var(--auto-line);
+
+    border-radius: 999px;
+
+
+
+    background: rgba(5, 17, 29, .68);
+
+}
+
+
+
+.section-header-toggle b {
+
+    min-width: 67px;
+
+
+
+    color: #a3b4c4;
+
+
+
+    font-size: 9px;
+
+
+
+    text-align: right;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   CAPABILITY WARNING
+
+   ============================================================ */
+
+
+
+.auto-capability-warning {
+
+    padding: 11px 13px;
+
+
+
+    display: flex;
+
+    align-items: flex-start;
+
+
+
+    gap: 10px;
+
+
+
+    border: 1px solid rgba(255, 159, 26, .25);
+
+    border-radius: 9px;
+
+
+
+    background: rgba(255, 159, 26, .055);
+
+}
+
+
+
+.auto-capability-warning > i,
+
+.auto-capability-warning i {
+
+    flex: 0 0 auto;
+
+
+
+    color: var(--auto-orange);
+
+
+
+    font-size: 18px;
+
+}
+
+
+
+.auto-capability-warning strong {
+
+    color: #f1f4f7;
+
+    font-size: 11px;
+
+}
+
+
+
+.auto-capability-warning p {
+
+    margin: 2px 0 0;
+
+
+
+    color: #9e8d76;
+
+
+
+    font-size: 9px;
+
+    line-height: 1.5;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   AUTOMATION CONFIGURATION
+
+   ============================================================ */
+
+
+
+.auto-automation-row {
+
+    min-height: 74px;
+
+
+
+    padding: 10px 12px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 15px;
+
+
+
+    border-bottom:
+
+        1px solid rgba(255, 255, 255, .05);
+
+
+
+    transition: background .18s ease;
+
+}
+
+
+
+.auto-automation-row:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+
+.auto-automation-row:hover {
+
+    background: rgba(255, 255, 255, .018);
+
+}
+
+
+
+.auto-automation-row > div:first-child {
+
+    min-width: 0;
+
+}
+
+
+
+.auto-automation-row strong {
+
+    color: #e9f0f7;
+
+    font-size: 11px;
+
+}
+
+
+
+.auto-automation-row small {
+
+    display: block;
+
+
+
+    margin-top: 2px;
+
+
+
+    color: #72879b;
+
+
+
+    font-size: 8px;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   SYMBOL CHIPS
+
+   ============================================================ */
+
+
+
+.auto-symbol-strip {
+
+    margin-top: 7px;
+
+
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+
+
+    gap: 5px;
+
+}
+
+
+
+.auto-symbol-chip {
+
+    min-height: 27px;
+
+
+
+    padding: 3px 7px 3px 4px;
+
+
+
+    display: inline-flex;
+
+    align-items: center;
+
+
+
+    gap: 5px;
+
+
+
+    border: 1px solid rgba(255, 255, 255, .07);
+
+    border-radius: 6px;
+
+
+
+    background: rgba(255, 255, 255, .025);
+
+
+
+    color: #c6d4df;
+
+
+
+    font-size: 8px;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   RUNTIME BADGE
+
+   ============================================================ */
+
+
+
+.auto-runtime-badge {
+
+    min-width: 74px;
+
+
+
+    padding: 5px 8px;
+
+
+
+    flex: 0 0 auto;
+
+
+
+    border: 1px solid rgba(255, 159, 26, .18);
+
+    border-radius: 999px;
+
+
+
+    background: rgba(255, 159, 26, .05);
+
+
+
+    color: #ffb448;
+
+
+
+    font-size: 8px;
+
+    font-weight: 850;
+
+
+
+    text-align: center;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   CHART / LIVE CARDS
+
+   ============================================================ */
+
+
+
+.auto-chart-grid,
+
+.auto-live-grid,
+
+.auto-position-chart-grid {
+
+    padding: 10px;
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns:
+
+        repeat(2, minmax(0, 1fr));
+
+
+
+    gap: 8px;
+
+}
+
+
+
+.auto-position-card,
+
+.auto-live-card,
+
+.auto-position-chart-card {
+
+    min-width: 0;
+
+    min-height: 76px;
+
+
+
+    padding: 11px 12px;
+
+
+
+    border: 1px solid var(--auto-line);
+
+    border-radius: 9px;
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(8, 25, 41, .72),
+
+            rgba(3, 13, 23, .62)
+
+        );
+
+
+
+    color: inherit;
+
+
+
+    text-align: left;
+
+
+
+    transition:
+
+        transform .18s ease,
+
+        border-color .18s ease,
+
+        background .18s ease;
+
+}
+
+
+
+button.auto-position-chart-card {
+
+    cursor: pointer;
+
+}
+
+
+
+.auto-position-card:hover,
+
+.auto-live-card:hover,
+
+.auto-position-chart-card:hover {
+
+    transform: translateY(-1px);
+
+
+
+    border-color: rgba(24, 168, 255, .30);
+
+
+
+    background:
+
+        linear-gradient(
+
+            145deg,
+
+            rgba(10, 31, 50, .78),
+
+            rgba(4, 16, 28, .68)
+
+        );
+
+}
+
+
+
+.auto-position-card header,
+
+.auto-live-card header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 10px;
+
+}
+
+
+
+.auto-position-card h3,
+
+.auto-live-card h3 {
+
+    margin: 0;
+
+
+
+    color: #f3f7fb;
+
+
+
+    font-size: 13px;
+
+}
+
+
+
+.auto-position-card p,
+
+.auto-live-card p {
+
+    margin: 3px 0 0;
+
+
+
+    color: var(--auto-muted);
+
+
+
+    font-size: 9px;
+
+}
+
+
+
+.auto-position-chart-copy {
+
+    min-width: 0;
+
+
+
+    flex: 1;
+
+
+
+    display: grid;
+
+
+
+    gap: 4px;
+
+}
+
+
+
+.auto-position-chart-copy strong {
+
+    color: #f1f6fb;
+
+    font-size: 12px;
+
+}
+
+
+
+.auto-position-chart-copy small {
+
+    overflow: hidden;
+
+
+
+    color: #70869a;
+
+
+
+    font-size: 9px;
+
+
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+}
+
+
+
+.auto-position-chart-action {
+
+    display: inline-flex;
+
+    align-items: center;
+
+
+
+    gap: 6px;
+
+
+
+    color: #9bcfff;
+
+
+
+    font-size: 9px;
+
+    font-weight: 750;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   EMBEDDED CHART
+
+   ============================================================ */
+
+
+
+.auto-embedded-chart-shell {
+
+    margin: 10px;
+
+
+
+    overflow: hidden;
+
+
+
+    border: 1px solid var(--auto-line);
+
+    border-radius: 10px;
+
+
+
+    background: rgba(3, 13, 24, .72);
+
+}
+
+
+
+.auto-embedded-chart-head {
+
+    min-height: 52px;
+
+
+
+    padding: 9px 12px;
+
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+
+    gap: 14px;
+
+
+
+    border-bottom:
+
+        1px solid rgba(148, 163, 184, .10);
+
+}
+
+
+
+.auto-embedded-chart-head > div {
+
+    display: grid;
+
+
+
+    gap: 2px;
+
+}
+
+
+
+.auto-embedded-chart-head span {
+
+    color: var(--auto-muted);
+
+
+
+    font-size: 8px;
+
+
+
+    letter-spacing: .14em;
+
+}
+
+
+
+.auto-embedded-chart-head strong {
+
+    color: #f1f6fb;
+
+    font-size: 12px;
+
+}
+
+
+
+.auto-embedded-provider-chart {
+
+    width: 100%;
+
+    height: 420px;
+
+    min-height: 420px;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   PERFORMANCE
+
+   ============================================================ */
+
+
+
+.auto-performance-grid {
+
+    grid-template-columns:
+
+        repeat(5, minmax(0, 1fr));
+
+}
+
+
+
+
+
+/* ============================================================
+
+   LOADING
+
+   ============================================================ */
+
+
+
+.auto-loading-panel {
+
+    min-height: 220px;
+
+
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+
+    gap: 10px;
+
+
+
+    border: 1px solid var(--auto-line);
+
+    border-radius: 10px;
+
+
+
+    background: rgba(4, 15, 26, .72);
+
+
+
+    color: #93a8ba;
+
+
+
+    font-size: 11px;
+
+}
+
+
+
+.auto-loader {
+
+    width: 27px;
+
+    height: 27px;
+
+
+
+    border: 2px solid rgba(255, 255, 255, .08);
+
+    border-top-color: var(--auto-orange);
+
+    border-radius: 50%;
+
+
+
+    animation: autoSpin .75s linear infinite;
+
+}
+
+
+
+@keyframes autoSpin {
+
+    to {
+
+        transform: rotate(360deg);
+
+    }
+
+}
+
+
+
+
+
+/* ============================================================
+
+   ENGINE STATES
+
+   ============================================================ */
+
+
+
+[data-engine-state="RUNNING"] {
+
+    border-color: rgba(0, 229, 139, .28);
+
+
+
+    color: #64ffc0;
+
+
+
+    background: rgba(0, 229, 139, .07);
+
+}
+
+
+
+[data-engine-state="STOPPED"] {
+
+    border-color: rgba(255, 159, 26, .22);
+
+
+
+    color: #ffba57;
+
+
+
+    background: rgba(255, 159, 26, .06);
+
+}
+
+
+
+[data-engine-state="EMERGENCY_STOP"] {
+
+    border-color: rgba(255, 64, 88, .34);
+
+
+
+    color: #ff8190;
+
+
+
+    background: rgba(255, 64, 88, .08);
+
+}
+
+
+
+
+
+/* ============================================================
+
+   RUNTIME STATES
+
+   ============================================================ */
+
+
+
+[data-runtime-state="RUNNING"] .auto-runtime-badge {
+
+    border-color: rgba(0, 229, 139, .25);
+
+
+
+    background: rgba(0, 229, 139, .06);
+
+
+
+    color: #61fdbb;
+
+}
+
+
+
+[data-runtime-state="ERROR"] .auto-runtime-badge,
+
+[data-runtime-state="FAILED"] .auto-runtime-badge {
+
+    border-color: rgba(255, 64, 88, .28);
+
+
+
+    background: rgba(255, 64, 88, .07);
+
+
+
+    color: #ff8795;
+
+}
+
+
+
+
+
+/* ============================================================
+
+   SCROLLBARS
+
+   ============================================================ */
+
+
+
+.pt-automations * {
+
+    scrollbar-width: thin;
+
+
+
+    scrollbar-color:
+
+        rgba(108, 138, 164, .35)
+
+        transparent;
+
+}
+
+
+
+.pt-automations *::-webkit-scrollbar {
+
+    width: 6px;
+
+    height: 6px;
+
+}
+
+
+
+.pt-automations *::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+
+
+.pt-automations *::-webkit-scrollbar-thumb {
+
+    border-radius: 999px;
+
+
+
+    background:
+
+        rgba(108, 138, 164, .35);
+
+}
+
+
+
+.pt-automations *::-webkit-scrollbar-thumb:hover {
+
+    background:
+
+        rgba(108, 138, 164, .55);
+
+}
+
+
+
+
+
+/* ============================================================
+
+   RESPONSIVE
+
+   ============================================================ */
+
+
+
+@media (max-width: 1450px) {
+
+    .auto-section-nav {
+
+        grid-template-columns:
+
+            repeat(5, minmax(110px, 1fr));
+
+    }
+
+
+
+    .auto-engine-shell {
+
+        grid-template-columns:
+
+            minmax(0, 1fr)
+
+            260px;
+
+    }
+
+
+
+    .auto-engine-layout {
+
+        grid-template-columns:
+
+            minmax(300px, .75fr)
+
+            minmax(470px, 1.25fr);
+
+    }
+
+
+
+    .auto-master-action {
+
+        min-width: 300px;
+
+    }
+
+}
+
+
+
+@media (max-width: 1180px) {
+
+    .auto-hero-content {
+
+        align-items: stretch;
+
+    }
+
+
+
+    .auto-hero-copy {
+
+        width: auto;
+
+        flex: 1;
+
+    }
+
+
+
+    .auto-engine-shell {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+
+    .auto-side-stack {
+
+        grid-template-columns:
+
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+
+    .auto-engine-layout {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+
+    .auto-engine-command {
+
+        align-items: stretch;
+
+        flex-direction: column;
+
+    }
+
+
+
+    .auto-master-action {
+
+        width: 100%;
+
+        min-width: 0;
+
+    }
+
+}
+
+
+
+@media (max-width: 900px) {
+
+    .auto-hero-content {
+
+        flex-direction: column;
+
+    }
+
+
+
+    .auto-hero-copy {
+
+        width: 100%;
+
+        max-width: none;
+
+    }
+
+
+
+    .auto-hero-card {
+
+        width: 100%;
+
+        flex: 0 0 auto;
+
+    }
+
+
+
+    .auto-section-nav {
+
+        grid-template-columns:
+
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+
+    .auto-engine-metrics,
+
+    .auto-performance-grid {
+
+        grid-template-columns:
+
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+
+    .auto-asset-status-grid {
+
+        grid-template-columns:
+
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+
+    .auto-side-stack {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+
+    .auto-chart-grid,
+
+    .auto-live-grid,
+
+    .auto-position-chart-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+
+
+@media (max-width: 620px) {
+
+    .pt-automations {
+
+        gap: 9px;
+
+    }
+
+
+
+    .auto-hero-content {
+
+        padding: 19px 16px;
+
+    }
+
+
+
+    .auto-hero h1 {
+
+        font-size: 38px;
+
+    }
+
+
+
+    .auto-section-nav {
+
+        grid-template-columns: 1fr 1fr;
+
+    }
+
+
+
+    .auto-nav-item {
+
+        justify-content: flex-start;
+
+    }
+
+
+
+    .auto-engine-metrics,
+
+    .auto-asset-status-grid,
+
+    .auto-performance-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+
+    .auto-master-action {
+
+        align-items: stretch;
+
+        flex-direction: column;
+
+    }
+
+
+
+    .auto-start-btn {
+
+        width: 100%;
+
+    }
+
+
+
+    .auto-engine-asset {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+
+    .auto-section-toggle-wrap {
+
+        padding: 0 10px 9px 50px;
+
+        justify-content: flex-end;
+
+    }
+
+
+
+    .auto-section-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+
+    .section-header-toggle {
+
+        width: 100%;
+
+        justify-content: flex-end;
+
+    }
+
+
+
+    .auto-runtime-row {
+
+        min-width: 650px;
+
+    }
+
+
+
+    .auto-embedded-provider-chart {
+
+        height: 340px;
+
+        min-height: 340px;
+
+    }
+
+}
+
+
+
+/* Full-width approved automation hero after removal of the redundant refresh card. */
+
+.auto-hero-copy{width:100%;max-width:none;}
+
+.auto-live-indicator{display:inline-flex;align-items:center;gap:6px;color:#18e6ad;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+
+
+/* ============================================================
+   ENGINE ACTIVITY — SYMBOL LOGOS + PHOSPHOR ACTION ICONS
+   Uses the existing StockLogo component and existing Phosphor icon library.
+   ============================================================ */
+
+.auto-runtime-row {
+    grid-template-columns:
+        minmax(128px, 1.22fr)
+        minmax(66px, .62fr)
+        minmax(116px, .92fr)
+        minmax(118px, 1.02fr)
+        minmax(86px, .72fr)
+        minmax(104px, .82fr)
+        minmax(82px, .68fr);
+
+    min-height: 48px;
+    font-size: 10px;
+}
+
+.auto-runtime-row.head {
+    min-height: 34px;
+    font-size: 8px;
+}
+
+.auto-runtime-automation,
+.auto-runtime-symbol,
+.auto-runtime-action {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.auto-runtime-automation > i {
+    width: 24px;
+    height: 24px;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 24px;
+    border: 1px solid rgba(31, 143, 225, .28);
+    border-radius: 7px;
+    background: rgba(10, 48, 76, .44);
+    color: #a9dfff;
+    font-size: 13px;
+}
+
+.auto-runtime-automation > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.auto-runtime-symbol {
+    overflow: visible !important;
+}
+
+.auto-runtime-symbol .stock-logo,
+.auto-symbol-chip .stock-logo {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    flex: 0 0 24px;
+    border-radius: 7px;
+}
+
+.auto-runtime-symbol .stock-logo img,
+.auto-symbol-chip .stock-logo img {
+    width: 72%;
+    height: 72%;
+}
+
+.auto-runtime-symbol .stock-logo-fallback,
+.auto-symbol-chip .stock-logo-fallback {
+    font-size: 0;
+}
+
+.auto-runtime-symbol .stock-logo-fallback i,
+.auto-symbol-chip .stock-logo-fallback i {
+    font-size: 12px;
+}
+
+.auto-runtime-symbol strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #edf6ff;
+    font-size: 10px;
+    font-weight: 850;
+}
+
+.auto-runtime-dash {
+    color: #5f768a;
+}
+
+.auto-runtime-action {
+    font-weight: 850;
+    letter-spacing: .02em;
+}
+
+.auto-runtime-action > i {
+    flex: 0 0 auto;
+    font-size: 14px;
+}
+
+.auto-runtime-action.buy {
+    color: var(--auto-green);
+}
+
+.auto-runtime-action.sell {
+    color: #ff6b7b;
+}
+
+.auto-runtime-action.hold {
+    color: var(--auto-orange-2);
+}
+
+.auto-runtime-action.neutral {
+    color: #8298aa;
+}
+
+.auto-state-badge,
+.auto-runtime-badge {
+    max-width: 100%;
+    min-width: 0;
+    padding: 5px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid rgba(92, 159, 209, .22);
+    border-radius: 999px;
+    background: rgba(16, 53, 79, .34);
+    color: #bdd7e9;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .045em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.auto-state-badge.executing {
+    border-color: rgba(255, 157, 22, .32);
+    background: rgba(255, 157, 22, .08);
+    color: #ffc86e;
+}
+
+.auto-state-badge.decision {
+    border-color: rgba(25, 169, 255, .32);
+    background: rgba(25, 169, 255, .08);
+    color: #80d1ff;
+}
+
+.auto-state-badge.scanning,
+.auto-state-badge.monitoring {
+    border-color: rgba(112, 154, 186, .25);
+    background: rgba(112, 154, 186, .07);
+    color: #a9bfd0;
+}
+
+.auto-state-badge.risk {
+    border-color: rgba(190, 133, 255, .30);
+    background: rgba(190, 133, 255, .07);
+    color: #d5adff;
+}
+
+.auto-state-badge.failed {
+    border-color: rgba(255, 69, 91, .34);
+    background: rgba(255, 69, 91, .08);
+    color: #ff8d9b;
+}
+
+.auto-symbol-chip {
+    padding: 3px 8px 3px 4px;
+    gap: 6px;
+    font-size: 9px;
+}
+
+@media (max-width: 900px) {
+    .auto-runtime-row {
+        min-width: 760px;
+    }
+}
+/* ============================================================
+   AUTOMATIONS — TYPOGRAPHY SIZE FIX
+   Paste at the VERY END of automations.css
+   Font/readability only — no layout/hero/functionality changes
+   ============================================================ */
+
+
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+
+.pt-automations .auto-section-header > div:first-child > span {
+    font-size: 11px;
+}
+
+.pt-automations .auto-section-header p {
+    font-size: 12px;
+}
+
+.pt-automations .auto-engine-state {
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   MASTER CONTROL CENTER
+   ============================================================ */
+
+.pt-automations .auto-engine-command-copy > span {
+    font-size: 11px;
+}
+
+.pt-automations .auto-engine-command-copy > strong {
+    font-size: 22px;
+}
+
+.pt-automations .auto-engine-command-copy > small {
+    font-size: 12px;
+}
+
+.pt-automations .auto-master-state b {
+    font-size: 13px;
+}
+
+.pt-automations .auto-master-state small {
+    font-size: 10px;
+}
+
+.pt-automations .auto-start-btn {
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   TOP ENGINE METRICS
+   Broker / Sections / Running / Automations / Orders
+   ============================================================ */
+
+.pt-automations .auto-engine-metrics article span,
+.pt-automations .auto-asset-status-grid article span,
+.pt-automations .auto-performance-grid article span,
+.pt-automations .auto-metric-copy span {
+    font-size: 11px;
+}
+
+.pt-automations .auto-engine-metrics article strong,
+.pt-automations .auto-asset-status-grid article strong,
+.pt-automations .auto-performance-grid article strong,
+.pt-automations .auto-metric-copy strong {
+    font-size: 16px;
+}
+
+
+/* ============================================================
+   PANEL HEADERS
+   Asset Engines / Engine Activity
+   ============================================================ */
+
+.pt-automations .auto-panel-header h3 {
+    font-size: 17px;
+}
+
+.pt-automations .auto-panel-header span {
+    font-size: 11px;
+}
+
+.pt-automations .auto-panel-header small {
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   ASSET ENGINES
+   ============================================================ */
+
+.pt-automations .auto-engine-asset-copy strong {
+    font-size: 13px;
+}
+
+.pt-automations .auto-engine-asset-copy small {
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.pt-automations .auto-engine-asset-state {
+    font-size: 9px;
+}
+
+.pt-automations .auto-section-toggle-label,
+.pt-automations .auto-toggle-label {
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   ENGINE ACTIVITY TABLE
+   ============================================================ */
+
+.pt-automations .auto-runtime-row {
+    font-size: 12px;
+}
+
+.pt-automations .auto-runtime-row.head {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .055em;
+}
+
+.pt-automations .auto-runtime-row > span {
+    line-height: 1.25;
+}
+
+
+/* Symbol text */
+
+.pt-automations .auto-runtime-symbol,
+.pt-automations .auto-symbol-cell {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+/* Automation / strategy text */
+
+.pt-automations .auto-runtime-automation,
+.pt-automations .auto-runtime-strategy {
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   BUY / SELL / HOLD ACTIONS
+   ============================================================ */
+
+.pt-automations .auto-runtime-action,
+.pt-automations .auto-action {
+    font-size: 11px;
+    font-weight: 850;
+}
+
+.pt-automations .auto-runtime-action i,
+.pt-automations .auto-action i {
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   STATE / RUNTIME BADGES
+   EXECUTING / DECISION / RUNNING
+   ============================================================ */
+
+.pt-automations .auto-runtime-state,
+.pt-automations .auto-runtime-badge,
+.pt-automations .auto-state-badge,
+.pt-automations .auto-status-badge {
+    font-size: 10px;
+    font-weight: 850;
+}
+
+
+/* ============================================================
+   EMPTY ENGINE ACTIVITY
+   ============================================================ */
+
+.pt-automations .auto-empty-runtime strong,
+.pt-automations .auto-empty strong {
+    font-size: 13px;
+}
+
+.pt-automations .auto-empty-runtime span,
+.pt-automations .auto-empty span {
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   EMERGENCY CONTROLS
+   ============================================================ */
+
+.pt-automations .auto-side-title {
+    font-size: 15px;
+}
+
+.pt-automations .auto-emergency-head b {
+    font-size: 13px;
+}
+
+.pt-automations .auto-emergency-head small {
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.pt-automations .auto-emergency-btn {
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   SYSTEM STATUS
+   ============================================================ */
+
+.pt-automations .auto-system-row,
+.pt-automations .auto-status-row {
+    font-size: 11px;
+}
+
+.pt-automations .auto-system-row > span,
+.pt-automations .auto-status-row > span {
+    font-size: 11px;
+}
+
+.pt-automations .auto-system-row strong,
+.pt-automations .auto-system-row b,
+.pt-automations .auto-status-row strong,
+.pt-automations .auto-status-row b {
+    font-size: 11px;
+    font-weight: 850;
+}
+
+
+/* ============================================================
+   CONFIGURED AUTOMATIONS
+   ============================================================ */
+
+.pt-automations .auto-automation-row strong {
+    font-size: 13px;
+}
+
+.pt-automations .auto-automation-row small {
+    font-size: 10px;
+}
+
+.pt-automations .auto-symbol-chip {
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   NAVIGATION
+   Keep compact but improve readability
+   ============================================================ */
+
+.pt-automations .auto-nav-item {
+    font-size: 12px;
+}
+
+.pt-automations .auto-nav-icon {
+    font-size: 16px;
+}
+
+
+/* ============================================================
+   PHOSPHOR ICON NORMALIZATION
+   ============================================================ */
+
+.pt-automations .auto-nav-icon i,
+.pt-automations .auto-metric-icon i,
+.pt-automations .auto-engine-asset-icon i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1;
+}
+
+.pt-automations .auto-nav-icon i {
+    font-size: 16px;
+}
+
+.pt-automations .auto-metric-icon i {
+    font-size: 18px;
+}
+
+.pt-automations .auto-engine-asset-icon i {
+    font-size: 18px;
+}
+
+
+/* ============================================================
+   STOCK / CRYPTO SYMBOL LOGOS
+   Existing StockLogo component only
+   ============================================================ */
+
+.pt-automations .stock-logo-small {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+}
+
+.pt-automations .stock-logo-small .stock-logo-fallback {
+    font-size: 10px;
+}
+
+.pt-automations .stock-logo-small .stock-logo-fallback i {
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   FINAL READABILITY SAFETY
+   Prevent tiny 7/8px labels inside Automations
+   ============================================================ */
+
+.pt-automations .auto-runtime-table,
+.pt-automations .auto-engine-assets,
+.pt-automations .auto-side-stack {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}

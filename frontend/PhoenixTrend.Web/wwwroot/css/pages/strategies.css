@@ -1,0 +1,3485 @@
+/* ============================================================
+   PHOENIXTREND — STRATEGIES
+   File:
+   frontend/PhoenixTrend.Web/wwwroot/css/pages/strategies.css
+
+   Full replacement
+   ============================================================ */
+
+
+/* ============================================================
+   PAGE
+   ============================================================ */
+
+.pt-strategies {
+    --pt-bg: #020912;
+    --pt-panel: rgba(7, 20, 31, 0.88);
+    --pt-panel-2: rgba(10, 27, 41, 0.82);
+    --pt-card: rgba(8, 23, 35, 0.88);
+
+    --pt-border: rgba(108, 145, 169, 0.17);
+    --pt-border-bright: rgba(94, 199, 244, 0.28);
+
+    --pt-text: #f3f8fb;
+    --pt-text-soft: #b8c9d3;
+    --pt-muted: #8298a7;
+    --pt-muted-2: #5f7787;
+
+    --pt-cyan: #55d7ff;
+    --pt-blue: #5d9fff;
+    --pt-green: #4ce0a0;
+    --pt-red: #ff6876;
+    --pt-orange: #ffad42;
+    --pt-purple: #a98aff;
+
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    gap: 18px;
+
+    color: var(--pt-text);
+}
+
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.pt-strategies .strategies-hero {
+    position: relative;
+
+    min-height: 205px;
+
+    display: flex;
+    align-items: center;
+
+    overflow: hidden;
+
+    padding: 30px 32px;
+
+    border: 1px solid rgba(108, 145, 169, 0.18);
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(2, 11, 19, 0.97) 0%,
+            rgba(3, 13, 23, 0.87) 38%,
+            rgba(3, 12, 22, 0.36) 70%,
+            rgba(3, 12, 22, 0.12) 100%
+        ),
+        url("/assets/phoenixtrend-page-banner.png")
+        center 38% / cover no-repeat;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.055),
+        0 20px 50px rgba(0, 0, 0, 0.22);
+}
+
+.pt-strategies .strategies-hero::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at 12% 50%,
+            rgba(48, 191, 241, 0.11),
+            transparent 35%
+        );
+}
+
+.pt-strategies .strategies-hero::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(77, 207, 255, 0.35),
+            rgba(159, 103, 255, 0.20),
+            transparent
+        );
+}
+
+.pt-strategies .strategies-hero-content {
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+.pt-strategies .strategies-hero-copy {
+    max-width: 720px;
+    min-width: 0;
+}
+
+.pt-strategies .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 10px;
+
+    color: #6edcff;
+
+    font-size: 12px;
+    font-weight: 850;
+
+    letter-spacing: 0.12em;
+}
+
+.pt-strategies .hero-eyebrow i {
+    font-size: 17px;
+}
+
+.pt-strategies .strategies-hero h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: clamp(34px, 3vw, 46px);
+    font-weight: 850;
+
+    line-height: 1.04;
+
+    letter-spacing: -0.04em;
+}
+
+.pt-strategies .strategies-hero p {
+    max-width: 680px;
+
+    margin: 12px 0 0;
+
+    color: #a8bbc7;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    line-height: 1.65;
+}
+
+
+/* ============================================================
+   CATEGORY TABS
+   ============================================================ */
+
+.pt-strategies .strategy-tabs-shell {
+    position: relative;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 6px;
+
+    border: 1px solid var(--pt-border);
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 22, 34, 0.84),
+            rgba(5, 15, 24, 0.84)
+        );
+
+    scrollbar-width: none;
+}
+
+.pt-strategies .strategy-tabs-shell::-webkit-scrollbar {
+    display: none;
+}
+
+.pt-strategies .strategy-tabs {
+    min-width: max-content;
+
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.pt-strategies .strategy-tab {
+    min-height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 13px;
+
+    border: 1px solid transparent;
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: #8298a7;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 750;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        color 150ms ease,
+        background 150ms ease,
+        border-color 150ms ease;
+}
+
+.pt-strategies .strategy-tab i {
+    font-size: 16px;
+}
+
+.pt-strategies .strategy-tab:hover {
+    color: #cbd9e1;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+}
+
+.pt-strategies .strategy-tab.active {
+    border-color:
+        rgba(68, 199, 246, 0.20);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(41, 172, 220, 0.13),
+            rgba(35, 115, 160, 0.06)
+        );
+
+    color: #72dfff;
+}
+
+
+/* ============================================================
+   ACTION BAR
+   ============================================================ */
+
+.pt-strategies .strategy-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+}
+
+.pt-strategies .strategy-search-box {
+    width: min(470px, 100%);
+    min-height: 45px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 0 14px;
+
+    border: 1px solid var(--pt-border);
+    border-radius: 11px;
+
+    background:
+        rgba(7, 20, 31, 0.80);
+
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.pt-strategies .strategy-search-box:focus-within {
+    border-color:
+        rgba(81, 208, 255, 0.32);
+
+    box-shadow:
+        0 0 0 3px rgba(71, 197, 244, 0.045);
+}
+
+.pt-strategies .strategy-search-box i {
+    flex: 0 0 auto;
+
+    color: #718999;
+
+    font-size: 18px;
+}
+
+.pt-strategies .strategy-search-box input {
+    width: 100%;
+    min-width: 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #e1ebf0;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.pt-strategies .strategy-search-box input::placeholder {
+    color: #5f7686;
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.pt-strategies .strategy-primary-action,
+.pt-strategies .strategy-secondary-action,
+.pt-strategies .strategy-configure-button,
+.pt-strategies .strategy-danger-action {
+    min-height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 0 15px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        transform 150ms ease,
+        border-color 150ms ease,
+        background 150ms ease,
+        color 150ms ease,
+        box-shadow 150ms ease,
+        opacity 150ms ease;
+}
+
+.pt-strategies .strategy-primary-action {
+    border:
+        1px solid rgba(73, 203, 250, 0.30);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(41, 183, 231, 0.20),
+            rgba(29, 113, 164, 0.10)
+        );
+
+    color: #77e1ff;
+}
+
+.pt-strategies .strategy-primary-action:hover:not(:disabled) {
+    border-color:
+        rgba(86, 216, 255, 0.48);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(47, 195, 243, 0.27),
+            rgba(29, 113, 164, 0.14)
+        );
+
+    color: #b6efff;
+}
+
+.pt-strategies .strategy-secondary-action,
+.pt-strategies .strategy-configure-button {
+    border:
+        1px solid rgba(111, 145, 168, 0.18);
+
+    background:
+        rgba(14, 31, 44, 0.78);
+
+    color: #afc0ca;
+}
+
+.pt-strategies .strategy-secondary-action:hover:not(:disabled),
+.pt-strategies .strategy-configure-button:hover:not(:disabled) {
+    border-color:
+        rgba(94, 187, 227, 0.31);
+
+    background:
+        rgba(17, 40, 56, 0.94);
+
+    color: #edf5f8;
+}
+
+.pt-strategies .strategy-danger-action {
+    border:
+        1px solid rgba(255, 104, 118, 0.25);
+
+    background:
+        rgba(255, 104, 118, 0.08);
+
+    color: #ff8b95;
+}
+
+.pt-strategies button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.42;
+}
+
+.pt-strategies button:active:not(:disabled) {
+    transform:
+        translateY(1px);
+}
+
+.pt-strategies button i {
+    font-size: 16px;
+}
+
+
+/* ============================================================
+   MESSAGES
+   ============================================================ */
+
+.pt-strategies .strategy-message {
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px 15px;
+
+    border-radius: 12px;
+}
+
+.pt-strategies .strategy-message.loading {
+    border:
+        1px solid rgba(73, 198, 244, 0.18);
+
+    background:
+        rgba(37, 152, 197, 0.06);
+}
+
+.pt-strategies .strategy-message.error {
+    border:
+        1px solid rgba(255, 104, 118, 0.20);
+
+    background:
+        rgba(255, 104, 118, 0.06);
+}
+
+.pt-strategies .strategy-message > i {
+    flex: 0 0 auto;
+
+    font-size: 23px;
+}
+
+.pt-strategies .strategy-message.loading > i {
+    color: #60d9ff;
+}
+
+.pt-strategies .strategy-message.error > i {
+    color: #ff7d89;
+}
+
+.pt-strategies .strategy-message > div {
+    display: grid;
+
+    gap: 3px;
+}
+
+.pt-strategies .strategy-message strong {
+    color: #edf5f8;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pt-strategies .strategy-message span {
+    color: #8ca1af;
+
+    font-size: 12px;
+}
+
+.pt-strategies .spin {
+    animation:
+        pt-strategy-spin 0.8s linear infinite;
+}
+
+@keyframes pt-strategy-spin {
+    to {
+        transform:
+            rotate(360deg);
+    }
+}
+
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+.pt-strategies .strategy-summary-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 11px;
+}
+
+.pt-strategies .strategy-summary-card {
+    min-width: 0;
+    min-height: 100px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    border: 1px solid var(--pt-border);
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(9, 24, 36, 0.84),
+            rgba(5, 16, 25, 0.86)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.pt-strategies .summary-icon {
+    width: 43px;
+    height: 43px;
+
+    flex: 0 0 43px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    font-size: 20px;
+}
+
+.pt-strategies .summary-icon.cyan {
+    border:
+        1px solid rgba(72, 208, 255, 0.17);
+
+    background:
+        rgba(55, 181, 229, 0.08);
+
+    color: #61d9ff;
+}
+
+.pt-strategies .summary-icon.green {
+    border:
+        1px solid rgba(72, 224, 160, 0.16);
+
+    background:
+        rgba(58, 202, 139, 0.07);
+
+    color: #51dfa1;
+}
+
+.pt-strategies .summary-icon.purple {
+    border:
+        1px solid rgba(169, 138, 255, 0.17);
+
+    background:
+        rgba(150, 109, 236, 0.07);
+
+    color: #b497ff;
+}
+
+.pt-strategies .summary-icon.orange {
+    border:
+        1px solid rgba(255, 173, 66, 0.17);
+
+    background:
+        rgba(255, 164, 52, 0.07);
+
+    color: #ffb65a;
+}
+
+.pt-strategies .summary-content {
+    min-width: 0;
+
+    display: grid;
+
+    gap: 3px;
+}
+
+.pt-strategies .summary-content > span {
+    overflow: hidden;
+
+    color: #849aa9;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pt-strategies .summary-content > strong {
+    overflow: hidden;
+
+    color: #edf5f8;
+
+    font-size: 21px;
+    font-weight: 850;
+
+    line-height: 1.15;
+
+    letter-spacing: -0.025em;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pt-strategies .summary-content > small {
+    overflow: hidden;
+
+    color: #6b8292;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pt-strategies .green {
+    color:
+        var(--pt-green) !important;
+}
+
+.pt-strategies .red {
+    color:
+        var(--pt-red) !important;
+}
+
+.pt-strategies .orange-value {
+    color:
+        var(--pt-orange) !important;
+}
+
+
+/* ============================================================
+   WORKSPACE
+   ============================================================ */
+
+.pt-strategies .strategy-workspace {
+    min-width: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.78fr)
+        minmax(320px, 0.72fr);
+
+    gap: 15px;
+
+    align-items: start;
+}
+
+
+/* ============================================================
+   PANELS
+   ============================================================ */
+
+.pt-strategies .strategy-library-panel,
+.pt-strategies .strategy-inspector {
+    position: relative;
+
+    min-width: 0;
+
+    border:
+        1px solid var(--pt-border);
+
+    border-radius:
+        17px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 22, 34, 0.92),
+            rgba(4, 14, 23, 0.94)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 20px 45px rgba(0, 0, 0, 0.17);
+
+    backdrop-filter:
+        blur(18px);
+
+    -webkit-backdrop-filter:
+        blur(18px);
+}
+
+.pt-strategies .strategy-library-panel {
+    padding: 17px;
+}
+
+.pt-strategies .panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding:
+        2px 2px 16px;
+
+    border-bottom:
+        1px solid rgba(103, 128, 147, 0.11);
+}
+
+.pt-strategies .panel-kicker {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 5px;
+
+    color: #66d9ff;
+
+    font-size: 10px;
+    font-weight: 850;
+
+    letter-spacing: 0.12em;
+}
+
+.pt-strategies .panel-kicker i {
+    font-size: 14px;
+}
+
+.pt-strategies .panel-header h2 {
+    margin: 0;
+
+    color: #edf5f8;
+
+    font-size: 21px;
+    font-weight: 850;
+
+    letter-spacing: -0.025em;
+}
+
+.pt-strategies .panel-header p {
+    margin: 5px 0 0;
+
+    color: #7f95a4;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.pt-strategies .panel-count {
+    min-width: 52px;
+    height: 37px;
+
+    flex: 0 0 auto;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 0 11px;
+
+    border:
+        1px solid rgba(74, 202, 255, 0.17);
+
+    border-radius: 9px;
+
+    background:
+        rgba(38, 157, 205, 0.08);
+
+    color: #7cdcff;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+
+/* ============================================================
+   GRID
+   ============================================================ */
+
+.pt-strategies .strategy-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+    padding-top: 14px;
+}
+
+
+/* ============================================================
+   STRATEGY CARD
+   ============================================================ */
+
+.pt-strategies .strategy-card {
+    position: relative;
+
+    min-width: 0;
+    min-height: 385px;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    border:
+        1px solid rgba(93, 123, 145, 0.18);
+
+    border-radius:
+        14px;
+
+    background:
+        radial-gradient(
+            circle at 8% 0%,
+            rgba(52, 183, 232, 0.04),
+            transparent 34%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(9, 25, 38, 0.93),
+            rgba(5, 16, 26, 0.95)
+        );
+
+    cursor: pointer;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+    transition:
+        border-color 160ms ease,
+        background 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.pt-strategies .strategy-card:hover {
+    border-color:
+        rgba(88, 182, 222, 0.29);
+
+    background:
+        radial-gradient(
+            circle at 8% 0%,
+            rgba(52, 183, 232, 0.06),
+            transparent 34%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(10, 28, 42, 0.96),
+            rgba(5, 17, 27, 0.97)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 12px 28px rgba(0, 0, 0, 0.13);
+}
+
+.pt-strategies .strategy-card.selected {
+    border-color:
+        rgba(255, 173, 66, 0.55);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 0 0 1px rgba(255, 173, 66, 0.05),
+        0 15px 35px rgba(0, 0, 0, 0.16);
+}
+
+.pt-strategies .strategy-card-accent {
+    position: absolute;
+
+    top: 0;
+    left: 14px;
+    right: 14px;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(65, 206, 255, 0.35),
+            transparent
+        );
+
+    opacity: 0.4;
+}
+
+.pt-strategies .strategy-card.selected
+.strategy-card-accent {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 173, 66, 0.80),
+            transparent
+        );
+
+    opacity: 1;
+}
+
+
+/* ============================================================
+   CARD TOP ROW
+   ============================================================ */
+
+.pt-strategies .pt-strategy-card-top {
+    position: static !important;
+
+    width: 100%;
+    min-width: 0;
+
+    min-height: 46px;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 12px;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+}
+
+
+/* ============================================================
+   CARD ICON
+   ============================================================ */
+
+.pt-strategies .pt-strategy-card-icon {
+    position: static !important;
+
+    width: 44px !important;
+    height: 44px !important;
+
+    flex: 0 0 44px !important;
+
+    display: grid !important;
+    place-items: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border:
+        1px solid rgba(57, 217, 255, 0.19) !important;
+
+    border-radius:
+        10px !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(42, 181, 224, 0.14),
+            rgba(95, 88, 219, 0.08)
+        ) !important;
+
+    color:
+        #66ddf8 !important;
+
+    font-size:
+        20px !important;
+}
+
+
+/* ============================================================
+   CARD TEXT
+   IMPORTANT:
+   TITLE / CATEGORY / DESCRIPTION ALL NORMAL FLOW
+   ============================================================ */
+
+.pt-strategies .pt-strategy-card-copy {
+    position: static !important;
+
+    width: 100%;
+    min-width: 0;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+
+    gap: 0 !important;
+
+    margin: 1px 0 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    transform: none !important;
+}
+
+
+/* TITLE */
+
+.pt-strategies .pt-strategy-card-title {
+    position: static !important;
+    inset: auto !important;
+
+    width: 100% !important;
+
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    color:
+        #f5f9fb !important;
+
+    font-size:
+        18px !important;
+
+    font-weight:
+        850 !important;
+
+    line-height:
+        1.28 !important;
+
+    letter-spacing:
+        -0.02em !important;
+
+    text-align:
+        left !important;
+
+    text-overflow:
+        ellipsis !important;
+
+    white-space:
+        nowrap !important;
+
+    transform:
+        none !important;
+}
+
+
+/* CATEGORY */
+
+.pt-strategies .pt-strategy-card-category {
+    position: static !important;
+    inset: auto !important;
+
+    width: 100% !important;
+
+    display: block !important;
+
+    margin:
+        2px 0 0 !important;
+
+    padding:
+        0 !important;
+
+    overflow:
+        hidden !important;
+
+    color:
+        #7890a0 !important;
+
+    font-size:
+        12px !important;
+
+    font-weight:
+        700 !important;
+
+    line-height:
+        1.4 !important;
+
+    text-align:
+        left !important;
+
+    text-overflow:
+        ellipsis !important;
+
+    white-space:
+        nowrap !important;
+
+    transform:
+        none !important;
+}
+
+
+/* DESCRIPTION */
+
+.pt-strategies .pt-strategy-card-description {
+    position: static !important;
+    inset: auto !important;
+
+    width: 100% !important;
+
+    min-height:
+        40px !important;
+
+    display:
+        -webkit-box !important;
+
+    margin:
+        8px 0 0 !important;
+
+    padding:
+        0 !important;
+
+    overflow:
+        hidden !important;
+
+    color:
+        #9bafbc !important;
+
+    font-size:
+        13px !important;
+
+    font-weight:
+        500 !important;
+
+    line-height:
+        1.5 !important;
+
+    text-align:
+        left !important;
+
+    white-space:
+        normal !important;
+
+    -webkit-line-clamp:
+        2 !important;
+
+    -webkit-box-orient:
+        vertical !important;
+
+    transform:
+        none !important;
+}
+
+
+/* ============================================================
+   REMOVE LEGACY CARD TEXT
+   ============================================================ */
+
+.pt-strategies .strategy-card >
+.strategy-name,
+
+.pt-strategies .strategy-card >
+.strategy-description,
+
+.pt-strategies .strategy-card >
+.strategy-card-header,
+
+.pt-strategies .strategy-card >
+.strategy-identity {
+    display:
+        none !important;
+}
+
+
+/* ============================================================
+   ENABLE / DISABLE
+   ============================================================ */
+
+.pt-strategies .pt-strategy-card-toggle {
+    position: static !important;
+
+    min-width:
+        104px !important;
+
+    height:
+        31px !important;
+
+    flex:
+        0 0 auto !important;
+
+    display:
+        inline-flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        flex-end !important;
+
+    gap:
+        7px !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 8px !important;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.07) !important;
+
+    border-radius:
+        999px !important;
+
+    background:
+        rgba(255, 255, 255, 0.02) !important;
+
+    color:
+        #7e93a1 !important;
+
+    font-family:
+        inherit !important;
+
+    font-size:
+        10px !important;
+
+    font-weight:
+        850 !important;
+
+    line-height:
+        1 !important;
+
+    white-space:
+        nowrap !important;
+
+    cursor:
+        pointer !important;
+
+    transform:
+        none !important;
+
+    transition:
+        border-color 150ms ease,
+        background 150ms ease,
+        color 150ms ease,
+        box-shadow 150ms ease !important;
+}
+
+.pt-strategies .pt-strategy-card-toggle.enabled {
+    border-color:
+        rgba(66, 228, 155, 0.24) !important;
+
+    background:
+        rgba(48, 213, 142, 0.07) !important;
+
+    color:
+        #5be4a7 !important;
+}
+
+.pt-strategies .pt-strategy-card-toggle.disabled {
+    border-color:
+        rgba(255, 255, 255, 0.07) !important;
+
+    background:
+        rgba(255, 255, 255, 0.018) !important;
+
+    color:
+        #788c9a !important;
+}
+
+.pt-strategies .pt-strategy-card-toggle.enabled:hover {
+    border-color:
+        rgba(66, 228, 155, 0.40) !important;
+
+    background:
+        rgba(48, 213, 142, 0.10) !important;
+}
+
+.pt-strategies .pt-strategy-card-toggle.disabled:hover {
+    border-color:
+        rgba(96, 153, 184, 0.22) !important;
+
+    background:
+        rgba(255, 255, 255, 0.035) !important;
+}
+
+.pt-strategies .pt-strategy-card-toggle.unavailable {
+    cursor: default !important;
+
+    opacity: 0.46;
+}
+
+.pt-strategies .pt-strategy-toggle-state {
+    display:
+        inline-block !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
+    line-height:
+        1 !important;
+}
+
+
+/* ============================================================
+   SWITCH
+   ============================================================ */
+
+.pt-strategies .pt-strategy-switch {
+    position:
+        relative !important;
+
+    width:
+        34px !important;
+
+    height:
+        18px !important;
+
+    flex:
+        0 0 34px !important;
+
+    display:
+        block !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
+    overflow:
+        visible !important;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.07) !important;
+
+    border-radius:
+        999px !important;
+
+    background:
+        rgba(78, 96, 109, 0.29) !important;
+
+    box-shadow:
+        inset 0 1px 4px rgba(0, 0, 0, 0.30) !important;
+
+    transition:
+        background 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease !important;
+}
+
+
+/* KNOB */
+
+.pt-strategies .pt-strategy-switch-knob {
+    position:
+        absolute !important;
+
+    top:
+        2px !important;
+
+    left:
+        2px !important;
+
+    width:
+        12px !important;
+
+    height:
+        12px !important;
+
+    display:
+        block !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
+    border-radius:
+        50% !important;
+
+    background:
+        #8193a0 !important;
+
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.45) !important;
+
+    transform:
+        translateX(0) !important;
+
+    transition:
+        transform 170ms ease,
+        background 170ms ease,
+        box-shadow 170ms ease !important;
+}
+
+
+/* LIGHT */
+
+.pt-strategies .pt-strategy-switch-light {
+    position:
+        absolute !important;
+
+    top:
+        50% !important;
+
+    left:
+        5px !important;
+
+    width:
+        4px !important;
+
+    height:
+        4px !important;
+
+    display:
+        block !important;
+
+    border-radius:
+        50% !important;
+
+    background:
+        transparent !important;
+
+    opacity:
+        0 !important;
+
+    transform:
+        translateY(-50%) !important;
+
+    box-shadow:
+        none !important;
+}
+
+
+/* OFF = LEFT / NO LIGHT */
+
+.pt-strategies .pt-strategy-switch.off {
+    border-color:
+        rgba(255, 255, 255, 0.07) !important;
+
+    background:
+        rgba(76, 94, 108, 0.28) !important;
+}
+
+.pt-strategies .pt-strategy-switch.off
+.pt-strategy-switch-knob {
+    transform:
+        translateX(0) !important;
+
+    background:
+        #8193a0 !important;
+
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.45) !important;
+}
+
+.pt-strategies .pt-strategy-switch.off
+.pt-strategy-switch-light {
+    opacity:
+        0 !important;
+
+    background:
+        transparent !important;
+
+    box-shadow:
+        none !important;
+}
+
+
+/* ON = RIGHT / GREEN */
+
+.pt-strategies .pt-strategy-switch.on {
+    border-color:
+        rgba(67, 225, 157, 0.36) !important;
+
+    background:
+        rgba(31, 184, 119, 0.31) !important;
+
+    box-shadow:
+        inset 0 1px 4px rgba(0, 0, 0, 0.22),
+        0 0 9px rgba(66, 228, 155, 0.11) !important;
+}
+
+.pt-strategies .pt-strategy-switch.on
+.pt-strategy-switch-knob {
+    transform:
+        translateX(16px) !important;
+
+    background:
+        #50e4a2 !important;
+
+    box-shadow:
+        0 0 8px rgba(66, 228, 155, 0.58),
+        0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+.pt-strategies .pt-strategy-switch.on
+.pt-strategy-switch-light {
+    opacity:
+        1 !important;
+
+    background:
+        #50e4a2 !important;
+
+    box-shadow:
+        0 0 7px rgba(66, 228, 155, 0.95) !important;
+}
+
+
+/* ============================================================
+   PERFORMANCE BOX
+   ============================================================ */
+
+.pt-strategies .strategy-visual {
+    min-height:
+        100px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    padding:
+        12px;
+
+    border:
+        1px solid rgba(91, 122, 144, 0.13);
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(4, 15, 24, 0.72),
+            rgba(8, 23, 34, 0.64)
+        );
+}
+
+.pt-strategies .strategy-chart-label {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+}
+
+.pt-strategies .strategy-chart-label > div {
+    display:
+        grid;
+
+    gap:
+        3px;
+}
+
+.pt-strategies .strategy-chart-label span {
+    color:
+        #7c92a1;
+
+    font-size:
+        10px;
+
+    font-weight:
+        850;
+
+    letter-spacing:
+        0.08em;
+}
+
+.pt-strategies .strategy-chart-label small {
+    color:
+        #607787;
+
+    font-size:
+        9px;
+
+    font-weight:
+        600;
+}
+
+.pt-strategies .strategy-chart-label > strong {
+    color:
+        #e2ecf1;
+
+    font-size:
+        13px;
+
+    font-weight:
+        850;
+
+    white-space:
+        nowrap;
+}
+
+.pt-strategies .strategy-visual-empty {
+    flex:
+        1;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+    color:
+        #6f8797;
+
+    font-size:
+        11px;
+
+    font-weight:
+        650;
+}
+
+.pt-strategies .strategy-visual-empty i {
+    color:
+        #4d8aa6;
+
+    font-size:
+        16px;
+}
+
+.pt-strategies .strategy-visual-value {
+    flex:
+        1;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        11px;
+
+    padding-top:
+        9px;
+}
+
+.pt-strategies .strategy-visual-value > i {
+    color:
+        #54d6ff;
+
+    font-size:
+        25px;
+}
+
+.pt-strategies .strategy-visual-value > div {
+    display:
+        grid;
+
+    gap:
+        3px;
+}
+
+.pt-strategies .strategy-visual-value strong {
+    color:
+        #e7f0f4;
+
+    font-size:
+        18px;
+
+    font-weight:
+        850;
+}
+
+.pt-strategies .strategy-visual-value span {
+    color:
+        #718898;
+
+    font-size:
+        10px;
+}
+
+
+/* ============================================================
+   CARD METRICS
+   ============================================================ */
+
+.pt-strategies .strategy-card-metrics {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap:
+        7px;
+}
+
+.pt-strategies .strategy-card-metric {
+    min-width:
+        0;
+
+    min-height:
+        55px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    gap:
+        5px;
+
+    padding:
+        8px 9px;
+
+    border:
+        1px solid rgba(91, 121, 142, 0.12);
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(13, 30, 43, 0.62);
+}
+
+.pt-strategies .strategy-card-metric span {
+    overflow:
+        hidden;
+
+    color:
+        #7890a0;
+
+    font-size:
+        10px;
+
+    font-weight:
+        650;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.pt-strategies .strategy-card-metric strong {
+    overflow:
+        hidden;
+
+    color:
+        #e2ecf1;
+
+    font-size:
+        13px;
+
+    font-weight:
+        850;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   CARD ACTIONS
+   ============================================================ */
+
+.pt-strategies .strategy-card-actions {
+    display:
+        grid !important;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr)) !important;
+
+    gap:
+        8px !important;
+
+    margin-top:
+        auto !important;
+
+    padding:
+        0 !important;
+}
+
+.pt-strategies .strategy-card-actions > button {
+    width:
+        100% !important;
+
+    min-width:
+        0 !important;
+
+    min-height:
+        38px !important;
+
+    font-size:
+        12px !important;
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.pt-strategies .strategy-empty {
+    min-height:
+        240px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+    padding:
+        25px;
+
+    text-align:
+        center;
+}
+
+.pt-strategies .strategy-empty-icon {
+    width:
+        50px;
+
+    height:
+        50px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    margin-bottom:
+        4px;
+
+    border:
+        1px solid rgba(74, 199, 244, 0.15);
+
+    border-radius:
+        13px;
+
+    background:
+        rgba(46, 163, 209, 0.06);
+
+    color:
+        #62d6fb;
+
+    font-size:
+        23px;
+}
+
+.pt-strategies .strategy-empty strong {
+    color:
+        #dce8ee;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+}
+
+.pt-strategies .strategy-empty > span {
+    color:
+        #788e9d;
+
+    font-size:
+        12px;
+}
+
+
+/* ============================================================
+   INSPECTOR
+   ============================================================ */
+
+.pt-strategies .strategy-inspector {
+    position:
+        sticky;
+
+    top:
+        12px;
+
+    padding:
+        17px;
+}
+
+.pt-strategies .inspector-empty {
+    min-height:
+        380px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        9px;
+
+    text-align:
+        center;
+}
+
+.pt-strategies .inspector-empty-icon {
+    width:
+        52px;
+
+    height:
+        52px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    margin-bottom:
+        4px;
+
+    border:
+        1px solid rgba(77, 202, 247, 0.16);
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(46, 164, 209, 0.06);
+
+    color:
+        #62d7fc;
+
+    font-size:
+        24px;
+}
+
+.pt-strategies .inspector-empty h3 {
+    margin:
+        0;
+
+    color:
+        #e5eef3;
+
+    font-size:
+        17px;
+
+    font-weight:
+        850;
+}
+
+.pt-strategies .inspector-empty p {
+    max-width:
+        270px;
+
+    margin:
+        0;
+
+    color:
+        #788e9d;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.6;
+}
+
+.pt-strategies .inspector-header {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    padding-bottom:
+        14px;
+
+    border-bottom:
+        1px solid rgba(101, 130, 150, 0.11);
+}
+
+.pt-strategies .inspector-title-row {
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        11px;
+}
+
+.pt-strategies .inspector-strategy-icon {
+    width:
+        43px;
+
+    height:
+        43px;
+
+    flex:
+        0 0 43px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border:
+        1px solid rgba(69, 204, 251, 0.17);
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(44, 167, 215, 0.07);
+
+    color:
+        #65d9ff;
+
+    font-size:
+        19px;
+}
+
+.pt-strategies .inspector-eyebrow {
+    color:
+        #6b8495;
+
+    font-size:
+        9px;
+
+    font-weight:
+        850;
+
+    letter-spacing:
+        0.10em;
+}
+
+.pt-strategies .inspector-title-row h2 {
+    max-width:
+        220px;
+
+    overflow:
+        hidden;
+
+    margin:
+        3px 0 2px;
+
+    color:
+        #f0f6f9;
+
+    font-size:
+        18px;
+
+    font-weight:
+        850;
+
+    letter-spacing:
+        -0.02em;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.pt-strategies .inspector-category {
+    color:
+        #7c92a1;
+
+    font-size:
+        11px;
+
+    font-weight:
+        650;
+}
+
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.pt-strategies .strategy-status {
+    min-height:
+        26px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
+
+    padding:
+        0 9px;
+
+    border-radius:
+        999px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+}
+
+.pt-strategies .strategy-status.green {
+    border:
+        1px solid rgba(65, 224, 157, 0.21);
+
+    background:
+        rgba(48, 209, 142, 0.07);
+
+    color:
+        #55e2a4 !important;
+}
+
+.pt-strategies .strategy-status.red {
+    border:
+        1px solid rgba(255, 104, 118, 0.20);
+
+    background:
+        rgba(255, 104, 118, 0.06);
+
+    color:
+        #ff7d89 !important;
+}
+
+.pt-strategies .strategy-status.muted {
+    border:
+        1px solid rgba(119, 144, 160, 0.13);
+
+    background:
+        rgba(113, 135, 150, 0.05);
+
+    color:
+        #879ba8 !important;
+}
+
+.pt-strategies .status-dot {
+    width:
+        6px;
+
+    height:
+        6px;
+
+    display:
+        block;
+
+    border-radius:
+        50%;
+
+    background:
+        currentColor;
+
+    box-shadow:
+        0 0 7px currentColor;
+}
+
+
+/* ============================================================
+   INSPECTOR DESCRIPTION
+   ============================================================ */
+
+.pt-strategies .inspector-description {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        9px;
+
+    margin-top:
+        13px;
+
+    padding:
+        11px;
+
+    border:
+        1px solid rgba(91, 121, 142, 0.10);
+
+    border-radius:
+        9px;
+
+    background:
+        rgba(255, 255, 255, 0.018);
+}
+
+.pt-strategies .inspector-description > i {
+    flex:
+        0 0 auto;
+
+    margin-top:
+        2px;
+
+    color:
+        #5ecff5;
+
+    font-size:
+        16px;
+}
+
+.pt-strategies .inspector-description p {
+    margin:
+        0;
+
+    color:
+        #91a6b4;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.6;
+}
+
+
+/* ============================================================
+   INSPECTOR SECTIONS
+   ============================================================ */
+
+.pt-strategies .inspector-section {
+    margin-top:
+        13px;
+
+    padding-top:
+        13px;
+
+    border-top:
+        1px solid rgba(101, 130, 150, 0.10);
+}
+
+.pt-strategies .inspector-section-header {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        10px;
+}
+
+.pt-strategies .inspector-section-header > div {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    color:
+        #c3d1d9;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+}
+
+.pt-strategies .inspector-section-header i {
+    color:
+        #5ed5fb;
+
+    font-size:
+        16px;
+}
+
+.pt-strategies .inspector-section-header small {
+    color:
+        #607787;
+
+    font-size:
+        9px;
+}
+
+
+/* ============================================================
+   INSPECTOR KPIs
+   ============================================================ */
+
+.pt-strategies .inspector-kpis {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap:
+        7px;
+}
+
+.pt-strategies .inspector-kpi {
+    min-width:
+        0;
+
+    padding:
+        9px;
+
+    border:
+        1px solid rgba(91, 121, 142, 0.11);
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(11, 29, 42, 0.59);
+}
+
+.pt-strategies .inspector-kpi span {
+    display:
+        block;
+
+    overflow:
+        hidden;
+
+    color:
+        #748b9b;
+
+    font-size:
+        9px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.pt-strategies .inspector-kpi strong {
+    display:
+        block;
+
+    overflow:
+        hidden;
+
+    margin-top:
+        5px;
+
+    color:
+        #e2edf2;
+
+    font-size:
+        14px;
+
+    font-weight:
+        850;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   INSPECTOR PERFORMANCE
+   ============================================================ */
+
+.pt-strategies .inspector-chart {
+    min-height:
+        105px;
+
+    margin-top:
+        8px;
+
+    padding:
+        11px;
+
+    border:
+        1px solid rgba(91, 121, 142, 0.10);
+
+    border-radius:
+        9px;
+
+    background:
+        rgba(5, 17, 27, 0.54);
+}
+
+.pt-strategies .inspector-chart-header {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+}
+
+.pt-strategies .inspector-chart-header > div {
+    display:
+        grid;
+
+    gap:
+        3px;
+}
+
+.pt-strategies .inspector-chart-header span {
+    color:
+        #9bafbc;
+
+    font-size:
+        11px;
+
+    font-weight:
+        750;
+}
+
+.pt-strategies .inspector-chart-header small {
+    color:
+        #607787;
+
+    font-size:
+        9px;
+}
+
+.pt-strategies .inspector-performance-empty {
+    min-height:
+        68px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        4px;
+
+    text-align:
+        center;
+}
+
+.pt-strategies .inspector-performance-empty i {
+    color:
+        #4e8ba6;
+
+    font-size:
+        19px;
+}
+
+.pt-strategies .inspector-performance-empty strong {
+    color:
+        #8fa4b2;
+
+    font-size:
+        11px;
+}
+
+.pt-strategies .inspector-performance-empty span {
+    color:
+        #607787;
+
+    font-size:
+        9px;
+}
+
+.pt-strategies .inspector-performance-state {
+    min-height:
+        68px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+}
+
+.pt-strategies .inspector-performance-state > i {
+    color:
+        #59d8ff;
+
+    font-size:
+        23px;
+}
+
+.pt-strategies .inspector-performance-state strong {
+    color:
+        #e1edf2;
+
+    font-size:
+        17px;
+
+    font-weight:
+        850;
+}
+
+.pt-strategies .inspector-performance-state span {
+    margin-left:
+        auto;
+
+    color:
+        #6c8494;
+
+    font-size:
+        10px;
+}
+
+
+/* ============================================================
+   DETAIL LIST
+   ============================================================ */
+
+.pt-strategies .strategy-detail-list {
+    display:
+        grid;
+
+    gap:
+        6px;
+}
+
+.pt-strategies .strategy-detail-row {
+    min-height:
+        38px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    padding:
+        0 10px;
+
+    border:
+        1px solid rgba(91, 121, 142, 0.08);
+
+    border-radius:
+        7px;
+
+    background:
+        rgba(255, 255, 255, 0.012);
+}
+
+.pt-strategies .strategy-detail-row > div {
+    min-width:
+        0;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    color:
+        #8298a7;
+
+    font-size:
+        11px;
+}
+
+.pt-strategies .strategy-detail-row i {
+    color:
+        #55c7ed;
+
+    font-size:
+        14px;
+}
+
+.pt-strategies .strategy-detail-row strong {
+    max-width:
+        57%;
+
+    overflow:
+        hidden;
+
+    color:
+        #c6d5dd;
+
+    font-size:
+        11px;
+
+    font-weight:
+        750;
+
+    text-align:
+        right;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   BACKEND NOTICE
+   ============================================================ */
+
+.pt-strategies .strategy-backend-notice {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        10px;
+
+    margin-top:
+        13px;
+
+    padding:
+        11px;
+
+    border:
+        1px solid rgba(255, 173, 66, 0.15);
+
+    border-radius:
+        9px;
+
+    background:
+        rgba(255, 173, 66, 0.045);
+}
+
+.pt-strategies .backend-notice-icon {
+    width:
+        32px;
+
+    height:
+        32px;
+
+    flex:
+        0 0 32px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(255, 173, 66, 0.08);
+
+    color:
+        #ffb452;
+
+    font-size:
+        15px;
+}
+
+.pt-strategies .strategy-backend-notice > div:last-child {
+    min-width:
+        0;
+
+    display:
+        grid;
+
+    gap:
+        3px;
+}
+
+.pt-strategies .strategy-backend-notice strong {
+    color:
+        #d9b87d;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+}
+
+.pt-strategies .strategy-backend-notice span {
+    color:
+        #927e60;
+
+    font-size:
+        10px;
+
+    line-height:
+        1.5;
+}
+
+.pt-strategies .inspector-main-action,
+.pt-strategies .inspector-toggle-action {
+    width:
+        100%;
+
+    margin-top:
+        11px;
+}
+
+.pt-strategies .inspector-toggle-action {
+    border:
+        1px solid rgba(104, 145, 169, 0.15);
+
+    background:
+        rgba(13, 31, 44, 0.72);
+
+    color:
+        #a7b8c3;
+}
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.pt-strategies .strategy-modal-backdrop {
+    position:
+        fixed !important;
+
+    inset:
+        0 !important;
+
+    z-index:
+        10000 !important;
+
+    display:
+        flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
+
+    padding:
+        22px !important;
+
+    overflow:
+        auto !important;
+
+    background:
+        rgba(0, 5, 10, 0.80) !important;
+
+    backdrop-filter:
+        blur(12px) !important;
+
+    -webkit-backdrop-filter:
+        blur(12px) !important;
+}
+
+.pt-strategies .strategy-modal {
+    position:
+        relative !important;
+
+    z-index:
+        10001 !important;
+
+    width:
+        min(680px, 100%) !important;
+
+    max-height:
+        calc(100vh - 44px) !important;
+
+    overflow:
+        auto !important;
+
+    margin:
+        auto !important;
+
+    border:
+        1px solid rgba(101, 163, 194, 0.24) !important;
+
+    border-radius:
+        17px !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 24, 37, 0.995),
+            rgba(3, 12, 20, 0.995)
+        ) !important;
+
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.60),
+        inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+}
+
+.pt-strategies .strategy-modal-glow {
+    position:
+        absolute;
+
+    top:
+        -120px;
+
+    left:
+        50%;
+
+    width:
+        440px;
+
+    height:
+        220px;
+
+    pointer-events:
+        none;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(54, 196, 246, 0.10),
+            transparent 67%
+        );
+}
+
+.pt-strategies .strategy-modal > header {
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    padding:
+        17px 18px;
+
+    border-bottom:
+        1px solid rgba(101, 130, 150, 0.12);
+}
+
+.pt-strategies .strategy-modal > header h2 {
+    margin:
+        3px 0 0;
+
+    color:
+        #eef5f8;
+
+    font-size:
+        20px;
+
+    font-weight:
+        850;
+
+    letter-spacing:
+        -0.025em;
+}
+
+.pt-strategies .strategy-modal > header > button {
+    width:
+        34px;
+
+    height:
+        34px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    padding:
+        0;
+
+    border:
+        1px solid rgba(104, 137, 159, 0.14);
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    color:
+        #899eab;
+
+    cursor:
+        pointer;
+}
+
+.pt-strategies .strategy-modal > header > button:hover {
+    background:
+        rgba(255, 255, 255, 0.05);
+
+    color:
+        #ffffff;
+}
+
+
+/* ============================================================
+   CONFIGURATION FORM
+   ============================================================ */
+
+.pt-strategies .strategy-config-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        12px;
+
+    padding:
+        18px;
+}
+
+.pt-strategies .strategy-config-grid label {
+    min-width:
+        0;
+
+    display:
+        grid;
+
+    gap:
+        7px;
+}
+
+.pt-strategies .strategy-config-grid label > span {
+    color:
+        #8ba0ae;
+
+    font-size:
+        11px;
+
+    font-weight:
+        750;
+}
+
+.pt-strategies .strategy-config-grid input,
+.pt-strategies .strategy-config-grid select {
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    height:
+        42px;
+
+    padding:
+        0 11px;
+
+    border:
+        1px solid rgba(102, 139, 163, 0.17);
+
+    border-radius:
+        9px;
+
+    outline:
+        0;
+
+    background:
+        rgba(4, 16, 25, 0.84);
+
+    color:
+        #dce8ee;
+
+    font-family:
+        inherit;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+}
+
+.pt-strategies .strategy-config-grid input:focus,
+.pt-strategies .strategy-config-grid select:focus {
+    border-color:
+        rgba(71, 204, 251, 0.35);
+
+    box-shadow:
+        0 0 0 3px rgba(58, 190, 239, 0.05);
+}
+
+.pt-strategies .strategy-config-grid select option {
+    background:
+        #07131d;
+
+    color:
+        #dce8ee;
+}
+
+.pt-strategies .strategy-modal-note {
+    margin:
+        0 18px 18px;
+
+    padding:
+        11px;
+
+    border:
+        1px solid rgba(90, 124, 147, 0.10);
+
+    border-radius:
+        9px;
+
+    background:
+        rgba(255, 255, 255, 0.016);
+
+    color:
+        #8095a4;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.6;
+}
+
+.pt-strategies .strategy-modal >
+.strategy-backend-notice {
+    margin:
+        18px;
+}
+
+.pt-strategies .strategy-modal > footer {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    padding:
+        15px 18px;
+
+    border-top:
+        1px solid rgba(101, 130, 150, 0.11);
+}
+
+.pt-strategies .strategy-modal > footer > div {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+}
+
+
+/* ============================================================
+   RESPONSIVE — LARGE
+   ============================================================ */
+
+@media (min-width: 1700px) {
+
+    .pt-strategies .strategy-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .pt-strategies .strategy-workspace {
+        grid-template-columns:
+            minmax(0, 2fr)
+            minmax(340px, 0.62fr);
+    }
+}
+
+
+/* ============================================================
+   RESPONSIVE — MEDIUM
+   ============================================================ */
+
+@media (max-width: 1350px) {
+
+    .pt-strategies .strategy-summary-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .pt-strategies .strategy-workspace {
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(300px, 0.60fr);
+    }
+
+    .pt-strategies .strategy-grid {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+}
+
+
+/* ============================================================
+   RESPONSIVE — TABLET
+   ============================================================ */
+
+@media (max-width: 1050px) {
+
+    .pt-strategies .strategy-workspace {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+    .pt-strategies .strategy-inspector {
+        position:
+            relative;
+
+        top:
+            auto;
+    }
+
+    .pt-strategies .strategy-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* ============================================================
+   RESPONSIVE — SMALL TABLET
+   ============================================================ */
+
+@media (max-width: 780px) {
+
+    .pt-strategies {
+        gap:
+            13px;
+    }
+
+    .pt-strategies .strategies-hero {
+        min-height:
+            175px;
+
+        padding:
+            21px;
+    }
+
+    .pt-strategies .strategies-hero h1 {
+        font-size:
+            34px;
+    }
+
+    .pt-strategies .strategies-hero p {
+        font-size:
+            13px;
+    }
+
+    .pt-strategies .strategy-summary-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .pt-strategies .strategy-action-bar {
+        align-items:
+            stretch;
+
+        flex-direction:
+            column;
+    }
+
+    .pt-strategies .strategy-search-box {
+        width:
+            100%;
+    }
+
+    .pt-strategies .strategy-grid {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+}
+
+
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+
+@media (max-width: 520px) {
+
+    .pt-strategies .strategies-hero {
+        min-height:
+            155px;
+
+        padding:
+            17px;
+
+        background-position:
+            center 30%;
+    }
+
+    .pt-strategies .strategies-hero h1 {
+        font-size:
+            30px;
+    }
+
+    .pt-strategies .strategies-hero p {
+        font-size:
+            12px;
+    }
+
+    .pt-strategies .strategy-summary-grid {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+    .pt-strategies .strategy-library-panel,
+    .pt-strategies .strategy-inspector {
+        padding:
+            13px;
+
+        border-radius:
+            14px;
+    }
+
+    .pt-strategies .strategy-card {
+        min-height:
+            auto;
+
+        padding:
+            13px;
+    }
+
+    .pt-strategies .pt-strategy-card-title {
+        font-size:
+            17px !important;
+    }
+
+    .pt-strategies .pt-strategy-card-category {
+        font-size:
+            11px !important;
+    }
+
+    .pt-strategies .pt-strategy-card-description {
+        font-size:
+            12px !important;
+    }
+
+    .pt-strategies .pt-strategy-card-toggle {
+        width:
+            38px !important;
+
+        min-width:
+            38px !important;
+
+        justify-content:
+            center !important;
+
+        padding:
+            0 !important;
+    }
+
+    .pt-strategies .pt-strategy-toggle-state {
+        display:
+            none !important;
+    }
+
+    .pt-strategies .strategy-card-metrics {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+    .pt-strategies .strategy-card-metric {
+        min-height:
+            42px;
+
+        flex-direction:
+            row;
+
+        align-items:
+            center;
+
+        justify-content:
+            space-between;
+    }
+
+    .pt-strategies .strategy-card-actions {
+        grid-template-columns:
+            minmax(0, 1fr) !important;
+    }
+
+    .pt-strategies .inspector-header {
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+    }
+
+    .pt-strategies .inspector-kpis {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+    .pt-strategies .strategy-config-grid {
+        grid-template-columns:
+            minmax(0, 1fr);
+
+        padding:
+            15px;
+    }
+
+    .pt-strategies .strategy-modal-backdrop {
+        align-items:
+            flex-start !important;
+
+        padding:
+            10px !important;
+    }
+
+    .pt-strategies .strategy-modal {
+        max-height:
+            calc(100vh - 20px) !important;
+
+        border-radius:
+            14px !important;
+    }
+
+    .pt-strategies .strategy-modal > footer {
+        align-items:
+            stretch;
+
+        flex-direction:
+            column;
+    }
+
+    .pt-strategies .strategy-modal > footer > div {
+        width:
+            100%;
+
+        flex-direction:
+            column;
+    }
+
+    .pt-strategies .strategy-modal > footer button {
+        width:
+            100%;
+    }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .pt-strategies *,
+    .pt-strategies *::before,
+    .pt-strategies *::after {
+        scroll-behavior:
+            auto !important;
+
+        transition-duration:
+            0.01ms !important;
+
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+    }
+}

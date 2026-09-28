@@ -1,0 +1,2445 @@
+/* ============================================================
+   PHOENIXTREND CHARTS
+   Premium professional chart workstation
+   ============================================================ */
+
+.pt-charts {
+    --charts-bg: #020910;
+    --charts-panel: rgba(5, 17, 28, 0.94);
+    --charts-panel-soft: rgba(8, 22, 35, 0.86);
+    --charts-border: rgba(123, 157, 188, 0.18);
+    --charts-border-strong: rgba(137, 171, 201, 0.28);
+
+    --charts-text: #edf5fc;
+    --charts-muted: #8395a7;
+    --charts-dim: #607286;
+
+    --charts-gold: #f6a51c;
+    --charts-orange: #ff8b17;
+    --charts-green: #16dc91;
+    --charts-red: #ff5362;
+    --charts-blue: #38a9ff;
+    --charts-purple: #b36cff;
+
+    display: grid;
+    gap: 12px;
+
+    width: 100%;
+    min-width: 0;
+
+    padding: 14px 18px 28px;
+}
+
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.pt-charts .charts-hero {
+    position: relative;
+    isolation: isolate;
+
+    min-height: 112px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    overflow: hidden;
+
+    padding: 22px 24px;
+
+    border: 1px solid rgba(246, 165, 28, 0.24);
+    border-radius: 17px;
+
+    background:
+    linear-gradient(
+        90deg,
+        rgba(2,8,15,.94) 0%,
+        rgba(2,8,15,.72) 28%,
+        rgba(2,8,15,.24) 60%,
+        rgba(2,8,15,.08) 100%
+    ),
+    url("/assets/phoenixtrend-page-banner.png") center 40% / cover no-repeat;
+
+    box-shadow:
+
+        inset 0 1px 0 rgba(255,255,255,.08),
+
+        0 18px 42px rgba(0,0,0,.22);
+}
+
+.pt-charts .charts-hero::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    z-index: -1;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(2, 9, 16, 0.42),
+            transparent 42%,
+            transparent 75%,
+            rgba(2, 9, 16, 0.12)
+        );
+}
+
+.pt-charts .charts-hero-copy {
+    min-width: 0;
+}
+
+.pt-charts .charts-hero-copy h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: clamp(25px, 2vw, 32px);
+    font-weight: 760;
+    line-height: 1.05;
+
+    letter-spacing: -0.035em;
+
+    text-shadow:
+        0 2px 14px rgba(0, 0, 0, 0.55);
+}
+
+.pt-charts .charts-hero-copy p {
+    margin: 7px 0 0;
+
+    color: rgba(241, 247, 252, 0.88);
+
+    font-size: 12px;
+    font-weight: 500;
+
+    text-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.70);
+}
+
+.pt-charts .charts-hero-status {
+    align-self: flex-start;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    min-width: 220px;
+
+    padding: 8px 11px;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(3, 12, 20, 0.82),
+            rgba(6, 18, 29, 0.70)
+        );
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.pt-charts .charts-hero-status .status-dot {
+    flex: 0 0 auto;
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #627282;
+}
+
+.pt-charts .charts-hero-status .status-dot.online {
+    background: var(--charts-green);
+
+    box-shadow:
+        0 0 0 3px rgba(22, 220, 145, 0.10),
+        0 0 11px rgba(22, 220, 145, 0.75);
+}
+
+.pt-charts .charts-hero-status div {
+    min-width: 0;
+
+    display: grid;
+    gap: 2px;
+}
+
+.pt-charts .charts-hero-status strong {
+    color: #ffffff;
+
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.pt-charts .charts-hero-status small {
+    overflow: hidden;
+
+    color: #b4c0cc;
+
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   TICKER STRIP
+   ============================================================ */
+
+.pt-charts .ticker-strip {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+.pt-charts .ticker-card {
+    position: relative;
+
+    min-width: 0;
+    min-height: 58px;
+
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+
+    align-items: center;
+
+    column-gap: 8px;
+
+    padding: 8px 10px;
+
+    border: 1px solid var(--charts-border);
+    border-radius: 10px;
+
+    color: var(--charts-text);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(7, 20, 32, 0.95),
+            rgba(3, 13, 22, 0.96)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+    cursor: pointer;
+
+    transition:
+        border-color 150ms ease,
+        background 150ms ease,
+        transform 150ms ease;
+}
+
+.pt-charts .ticker-card:hover {
+    border-color: rgba(246, 165, 28, 0.45);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(12, 27, 42, 0.98),
+            rgba(5, 16, 27, 0.98)
+        );
+}
+
+.pt-charts .ticker-card.active {
+    border-color: rgba(246, 165, 28, 0.60);
+
+    box-shadow:
+        inset 0 0 0 1px rgba(246, 165, 28, 0.08),
+        0 0 22px rgba(246, 165, 28, 0.035);
+}
+
+.pt-charts .ticker-card > :first-child {
+    grid-row: 1 / span 2;
+}
+
+.pt-charts .ticker-copy {
+    min-width: 0;
+
+    display: grid;
+    gap: 2px;
+
+    text-align: left;
+}
+
+.pt-charts .ticker-copy strong {
+    color: #f2f7fb;
+
+    font-size: 11px;
+    font-weight: 760;
+}
+
+.pt-charts .ticker-copy small {
+    color: #95a6b6;
+
+    font-size: 9px;
+}
+
+.pt-charts .ticker-change {
+    align-self: start;
+
+    font-size: 9px;
+    font-weight: 760;
+}
+
+.pt-charts .ticker-spark {
+    grid-column: 3;
+    grid-row: 2;
+
+    height: 16px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+
+    gap: 2px;
+}
+
+.pt-charts .ticker-spark i {
+    display: block;
+
+    width: 2px;
+
+    border-radius: 2px;
+
+    background: currentColor;
+}
+
+.pt-charts .ticker-spark i:nth-child(1) {
+    height: 5px;
+}
+
+.pt-charts .ticker-spark i:nth-child(2) {
+    height: 9px;
+}
+
+.pt-charts .ticker-spark i:nth-child(3) {
+    height: 7px;
+}
+
+.pt-charts .ticker-spark i:nth-child(4) {
+    height: 13px;
+}
+
+.pt-charts .ticker-spark i:nth-child(5) {
+    height: 16px;
+}
+
+
+/* ============================================================
+   ALERT
+   ============================================================ */
+
+.pt-charts .chart-alert {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 12px;
+
+    border: 1px solid rgba(255, 83, 98, 0.28);
+    border-radius: 9px;
+
+    color: #ff9ba4;
+
+    background: rgba(255, 83, 98, 0.06);
+
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   MAIN WORKSPACE
+   ============================================================ */
+
+.pt-charts .charts-workspace {
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 245px;
+
+    align-items: start;
+
+    gap: 10px;
+}
+
+.pt-charts .chart-column {
+    min-width: 0;
+
+    display: grid;
+    gap: 10px;
+}
+
+
+/* ============================================================
+   CHART SHELL
+   ============================================================ */
+
+.pt-charts .chart-shell {
+    min-width: 0;
+
+    overflow: hidden;
+
+    border: 1px solid var(--charts-border);
+    border-radius: 12px;
+
+    background: #030b13;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ============================================================
+   COMMAND BAR
+   ============================================================ */
+
+.pt-charts .chart-commandbar {
+    min-height: 48px;
+
+    display: grid;
+    grid-template-columns: minmax(130px, auto) minmax(0, 1fr) auto;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 6px 10px;
+
+    border-bottom: 1px solid rgba(123, 157, 188, 0.13);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(7, 20, 31, 0.98),
+            rgba(4, 14, 23, 0.98)
+        );
+}
+
+.pt-charts .symbol-command {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.pt-charts .symbol-command > div {
+    min-width: 0;
+
+    display: grid;
+    gap: 1px;
+}
+
+.pt-charts .symbol-command strong {
+    color: #f5f8fb;
+
+    font-size: 11px;
+    font-weight: 760;
+}
+
+.pt-charts .symbol-command small {
+    overflow: hidden;
+
+    max-width: 130px;
+
+    color: #7f91a3;
+
+    font-size: 8px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   TIMEFRAME BUTTONS
+   ============================================================ */
+
+.pt-charts .timeframe-group {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 2px;
+}
+
+.pt-charts .timeframe-group button {
+    min-width: 28px;
+    height: 28px;
+
+    padding: 0 7px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    color: #9aabba;
+
+    background: transparent;
+
+    font-size: 9px;
+    font-weight: 650;
+
+    cursor: pointer;
+}
+
+.pt-charts .timeframe-group button:hover {
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.pt-charts .timeframe-group button.active {
+    border-color: rgba(246, 165, 28, 0.40);
+
+    color: #ffc45c;
+
+    background: rgba(246, 165, 28, 0.10);
+
+    box-shadow:
+        inset 0 0 12px rgba(246, 165, 28, 0.025);
+}
+
+.pt-charts .timeframe-group button:disabled {
+    opacity: 0.45;
+
+    cursor: default;
+}
+
+
+/* ============================================================
+   CHART ACTIONS
+   ============================================================ */
+
+.pt-charts .chart-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 3px;
+}
+
+.pt-charts .chart-actions button,
+.pt-charts .icon-btn,
+.pt-charts .command-btn {
+    height: 28px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 0 7px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    color: #8ea0b1;
+
+    background: transparent;
+
+    font-size: 9px;
+
+    cursor: pointer;
+}
+
+.pt-charts .chart-actions button:hover,
+.pt-charts .icon-btn:hover,
+.pt-charts .command-btn:hover {
+    border-color: rgba(137, 171, 201, 0.16);
+
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.pt-charts .chart-actions button.active,
+.pt-charts .icon-btn.active {
+    border-color: rgba(246, 165, 28, 0.42);
+
+    color: #ffb33a;
+
+    background: rgba(246, 165, 28, 0.09);
+}
+
+
+/* ============================================================
+   OHLC STRIP
+   ============================================================ */
+
+.pt-charts .ohlc-strip {
+    min-height: 30px;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    padding: 4px 10px;
+
+    border-bottom: 1px solid rgba(123, 157, 188, 0.10);
+
+    color: #8193a5;
+
+    background: rgba(2, 10, 17, 0.96);
+
+    font-size: 8px;
+}
+
+.pt-charts .ohlc-strip strong {
+    color: #cbd6df;
+
+    font-size: 8px;
+}
+
+.pt-charts .ohlc-strip span {
+    white-space: nowrap;
+}
+
+.pt-charts .ohlc-strip b {
+    margin-left: 2px;
+
+    color: #c9d4de;
+
+    font-weight: 650;
+}
+
+.pt-charts .ohlc-strip .provider-label {
+    margin-left: auto;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64788b;
+}
+
+
+/* ============================================================
+   COMMON STATUS
+   ============================================================ */
+
+.pt-charts .live-dot {
+    display: inline-block;
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: var(--charts-green);
+
+    box-shadow:
+        0 0 8px rgba(22, 220, 145, 0.75);
+}
+
+.pt-charts .positive {
+    color: var(--charts-green) !important;
+}
+
+.pt-charts .negative {
+    color: var(--charts-red) !important;
+}
+
+
+/* ============================================================
+   CHART STAGE
+   ============================================================ */
+
+.pt-charts .chart-stage {
+    position: relative;
+
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+
+    background: #020a11;
+}
+
+
+/* ============================================================
+   DRAWING RAIL
+   ============================================================ */
+
+.pt-charts .drawing-rail {
+    position: relative;
+
+    z-index: 8;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 4px;
+
+    padding: 8px 5px;
+
+    border-right: 1px solid rgba(123, 157, 188, 0.12);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(5, 17, 28, 0.98),
+            rgba(3, 12, 20, 0.98)
+        );
+}
+
+.pt-charts .drawing-rail button {
+    width: 27px;
+    height: 27px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 0;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    color: #8396a8;
+
+    background: transparent;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+.pt-charts .drawing-rail button:hover {
+    border-color: rgba(137, 171, 201, 0.17);
+
+    color: #f2f6fa;
+
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.pt-charts .drawing-rail button.active {
+    border-color: rgba(48, 174, 255, 0.38);
+
+    color: #55c7ff;
+
+    background: rgba(48, 174, 255, 0.10);
+
+    box-shadow:
+        0 0 14px rgba(48, 174, 255, 0.06);
+}
+
+
+/* ============================================================
+   CHART AREA
+   ============================================================ */
+
+.pt-charts .chart-area {
+    position: relative;
+
+    min-width: 0;
+
+    display: grid;
+
+    /*
+       Main chart gets most of the room.
+       RSI and MACD are real dedicated panes below it.
+    */
+    grid-template-rows:
+        minmax(390px, 55vh)
+        105px
+        105px;
+
+    overflow: hidden;
+
+    background: #020a11;
+}
+
+.pt-charts .phoenix-main-chart {
+    position: relative;
+
+    z-index: 1;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 390px;
+
+    overflow: hidden;
+
+    background: #020a11;
+}
+
+
+/* ============================================================
+   LOADING / NO DATA
+   ============================================================ */
+
+.pt-charts .chart-loading,
+.pt-charts .chart-no-data {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    color: #9babb9;
+
+    background: rgba(2, 10, 17, 0.82);
+
+    backdrop-filter: blur(4px);
+
+    font-size: 10px;
+}
+
+.pt-charts .chart-loading span {
+    width: 13px;
+    height: 13px;
+
+    border: 2px solid rgba(246, 165, 28, 0.20);
+    border-top-color: var(--charts-gold);
+    border-radius: 50%;
+
+    animation: charts-spin 700ms linear infinite;
+}
+
+@keyframes charts-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pt-charts .chart-no-data {
+    flex-direction: column;
+
+    text-align: center;
+}
+
+.pt-charts .chart-no-data i {
+    color: #60778c;
+
+    font-size: 26px;
+}
+
+.pt-charts .chart-no-data strong {
+    color: #d6e0e8;
+
+    font-size: 12px;
+}
+
+.pt-charts .chart-no-data span {
+    color: #718497;
+
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   RSI / MACD PANES
+   ============================================================ */
+
+.pt-charts .indicator-pane {
+    position: relative;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+    border-top: 1px solid rgba(123, 157, 188, 0.12);
+
+    background: #020a11;
+}
+
+.pt-charts .indicator-pane-title {
+    position: absolute;
+
+    top: 5px;
+    left: 8px;
+
+    z-index: 7;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    pointer-events: none;
+}
+
+.pt-charts .indicator-pane-title strong {
+    color: #b5c1cc;
+
+    font-size: 8px;
+    font-weight: 650;
+}
+
+.pt-charts .indicator-pane-title span {
+    color: #b36cff;
+
+    font-size: 8px;
+    font-weight: 700;
+}
+
+.pt-charts .phoenix-indicator-chart {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ============================================================
+   CHART FOOTER
+   ============================================================ */
+
+.pt-charts .chart-footer {
+    min-height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 4px 9px;
+
+    border-top: 1px solid rgba(123, 157, 188, 0.12);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(4, 14, 23, 0.98),
+            rgba(3, 12, 20, 0.98)
+        );
+}
+
+.pt-charts .range-group {
+    display: flex;
+    align-items: center;
+
+    gap: 2px;
+}
+
+.pt-charts .range-group button {
+    min-width: 29px;
+    height: 24px;
+
+    padding: 0 6px;
+
+    border: 1px solid transparent;
+    border-radius: 5px;
+
+    color: #8092a4;
+
+    background: transparent;
+
+    font-size: 8px;
+    font-weight: 650;
+
+    cursor: pointer;
+}
+
+.pt-charts .range-group button:hover {
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.pt-charts .range-group button.active {
+    border-color: rgba(246, 165, 28, 0.42);
+
+    color: #ffc15a;
+
+    background: rgba(246, 165, 28, 0.10);
+}
+
+.pt-charts .chart-status {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #73869a;
+
+    font-size: 8px;
+}
+
+.pt-charts .chart-status button {
+    height: 22px;
+
+    padding: 0 5px;
+
+    border: 0;
+
+    color: #56bdf4;
+
+    background: transparent;
+
+    font-size: 8px;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   SUPPORT / RESISTANCE / ENTRY / TARGET
+   ============================================================ */
+
+.pt-charts .chart-levels-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+.pt-charts .chart-level-card {
+    position: relative;
+
+    min-width: 0;
+    min-height: 86px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    padding: 11px 12px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--charts-border);
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(7, 20, 32, 0.95),
+            rgba(3, 13, 22, 0.96)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.pt-charts .chart-level-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 2px;
+
+    opacity: 0.85;
+}
+
+.pt-charts .chart-level-card.support::before {
+    background:
+        linear-gradient(
+            90deg,
+            var(--charts-green),
+            transparent
+        );
+}
+
+.pt-charts .chart-level-card.resistance::before {
+    background:
+        linear-gradient(
+            90deg,
+            var(--charts-red),
+            transparent
+        );
+}
+
+.pt-charts .chart-level-card.entry::before {
+    background:
+        linear-gradient(
+            90deg,
+            var(--charts-blue),
+            transparent
+        );
+}
+
+.pt-charts .chart-level-card.target::before {
+    background:
+        linear-gradient(
+            90deg,
+            var(--charts-gold),
+            transparent
+        );
+}
+
+.pt-charts .chart-level-card header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    min-height: auto;
+
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+}
+
+.pt-charts .chart-level-card header span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #8497a9;
+
+    font-size: 9px;
+    font-weight: 650;
+}
+
+.pt-charts .chart-level-card.support header i {
+    color: var(--charts-green);
+}
+
+.pt-charts .chart-level-card.resistance header i {
+    color: var(--charts-red);
+}
+
+.pt-charts .chart-level-card.entry header i {
+    color: var(--charts-blue);
+}
+
+.pt-charts .chart-level-card.target header i {
+    color: var(--charts-gold);
+}
+
+.pt-charts .chart-level-card > strong {
+    overflow: hidden;
+
+    color: #f2f7fb;
+
+    font-size: 18px;
+    font-weight: 760;
+
+    letter-spacing: -0.03em;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pt-charts .chart-level-card > small {
+    overflow: hidden;
+
+    color: #75889b;
+
+    font-size: 8px;
+    line-height: 1.45;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   RIGHT COLUMN
+   ============================================================ */
+
+.pt-charts .right-column {
+    min-width: 0;
+
+    display: grid;
+    align-content: start;
+
+    gap: 9px;
+}
+
+.pt-charts .side-panel {
+    min-width: 0;
+
+    overflow: hidden;
+
+    border: 1px solid var(--charts-border);
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(7, 20, 32, 0.96),
+            rgba(3, 13, 22, 0.98)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.pt-charts .side-panel > header {
+    min-height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    padding: 8px 10px;
+
+    border-bottom: 1px solid rgba(123, 157, 188, 0.12);
+
+    background: rgba(6, 18, 29, 0.72);
+}
+
+.pt-charts .side-panel > header strong {
+    color: #e8eff5;
+
+    font-size: 10px;
+    font-weight: 720;
+}
+
+
+/* ============================================================
+   TRADE PANEL
+   ============================================================ */
+
+.pt-charts .trade-panel {
+    padding-bottom: 10px;
+}
+
+.pt-charts .trade-panel > :not(header) {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.pt-charts .buy-sell-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    margin-top: 8px !important;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(123, 157, 188, 0.18);
+    border-radius: 7px;
+}
+
+.pt-charts .buy-sell-tabs button {
+    height: 31px;
+
+    border: 0;
+
+    color: #8fa1b2;
+
+    background: rgba(3, 12, 20, 0.90);
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.pt-charts .buy-sell-tabs button.buy.active {
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            180deg,
+            #1bdc91,
+            #0fae70
+        );
+}
+
+.pt-charts .buy-sell-tabs button.sell.active {
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ff6170,
+            #d83c4b
+        );
+}
+
+.pt-charts .order-type-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 3px;
+
+    margin-top: 7px !important;
+}
+
+.pt-charts .order-type-tabs button {
+    height: 23px;
+
+    padding: 0 3px;
+
+    border: 1px solid rgba(123, 157, 188, 0.16);
+    border-radius: 5px;
+
+    color: #7e91a3;
+
+    background: rgba(3, 12, 20, 0.72);
+
+    font-size: 7px;
+
+    cursor: pointer;
+}
+
+.pt-charts .order-type-tabs button.active {
+    border-color: rgba(246, 165, 28, 0.48);
+
+    color: #ffbd4b;
+
+    background: rgba(246, 165, 28, 0.08);
+}
+
+.pt-charts .trade-panel label {
+    display: block;
+
+    margin-top: 9px;
+
+    color: #788b9d;
+
+    font-size: 8px;
+}
+
+.pt-charts .trade-input {
+    min-height: 35px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 4px;
+
+    padding: 0 8px;
+
+    border: 1px solid rgba(123, 157, 188, 0.18);
+    border-radius: 7px;
+
+    background: rgba(3, 12, 20, 0.84);
+}
+
+.pt-charts .trade-input input {
+    width: 100%;
+    min-width: 0;
+
+    padding: 0;
+
+    border: 0;
+    outline: 0;
+
+    color: #e7eef4;
+
+    background: transparent;
+
+    font: inherit;
+    font-size: 9px;
+}
+
+.pt-charts .order-value {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin-top: 8px !important;
+
+    color: #74879a;
+
+    font-size: 8px;
+}
+
+.pt-charts .order-value strong {
+    color: #e8eef3;
+
+    font-size: 9px;
+}
+
+.pt-charts .quick-qty {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 4px;
+
+    margin-top: 7px !important;
+}
+
+.pt-charts .quick-qty button {
+    height: 25px;
+
+    border: 1px solid rgba(123, 157, 188, 0.16);
+    border-radius: 5px;
+
+    color: #8496a8;
+
+    background: rgba(8, 23, 36, 0.85);
+
+    font-size: 8px;
+
+    cursor: pointer;
+}
+
+.pt-charts .quick-qty button.active {
+    border-color: rgba(246, 165, 28, 0.50);
+
+    color: #ffbd4b;
+
+    background: rgba(246, 165, 28, 0.08);
+}
+
+.pt-charts .trade-submit {
+    width: calc(100% - 20px);
+    min-height: 34px;
+
+    margin-top: 9px !important;
+
+    border: 0;
+    border-radius: 7px;
+
+    color: #ffffff;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.pt-charts .trade-submit.buy {
+    background:
+        linear-gradient(
+            180deg,
+            #18cf87,
+            #0e9d67
+        );
+}
+
+.pt-charts .trade-submit.sell {
+    background:
+        linear-gradient(
+            180deg,
+            #ff5d6b,
+            #c83b48
+        );
+}
+
+.pt-charts .trade-submit:disabled {
+    color: #778a9d;
+
+    background: #132334;
+
+    cursor: default;
+}
+
+.pt-charts .trade-note {
+    display: block;
+
+    margin-top: 6px !important;
+
+    color: #53687b;
+
+    font-size: 7px;
+    line-height: 1.45;
+}
+
+
+/* ============================================================
+   WATCHLIST
+   ============================================================ */
+
+.pt-charts .outline-action {
+    height: 24px;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+
+    padding: 0 7px;
+
+    border: 1px solid rgba(246, 165, 28, 0.48);
+    border-radius: 5px;
+
+    color: #ffb641;
+
+    background: rgba(246, 165, 28, 0.05);
+
+    font-size: 8px;
+
+    cursor: pointer;
+}
+
+.pt-charts .watch-head,
+.pt-charts .watch-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52px 45px;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+.pt-charts .watch-head {
+    padding: 7px 9px 5px;
+
+    color: #546a7e;
+
+    font-size: 7px;
+}
+
+.pt-charts .watch-row {
+    width: 100%;
+    min-height: 31px;
+
+    padding: 4px 9px;
+
+    border: 0;
+    border-top: 1px solid rgba(123, 157, 188, 0.055);
+
+    color: #a9b7c4;
+
+    background: transparent;
+
+    font-size: 8px;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.pt-charts .watch-row:hover,
+.pt-charts .watch-row.active {
+    background: rgba(91, 130, 164, 0.08);
+}
+
+.pt-charts .watch-row.active {
+    box-shadow:
+        inset 2px 0 0 rgba(246, 165, 28, 0.70);
+}
+
+.pt-charts .symbol-cell {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+}
+
+.pt-charts .symbol-cell b {
+    overflow: hidden;
+
+    color: #e5edf3;
+
+    font-size: 8px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   CHART TOOLS
+   ============================================================ */
+
+.pt-charts .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 5px;
+
+    padding: 9px;
+}
+
+.pt-charts .tool-grid button {
+    min-width: 0;
+    min-height: 49px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 4px;
+
+    border: 1px solid rgba(123, 157, 188, 0.12);
+    border-radius: 7px;
+
+    color: #8295a7;
+
+    background: rgba(3, 12, 20, 0.55);
+
+    cursor: pointer;
+}
+
+.pt-charts .tool-grid button:hover {
+    border-color: rgba(137, 171, 201, 0.25);
+
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.pt-charts .tool-grid button.active {
+    border-color: rgba(246, 165, 28, 0.44);
+
+    color: #ffb641;
+
+    background: rgba(246, 165, 28, 0.07);
+}
+
+.pt-charts .tool-grid button i {
+    font-size: 13px;
+}
+
+.pt-charts .tool-grid button span {
+    overflow: hidden;
+
+    max-width: 100%;
+
+    font-size: 6px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pt-charts .tool-secondary-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 6px;
+
+    padding: 0 9px 9px;
+}
+
+.pt-charts .tool-secondary-actions button {
+    min-height: 27px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    border: 1px solid rgba(123, 157, 188, 0.16);
+    border-radius: 6px;
+
+    color: #8194a6;
+
+    background: rgba(3, 12, 20, 0.68);
+
+    font-size: 8px;
+
+    cursor: pointer;
+}
+
+.pt-charts .tool-secondary-actions button:hover {
+    border-color: rgba(246, 165, 28, 0.30);
+
+    color: #ffb641;
+
+    background: rgba(246, 165, 28, 0.05);
+}
+
+
+/* ============================================================
+   MARKET DATA
+   ============================================================ */
+
+.pt-charts .market-data-status {
+    display: grid;
+
+    gap: 0;
+
+    padding: 4px 9px 8px;
+}
+
+.pt-charts .market-data-status > div {
+    min-height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    border-bottom: 1px solid rgba(123, 157, 188, 0.07);
+}
+
+.pt-charts .market-data-status > div:last-child {
+    border-bottom: 0;
+}
+
+.pt-charts .market-data-status span {
+    color: #63788c;
+
+    font-size: 8px;
+}
+
+.pt-charts .market-data-status strong {
+    color: #d9e2e9;
+
+    font-size: 8px;
+    font-weight: 650;
+
+    text-align: right;
+}
+
+
+/* ============================================================
+   BOTTOM GRID
+   ============================================================ */
+
+.pt-charts .bottom-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 0.95fr)
+        minmax(0, 0.95fr)
+        minmax(0, 1.1fr);
+
+    gap: 8px;
+}
+
+.pt-charts .data-panel {
+    min-width: 0;
+    min-height: 150px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--charts-border);
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(7, 20, 32, 0.95),
+            rgba(3, 13, 22, 0.96)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.pt-charts .data-panel > header {
+    min-height: 37px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    padding: 8px 10px;
+
+    border-bottom: 1px solid rgba(123, 157, 188, 0.11);
+
+    background: rgba(6, 18, 29, 0.60);
+}
+
+.pt-charts .data-panel > header strong {
+    color: #e3ebf1;
+
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.pt-charts .data-panel > header button {
+    padding: 0;
+
+    border: 0;
+
+    color: #e9a128;
+
+    background: transparent;
+
+    font-size: 7px;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   MINI TABLE
+   ============================================================ */
+
+.pt-charts .mini-table {
+    min-width: 0;
+}
+
+.pt-charts .mini-table-head,
+.pt-charts .mini-table-row {
+    display: grid;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 6px 9px;
+}
+
+.pt-charts .position-cols {
+    grid-template-columns:
+        minmax(70px, 1fr)
+        42px
+        58px
+        58px
+        58px;
+}
+
+.pt-charts .mini-table-head {
+    color: #586e81;
+
+    font-size: 7px;
+}
+
+.pt-charts .mini-table-row {
+    width: 100%;
+
+    border: 0;
+    border-top: 1px solid rgba(123, 157, 188, 0.06);
+
+    color: #9cadbb;
+
+    background: transparent;
+
+    font-size: 8px;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.pt-charts .mini-table-row:hover {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.pt-charts .panel-empty {
+    padding: 16px 10px;
+
+    color: #667b8e;
+
+    font-size: 8px;
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   MARKET CONTEXT
+   ============================================================ */
+
+.pt-charts .context-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 6px;
+
+    padding: 9px;
+}
+
+.pt-charts .context-grid > div {
+    min-width: 0;
+    min-height: 48px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 4px;
+
+    padding: 7px;
+
+    border: 1px solid rgba(123, 157, 188, 0.10);
+    border-radius: 6px;
+
+    background: rgba(7, 21, 33, 0.72);
+}
+
+.pt-charts .context-grid span {
+    color: #61778b;
+
+    font-size: 7px;
+}
+
+.pt-charts .context-grid strong {
+    overflow: hidden;
+
+    color: #dbe4eb;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   PHOENIX AI
+   ============================================================ */
+
+.pt-charts .ai-panel > header strong i {
+    margin-right: 4px;
+
+    color: var(--charts-purple);
+}
+
+.pt-charts .ai-insights {
+    display: grid;
+
+    gap: 5px;
+
+    padding: 9px 10px;
+}
+
+.pt-charts .ai-insights p {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 5px;
+
+    margin: 0;
+
+    color: #889aaa;
+
+    font-size: 7px;
+    line-height: 1.4;
+}
+
+.pt-charts .ai-insights p i {
+    flex: 0 0 auto;
+
+    margin-top: 1px;
+
+    color: var(--charts-purple);
+}
+
+
+/* ============================================================
+   FULLSCREEN
+   ============================================================ */
+
+.pt-charts .chart-shell:fullscreen,
+.pt-charts .chart-area:fullscreen,
+.pt-charts .phoenix-main-chart:fullscreen {
+    width: 100vw;
+    height: 100vh;
+
+    background: #020a11;
+}
+
+.pt-charts .phoenix-main-chart:fullscreen {
+    min-height: 100vh;
+}
+
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+
+.pt-charts * {
+    scrollbar-width: thin;
+    scrollbar-color:
+        rgba(106, 137, 165, 0.30)
+        transparent;
+}
+
+.pt-charts *::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.pt-charts *::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.pt-charts *::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+
+    background: rgba(106, 137, 165, 0.26);
+}
+
+
+/* ============================================================
+   LARGE DESKTOP
+   ============================================================ */
+
+@media (min-width: 1700px) {
+
+    .pt-charts {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .pt-charts .charts-workspace {
+        grid-template-columns:
+            minmax(0, 1fr)
+            250px;
+    }
+
+    .pt-charts .chart-area {
+        grid-template-rows:
+            minmax(430px, 54vh)
+            110px
+            110px;
+    }
+}
+
+
+/* ============================================================
+   MEDIUM DESKTOP
+   ============================================================ */
+
+@media (max-width: 1450px) {
+
+    .pt-charts .charts-workspace {
+        grid-template-columns:
+            minmax(0, 1fr)
+            230px;
+    }
+
+    .pt-charts .chart-commandbar {
+        grid-template-columns:
+            minmax(110px, auto)
+            minmax(0, 1fr)
+            auto;
+
+        gap: 8px;
+    }
+
+    .pt-charts .chart-area {
+        grid-template-rows:
+            minmax(360px, 52vh)
+            100px
+            100px;
+    }
+
+    .pt-charts .command-btn {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .pt-charts .bottom-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .pt-charts .bottom-grid .ai-panel {
+        grid-column: 1 / -1;
+    }
+}
+
+
+/* ============================================================
+   TABLET / SMALL DESKTOP
+   ============================================================ */
+
+@media (max-width: 1180px) {
+
+    .pt-charts {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .pt-charts .ticker-strip {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .pt-charts .charts-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-charts .right-column {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .pt-charts .market-data-panel {
+        grid-column: 1 / -1;
+    }
+
+    .pt-charts .chart-levels-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* ============================================================
+   MOBILE / NARROW
+   ============================================================ */
+
+@media (max-width: 820px) {
+
+    .pt-charts {
+        gap: 9px;
+
+        padding: 10px;
+    }
+
+    .pt-charts .charts-hero {
+        min-height: 120px;
+
+        align-items: flex-end;
+
+        padding: 16px;
+
+        background-position: 56% 39%;
+    }
+
+    .pt-charts .charts-hero-status {
+        display: none;
+    }
+
+    .pt-charts .ticker-strip {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .pt-charts .chart-commandbar {
+        grid-template-columns: 1fr;
+
+        gap: 7px;
+
+        padding: 8px;
+    }
+
+    .pt-charts .timeframe-group {
+        overflow-x: auto;
+
+        padding-bottom: 2px;
+    }
+
+    .pt-charts .chart-actions {
+        overflow-x: auto;
+    }
+
+    .pt-charts .chart-stage {
+        grid-template-columns:
+            34px
+            minmax(0, 1fr);
+    }
+
+    .pt-charts .chart-area {
+        grid-template-rows:
+            390px
+            100px
+            100px;
+    }
+
+    .pt-charts .chart-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pt-charts .range-group {
+        width: 100%;
+
+        overflow-x: auto;
+    }
+
+    .pt-charts .chart-levels-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-charts .right-column {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-charts .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-charts .bottom-grid .ai-panel {
+        grid-column: auto;
+    }
+
+    .pt-charts .context-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+}
+
+
+/* ============================================================
+   VERY SMALL
+   ============================================================ */
+
+@media (max-width: 520px) {
+
+    .pt-charts .ticker-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-charts .charts-hero-copy h1 {
+        font-size: 25px;
+    }
+
+    .pt-charts .ohlc-strip {
+        gap: 5px;
+    }
+
+    .pt-charts .chart-area {
+        grid-template-rows:
+            340px
+            95px
+            95px;
+    }
+
+    .pt-charts .context-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-charts .tool-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* ============================================================
+   CHARTS TYPOGRAPHY SIZE BOOST
+   ============================================================ */
+
+.pt-charts {
+    font-size: 15px;
+}
+
+/* Hero */
+.pt-charts .charts-hero h1 {
+    font-size: 32px;
+}
+
+.pt-charts .charts-hero p {
+    font-size: 15px;
+}
+
+/* Top ticker cards */
+.pt-charts .ticker-card strong {
+    font-size: 15px;
+}
+
+.pt-charts .ticker-card small {
+    font-size: 13px;
+}
+
+.pt-charts .ticker-change {
+    font-size: 13px;
+}
+
+/* Symbol header */
+.pt-charts .symbol-command strong {
+    font-size: 17px;
+}
+
+.pt-charts .symbol-command small {
+    font-size: 13px;
+}
+
+/* LIVE + timeframe buttons */
+.pt-charts .timeframe-group button {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Chart action buttons */
+.pt-charts .chart-actions button {
+    font-size: 14px;
+}
+
+/* OHLC strip */
+.pt-charts .ohlc-strip {
+    font-size: 13px;
+}
+
+.pt-charts .ohlc-strip strong {
+    font-size: 14px;
+}
+
+.pt-charts .ohlc-strip b {
+    font-size: 13px;
+}
+
+/* Bottom range buttons */
+.pt-charts .range-group button {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pt-charts .chart-status {
+    font-size: 13px;
+}
+
+/* Drawing toolbar */
+.pt-charts .drawing-rail button {
+    font-size: 18px;
+}
+
+/* Indicator labels */
+.pt-charts .indicator-pane-title {
+    font-size: 13px;
+}
+
+.pt-charts .indicator-pane-title strong {
+    font-size: 14px;
+}
+
+/* Support / resistance / entry / target */
+.pt-charts .chart-level-card header {
+    font-size: 14px;
+}
+
+.pt-charts .chart-level-card > strong {
+    font-size: 22px;
+}
+
+.pt-charts .chart-level-card small {
+    font-size: 13px;
+}
+
+/* Right-side panel headings */
+.pt-charts .side-panel > header strong,
+.pt-charts .data-panel > header strong {
+    font-size: 17px;
+}
+
+/* Trade panel */
+.pt-charts .trade-panel label {
+    font-size: 14px;
+}
+
+.pt-charts .buy-sell-tabs button {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.pt-charts .order-type-tabs button {
+    font-size: 13px;
+}
+
+.pt-charts .trade-input input {
+    font-size: 15px;
+}
+
+.pt-charts .order-value span {
+    font-size: 13px;
+}
+
+.pt-charts .order-value strong {
+    font-size: 15px;
+}
+
+.pt-charts .quick-qty button {
+    font-size: 13px;
+}
+
+.pt-charts .trade-submit {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.pt-charts .trade-note {
+    font-size: 12px;
+}
+
+/* Watchlist */
+.pt-charts .watch-head {
+    font-size: 12px;
+}
+
+.pt-charts .watch-row {
+    font-size: 14px;
+}
+
+.pt-charts .watch-row b {
+    font-size: 14px;
+}
+
+/* Chart tools */
+.pt-charts .tool-grid button {
+    font-size: 13px;
+}
+
+.pt-charts .tool-grid button i {
+    font-size: 20px;
+}
+
+.pt-charts .tool-secondary-actions button {
+    font-size: 13px;
+}
+
+/* Market data */
+.pt-charts .market-data-status span {
+    font-size: 13px;
+}
+
+.pt-charts .market-data-status strong {
+    font-size: 14px;
+}
+
+/* Bottom tables */
+.pt-charts .mini-table-head {
+    font-size: 12px;
+}
+
+.pt-charts .mini-table-row {
+    font-size: 14px;
+}
+
+.pt-charts .mini-table-row b {
+    font-size: 14px;
+}
+
+/* Market context */
+.pt-charts .context-grid span {
+    font-size: 13px;
+}
+
+.pt-charts .context-grid strong {
+    font-size: 16px;
+}
+
+/* Phoenix AI */
+.pt-charts .ai-insights p {
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+/* Empty/error messages */
+.pt-charts .panel-empty,
+.pt-charts .chart-no-data,
+.pt-charts .chart-alert {
+    font-size: 14px;
+}
+/* TradeDesk functional additions only: search + order feedback */
+.tradedesk-symbol-search{display:flex;align-items:center;gap:7px;min-width:250px;max-width:330px;height:42px;padding:0 8px 0 12px;border:1px solid rgba(76,154,211,.28);border-radius:10px;background:rgba(4,18,31,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.tradedesk-symbol-search>i{color:#86bde4;font-size:16px}.tradedesk-symbol-search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#edf6ff;font:inherit;font-size:12px}.tradedesk-symbol-search input::placeholder{color:#6f879b}.tradedesk-symbol-search button{width:30px;height:30px;display:grid;place-items:center;border:1px solid rgba(255,159,26,.45);border-radius:7px;background:rgba(255,142,21,.1);color:#ffc25c;cursor:pointer}.tradedesk-symbol-search button:hover{background:rgba(255,142,21,.18);box-shadow:0 0 14px rgba(255,142,21,.14)}
+.trade-note.success{color:#42efb4!important}.trade-note.error{color:#ff7182!important}

@@ -1,0 +1,171 @@
+@using Microsoft.AspNetCore.Components
+
+<section class="@HeroClass"
+         style="@HeroStyle">
+
+    @if (!string.IsNullOrWhiteSpace(BackgroundImage))
+    {
+        <div class="page-hero-backdrop"
+             aria-hidden="true">
+        </div>
+    }
+
+    <div class="page-hero-copy">
+
+        <h1>
+            @Title
+        </h1>
+
+        @if (!string.IsNullOrWhiteSpace(Subtitle))
+        {
+            <p>
+                @Subtitle
+            </p>
+        }
+
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Action))
+    {
+        <div class="page-hero-actions">
+
+            <button
+                type="button"
+                class="pt-btn pt-btn-gold"
+                disabled="@ActionDisabled"
+                @onclick="HandleAction">
+
+                @if (ActionLoading)
+                {
+                    <span class="page-hero-action-loading">
+                        @LoadingText
+                    </span>
+                }
+                else
+                {
+                    @Action
+                }
+
+            </button>
+
+        </div>
+    }
+
+</section>
+
+@code
+{
+    // =========================================================
+    // CONTENT
+    // =========================================================
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+
+    [Parameter]
+    public string Subtitle { get; set; } = string.Empty;
+
+
+    // =========================================================
+    // ACTION
+    // =========================================================
+
+    [Parameter]
+    public string? Action { get; set; }
+
+
+    [Parameter]
+    public EventCallback OnAction { get; set; }
+
+
+    // =========================================================
+    // ACTION STATE
+    // =========================================================
+
+    [Parameter]
+    public bool ActionDisabled { get; set; }
+
+
+    [Parameter]
+    public bool ActionLoading { get; set; }
+
+
+    [Parameter]
+    public string LoadingText { get; set; } = "Loading...";
+
+
+    // =========================================================
+    // OPTIONAL HERO BACKGROUND
+    // =========================================================
+
+    [Parameter]
+    public string? BackgroundImage { get; set; }
+
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+
+    // =========================================================
+    // HERO CLASS
+    // =========================================================
+
+    private string HeroClass
+    {
+        get
+        {
+            var classes = new List<string>
+            {
+                "page-hero"
+            };
+
+            if (!string.IsNullOrWhiteSpace(BackgroundImage))
+            {
+                classes.Add("page-hero-has-background");
+            }
+
+            if (!string.IsNullOrWhiteSpace(CssClass))
+            {
+                classes.Add(CssClass);
+            }
+
+            return string.Join(" ", classes);
+        }
+    }
+
+
+    // =========================================================
+    // HERO BACKGROUND IMAGE
+    // =========================================================
+
+    private string? HeroStyle
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(BackgroundImage))
+            {
+                return null;
+            }
+
+            return $"--page-hero-image: url('{BackgroundImage}');";
+        }
+    }
+
+
+    // =========================================================
+    // ACTION HANDLER
+    // =========================================================
+
+    private async Task HandleAction()
+    {
+        if (ActionDisabled ||
+            ActionLoading ||
+            !OnAction.HasDelegate)
+        {
+            return;
+        }
+
+        await OnAction.InvokeAsync();
+    }
+}

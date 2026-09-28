@@ -1,0 +1,158 @@
+<article class="metric-card @ToneClass">
+
+    <div class="metric-icon"
+         aria-hidden="true">
+
+        <i class="@Icon"></i>
+
+    </div>
+
+
+    <div class="metric-copy">
+
+        <span class="metric-label">
+            @Label
+        </span>
+
+        <strong class="metric-value">
+            @DisplayValue
+        </strong>
+
+        @if (!string.IsNullOrWhiteSpace(Detail))
+        {
+            <span class="metric-detail">
+                @Detail
+            </span>
+        }
+
+    </div>
+
+
+    @if (ShowSpark)
+    {
+        <div class="metric-spark"
+             aria-hidden="true">
+
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+
+        </div>
+    }
+
+</article>
+
+
+@code
+{
+    // =========================================================
+    // ICON
+    //
+    // Example:
+    // Icon="ph ph-wallet"
+    // Icon="ph ph-trend-up"
+    // Icon="ph ph-lightning"
+    // =========================================================
+
+    [Parameter]
+    public string Icon { get; set; } =
+        "ph ph-sparkle";
+
+
+    // =========================================================
+    // CONTENT
+    // =========================================================
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } =
+        string.Empty;
+
+
+    [Parameter, EditorRequired]
+    public string Value { get; set; } =
+        string.Empty;
+
+
+    [Parameter]
+    public string Detail { get; set; } =
+        string.Empty;
+
+
+    // =========================================================
+    // APPEARANCE
+    // =========================================================
+
+    [Parameter]
+    public string Tone { get; set; } =
+        "positive";
+
+
+    /*
+       Keep this FALSE by default.
+
+       We do not want to display fake spark bars when there is
+       no real historical data behind them.
+    */
+
+    [Parameter]
+    public bool ShowSpark { get; set; } =
+        false;
+
+
+    // =========================================================
+    // DISPLAY VALUE
+    // =========================================================
+
+    private string DisplayValue =>
+        string.IsNullOrWhiteSpace(Value)
+            ? "—"
+            : Value;
+
+
+    // =========================================================
+    // TONE
+    // =========================================================
+
+    private string ToneClass
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Tone))
+            {
+                return "neutral";
+            }
+
+
+            return Tone
+                .Trim()
+                .ToLowerInvariant() switch
+            {
+                "positive" => "positive",
+
+                "green" => "positive",
+
+                "negative" => "negative",
+
+                "red" => "negative",
+
+                "warning" => "warning",
+
+                "orange" => "orange",
+
+                "purple" => "purple",
+
+                "blue" => "blue",
+
+                "cyan" => "cyan",
+
+                "neutral" => "neutral",
+
+                _ => Tone.Trim()
+            };
+        }
+    }
+}

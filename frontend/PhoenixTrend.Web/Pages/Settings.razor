@@ -1,0 +1,2012 @@
+@page "/settings"
+
+@inject PhoenixApi Api
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<PageTitle>PhoenixTrend | Settings</PageTitle>
+
+<div class="pt-settings">
+
+<section class="pt-market-hero">
+    <div class="pt-market-hero-copy">
+        <h1>Settings</h1>
+        <p>Manage your account, broker connection, trading preferences, risk settings, notifications and application preferences.</p>
+    </div>
+    <button class="pt-market-refresh" type="button" @onclick="Load" disabled="@Loading">
+        <i class="ph ph-arrows-clockwise"></i>
+        @(Loading ? "Refreshing" : "Refresh")
+    </button>
+</section>
+
+
+<!-- =========================================================
+     SETTINGS TABS
+     ========================================================= -->
+
+<div class="tabbar">
+
+    @foreach (var tab in Tabs)
+    {
+        <button
+            type="button"
+            class="@(ActiveTab == tab ? "active" : "")"
+            @onclick="() => SelectTab(tab)">
+
+            <i class="ph-duotone @GetTabIcon(tab)"></i>
+            <span>@tab</span>
+
+        </button>
+    }
+
+</div>
+
+
+@if (Loading)
+{
+    <div class="connect-message">
+        Loading settings...
+    </div>
+}
+
+
+@if (!string.IsNullOrWhiteSpace(StatusMessage))
+{
+    <div class="connect-message">
+        @StatusMessage
+    </div>
+}
+
+
+<div class="settings-layout">
+
+    <div class="settings-main">
+
+
+        <!-- =====================================================
+             ACCOUNT
+             ===================================================== -->
+
+        @if (ActiveTab == "Account")
+        {
+            <Panel Title="Profile Settings">
+
+                <div class="profile-head">
+
+                    <span>@ProfileInitials</span>
+
+                    <div>
+                        <b>@FullName</b>
+                        <small>@Email</small>
+                    </div>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <label>
+                        Full Name
+
+                        <input
+                            @bind="FullName"
+                            disabled />
+                    </label>
+
+
+                    <label>
+                        Email Address
+
+                        <input
+                            @bind="Email"
+                            disabled />
+                    </label>
+
+
+                    <label>
+                        Timezone
+
+                        <select @bind="Timezone">
+
+                            <option value="Eastern">
+                                Eastern Time (US & Canada)
+                            </option>
+
+                            <option value="Central">
+                                Central Time (US & Canada)
+                            </option>
+
+                            <option value="Mountain">
+                                Mountain Time (US & Canada)
+                            </option>
+
+                            <option value="Pacific">
+                                Pacific Time (US & Canada)
+                            </option>
+
+                            <option value="UTC">
+                                UTC
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        Language
+
+                        <select @bind="Language">
+
+                            <option value="English">
+                                English
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        Currency
+
+                        <select @bind="Currency">
+
+                            <option value="USD">
+                                USD - US Dollar
+                            </option>
+
+                        </select>
+
+                    </label>
+
+                </div>
+
+
+                <small>
+                    Profile persistence is not enabled by the current backend API.
+                </small>
+
+            </Panel>
+
+
+            <Panel Title="Account Status">
+
+                <div class="status-list">
+
+                    <div>
+                        <span>Backend</span>
+
+                        <b class="@(_backendOnline ? "green" : "red")">
+                            @(_backendOnline ? "Online" : "Offline")
+                        </b>
+                    </div>
+
+
+                    <div>
+                        <span>Broker</span>
+
+                        <b class="@(_brokerConnected ? "green" : "red")">
+                            @(_brokerConnected ? "Connected" : "Disconnected")
+                        </b>
+                    </div>
+
+
+                    <div>
+                        <span>Engine</span>
+
+                        <b>
+                            @EngineStatus
+                        </b>
+                    </div>
+
+                </div>
+
+            </Panel>
+        }
+
+
+        <!-- =====================================================
+             BROKERS
+             ===================================================== -->
+
+        @if (ActiveTab == "Brokers & Connections")
+        {
+            <Panel Title="Broker Connection">
+
+                <div class="status-list">
+
+                    <div>
+
+                        <span>
+                            Broker Status
+                        </span>
+
+                        <b class="@(_brokerConnected ? "green" : "red")">
+
+                            @(_brokerConnected
+                                ? "Connected"
+                                : "Disconnected")
+
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Broker
+                        </span>
+
+                        <b>
+                            @BrokerName
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Account
+                        </span>
+
+                        <b>
+                            @BrokerAccountId
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Portfolio Value
+                        </span>
+
+                        <b>
+                            @PortfolioValue
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Buying Power
+                        </span>
+
+                        <b>
+                            @BuyingPower
+                        </b>
+
+                    </div>
+
+                </div>
+
+
+                <div class="settings-actions">
+
+                    @if (!_brokerConnected)
+                    {
+                        <button
+                            type="button"
+                            class="pt-btn pt-btn-gold"
+                            @onclick="OpenBrokerConnection">
+
+                            Connect Alpaca
+
+                        </button>
+                    }
+                    else
+                    {
+                        <button
+                            type="button"
+                            class="pt-btn"
+                            disabled="@BrokerActionRunning"
+                            @onclick="DisconnectBroker">
+
+                            @(BrokerActionRunning
+                                ? "Disconnecting..."
+                                : "Disconnect Broker")
+
+                        </button>
+                    }
+
+                </div>
+
+            </Panel>
+
+
+            <Panel Title="Connection Information">
+
+                <div class="status-list">
+
+                    <div>
+
+                        <span>
+                            Connection Type
+                        </span>
+
+                        <b>
+                            Alpaca
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Trading Environment
+                        </span>
+
+                        <b>
+                            @BrokerEnvironment
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Open Positions
+                        </span>
+
+                        <b>
+                            @PositionCount
+                        </b>
+
+                    </div>
+
+                </div>
+
+            </Panel>
+        }
+
+
+        <!-- =====================================================
+             TRADING PREFERENCES
+             ===================================================== -->
+
+        @if (ActiveTab == "Trading Preferences")
+        {
+            <Panel Title="Trading Preferences">
+
+                <div class="form-grid three">
+
+                    <label>
+                        Default Order Quantity
+
+                        <input
+                            type="number"
+                            min="1"
+                            @bind="DefaultOrderQuantity" />
+                    </label>
+
+
+                    <label>
+                        Default Order Type
+
+                        <select @bind="DefaultOrderType">
+
+                            <option value="Market">
+                                Market
+                            </option>
+
+                            <option value="Limit">
+                                Limit
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        Default Time in Force
+
+                        <select @bind="DefaultTimeInForce">
+
+                            <option value="Day">
+                                Day
+                            </option>
+
+                            <option value="GTC">
+                                GTC
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        Chart Timeframe
+
+                        <select @bind="DefaultChartTimeframe">
+
+                            <option value="1m">1m</option>
+                            <option value="5m">5m</option>
+                            <option value="15m">15m</option>
+                            <option value="1h">1h</option>
+                            <option value="4h">4h</option>
+                            <option value="1d">1D</option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        Price Display
+
+                        <select @bind="PriceDisplay">
+
+                            <option value="Real-time">
+                                Real-time
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        P&amp;L Display Currency
+
+                        <select @bind="Currency">
+
+                            <option value="USD">
+                                USD
+                            </option>
+
+                        </select>
+
+                    </label>
+
+                </div>
+
+
+                <div class="toggle-grid">
+
+                    <label>
+
+                        <span>
+                            Confirm Orders
+
+                            <small>
+                                Require confirmation before trade execution.
+                            </small>
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="ConfirmOrders" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            One-Click Trading
+
+                            <small>
+                                Disabled while confirmation-first trading is enforced.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            disabled />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Sound Alerts
+
+                            <small>
+                                Play sounds for important events.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="SoundAlerts" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Desktop Notifications
+
+                            <small>
+                                Enable application notification preference.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="DesktopNotifications" />
+
+                    </label>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="pt-btn pt-btn-gold"
+                    @onclick="SaveLocalPreferences">
+
+                    Apply Preferences
+
+                </button>
+
+
+                <small>
+                    These preferences currently apply to this running UI session.
+                    Backend preference persistence has not yet been exposed.
+                </small>
+
+            </Panel>
+        }
+
+
+        <!-- =====================================================
+             RISK SETTINGS
+             ===================================================== -->
+
+        @if (ActiveTab == "Risk Settings")
+        {
+            <Panel Title="Risk Settings">
+
+                <div class="form-grid">
+
+                    <label>
+                        Daily Loss Limit
+
+                        <input
+                            type="number"
+                            min="0"
+                            step="100"
+                            @bind="DailyLossLimit" />
+                    </label>
+
+
+                    <label>
+                        Maximum Position %
+
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            @bind="MaximumPositionPercent" />
+                    </label>
+
+
+                    <label>
+                        Maximum Drawdown %
+
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            @bind="MaximumDrawdownPercent" />
+                    </label>
+
+
+                    <label>
+                        Maximum Leverage
+
+                        <input
+                            type="number"
+                            min="1"
+                            step="0.1"
+                            @bind="MaximumLeverage" />
+                    </label>
+
+                </div>
+
+
+                <div class="toggle-grid">
+
+                    <label>
+
+                        <span>
+                            Risk Confirmation
+
+                            <small>
+                                Keep risk validation enabled for trade execution.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            checked
+                            disabled />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Stop on Daily Loss Limit
+
+                            <small>
+                                Stop trading when the configured daily limit is reached.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="StopOnDailyLoss" />
+
+                    </label>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="pt-btn"
+                    @onclick="ApplyRiskSettings">
+
+                    Apply Locally
+
+                </button>
+
+
+                <small>
+                    The current PhoenixApi does not expose a risk-settings write endpoint,
+                    so these values are not sent to the Risk Engine yet.
+                </small>
+
+            </Panel>
+        }
+
+
+        <!-- =====================================================
+             NOTIFICATIONS
+             ===================================================== -->
+
+        @if (ActiveTab == "Notifications")
+        {
+            <Panel Title="Notification Settings">
+
+                <div class="toggle-grid">
+
+                    <label>
+
+                        <span>
+                            Price Alerts
+
+                            <small>
+                                Notify when configured price targets are hit.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="PriceAlerts" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Portfolio Updates
+
+                            <small>
+                                Portfolio summary notifications.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="PortfolioUpdates" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Strategy Signals
+
+                            <small>
+                                Notify when strategy signals are generated.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="StrategySignals" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Market News
+
+                            <small>
+                                Important market news notifications.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="MarketNews" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Order Updates
+
+                            <small>
+                                Notify when order state changes.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="OrderUpdates" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Risk Alerts
+
+                            <small>
+                                Notify when PhoenixTrend detects risk events.
+                            </small>
+
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            @bind="RiskAlerts" />
+
+                    </label>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="pt-btn pt-btn-gold"
+                    @onclick="SaveNotificationPreferences">
+
+                    Apply Notifications
+
+                </button>
+
+            </Panel>
+        }
+
+
+        <!-- =====================================================
+             APPEARANCE
+             ===================================================== -->
+
+        @if (ActiveTab == "Appearance")
+        {
+            <Panel Title="Appearance">
+
+                <div class="form-grid">
+
+                    <label>
+                        Theme
+
+                        <select @bind="Theme">
+
+                            <option value="Phoenix Dark">
+                                Phoenix Dark
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        Density
+
+                        <select @bind="Density">
+
+                            <option value="Comfortable">
+                                Comfortable
+                            </option>
+
+                            <option value="Compact">
+                                Compact
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+                        Chart Style
+
+                        <select @bind="ChartStyle">
+
+                            <option value="Candlestick">
+                                Candlestick
+                            </option>
+
+                            <option value="Line">
+                                Line
+                            </option>
+
+                        </select>
+
+                    </label>
+
+                </div>
+
+
+                <small>
+                    PhoenixTrend currently uses the premium dark interface as its primary theme.
+                </small>
+
+            </Panel>
+        }
+
+
+        <!-- =====================================================
+             API / INTEGRATIONS
+             ===================================================== -->
+
+        @if (ActiveTab == "API & Integrations")
+        {
+            <Panel Title="API & Integrations">
+
+                <div class="status-list">
+
+                    <div>
+
+                        <span>
+                            PhoenixTrend Backend
+                        </span>
+
+                        <b class="@(_backendOnline ? "green" : "red")">
+
+                            @(_backendOnline
+                                ? "Connected"
+                                : "Unavailable")
+
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Alpaca Broker
+                        </span>
+
+                        <b class="@(_brokerConnected ? "green" : "red")">
+
+                            @(_brokerConnected
+                                ? "Connected"
+                                : "Disconnected")
+
+                        </b>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Phoenix Engine
+                        </span>
+
+                        <b>
+                            @EngineStatus
+                        </b>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="pt-btn pt-btn-gold"
+                    @onclick="OpenBrokerConnection">
+
+                    Manage Broker Connection
+
+                </button>
+
+
+                <small>
+                    Additional external integration management requires backend integration endpoints.
+                </small>
+
+            </Panel>
+        }
+
+
+        <!-- =====================================================
+             SECURITY
+             ===================================================== -->
+
+        @if (ActiveTab == "Security")
+        {
+            <Panel Title="Account Security">
+
+                <div class="security-list">
+
+                    <button
+                        type="button"
+                        disabled>
+
+                        ▣
+
+                        <span>
+
+                            <b>
+                                Change Password
+                            </b>
+
+                            <small>
+                                Authentication backend endpoint not configured.
+                            </small>
+
+                        </span>
+
+                        ›
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        disabled>
+
+                        ⬡
+
+                        <span>
+
+                            <b>
+                                Two-Factor Authentication
+                            </b>
+
+                            <small>
+                                Authentication backend endpoint not configured.
+                            </small>
+
+                        </span>
+
+                        ›
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        disabled>
+
+                        ▤
+
+                        <span>
+
+                            <b>
+                                Active Sessions
+                            </b>
+
+                            <small>
+                                Session-management endpoint not configured.
+                            </small>
+
+                        </span>
+
+                        ›
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        disabled>
+
+                        ◷
+
+                        <span>
+
+                            <b>
+                                Login History
+                            </b>
+
+                            <small>
+                                Login-history endpoint not configured.
+                            </small>
+
+                        </span>
+
+                        ›
+
+                    </button>
+
+                </div>
+
+            </Panel>
+        }
+
+    </div>
+
+
+    <!-- =========================================================
+         RIGHT COLUMN
+         ========================================================= -->
+
+    <div class="settings-side">
+
+        <Panel Title="System Status">
+
+            <div class="status-list">
+
+                <div>
+
+                    <span>
+                        Backend
+                    </span>
+
+                    <b class="@(_backendOnline ? "green" : "red")">
+
+                        @(_backendOnline
+                            ? "Online"
+                            : "Offline")
+
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Broker
+                    </span>
+
+                    <b class="@(_brokerConnected ? "green" : "red")">
+
+                        @(_brokerConnected
+                            ? "Connected"
+                            : "Disconnected")
+
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Phoenix Engine
+                    </span>
+
+                    <b>
+                        @EngineStatus
+                    </b>
+
+                </div>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel Title="Quick Actions">
+
+            <div class="quick-grid">
+
+                <button
+                    type="button"
+                    @onclick="OpenBrokerConnection">
+
+                    🔗
+
+                    <b>
+                        Connect Broker
+                    </b>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    @onclick="OpenActivity">
+
+                    🔔
+
+                    <b>
+                        View Activity
+                    </b>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    @onclick="OpenStrategies">
+
+                    ◆
+
+                    <b>
+                        Strategies
+                    </b>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    @onclick="OpenRisk">
+
+                    ⬡
+
+                    <b>
+                        Risk
+                    </b>
+
+                </button>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel Title="Trading Safety">
+
+            <div class="check-list">
+
+                <span>
+                    ✓ Manual trade confirmation
+                </span>
+
+                <span>
+                    ✓ Risk validation path
+                </span>
+
+                <span>
+                    ✓ Broker connection monitoring
+                </span>
+
+                <span>
+                    ✓ Engine status monitoring
+                </span>
+
+            </div>
+
+        </Panel>
+
+    </div>
+
+</div>
+
+
+</div>
+
+@code
+{
+    // =========================================================
+    // TABS
+    // =========================================================
+
+    private readonly string[] Tabs =
+    {
+        "Account",
+        "Brokers & Connections",
+        "Trading Preferences",
+        "Risk Settings",
+        "Notifications",
+        "Appearance",
+        "API & Integrations",
+        "Security"
+    };
+
+
+    private string ActiveTab = "Account";
+
+
+    // =========================================================
+    // STATUS
+    // =========================================================
+
+    private bool Loading;
+
+    private bool BrokerActionRunning;
+
+    private bool _backendOnline;
+
+    private bool _brokerConnected;
+
+    private string StatusMessage = string.Empty;
+
+    private string EngineStatus = "Unavailable";
+
+
+    // =========================================================
+    // BROKER
+    // =========================================================
+
+    private string BrokerName = "Alpaca";
+
+    private string BrokerAccountId = "—";
+
+    private string BrokerEnvironment = "—";
+
+    private string PortfolioValue = "—";
+
+    private string BuyingPower = "—";
+
+    private string PositionCount = "0";
+
+
+    // =========================================================
+    // PROFILE
+    // =========================================================
+
+    private string FullName = "Account";
+
+    private string Email = "—";
+
+    private string Timezone = "Eastern";
+
+    private string Language = "English";
+
+    private string Currency = "USD";
+
+
+    // =========================================================
+    // TRADING PREFERENCES
+    // =========================================================
+
+    private int DefaultOrderQuantity = 100;
+
+    private string DefaultOrderType = "Market";
+
+    private string DefaultTimeInForce = "Day";
+
+    private string DefaultChartTimeframe = "1d";
+
+    private string PriceDisplay = "Real-time";
+
+    private bool ConfirmOrders = true;
+
+    private bool SoundAlerts = true;
+
+    private bool DesktopNotifications = true;
+
+
+    // =========================================================
+    // RISK
+    // =========================================================
+
+    private double DailyLossLimit = 5000;
+
+    private double MaximumPositionPercent = 10;
+
+    private double MaximumDrawdownPercent = 10;
+
+    private double MaximumLeverage = 2;
+
+    private bool StopOnDailyLoss = true;
+
+
+    // =========================================================
+    // NOTIFICATIONS
+    // =========================================================
+
+    private bool PriceAlerts = true;
+
+    private bool PortfolioUpdates = true;
+
+    private bool StrategySignals = true;
+
+    private bool MarketNews;
+
+    private bool OrderUpdates = true;
+
+    private bool RiskAlerts = true;
+
+
+    // =========================================================
+    // APPEARANCE
+    // =========================================================
+
+    private string Theme = "Phoenix Dark";
+
+    private string Density = "Comfortable";
+
+    private string ChartStyle = "Candlestick";
+
+
+    // =========================================================
+    // INITIALIZATION
+    // =========================================================
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+
+    // =========================================================
+    // LOAD REAL BACKEND STATUS
+    // =========================================================
+
+    private async Task Load()
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+
+        try
+        {
+            Loading = true;
+
+            StatusMessage = string.Empty;
+
+            LoadAuthenticatedProfile();
+
+            var healthTask =
+                Api.Health();
+
+            var brokerStatusTask =
+                Api.BrokerStatus();
+
+            var accountTask =
+                Api.BrokerAccount();
+
+            var positionsTask =
+                Api.BrokerPositions();
+
+            var engineTask =
+                Api.EngineStatus();
+
+
+            await Task.WhenAll(
+                healthTask,
+                brokerStatusTask,
+                accountTask,
+                positionsTask,
+                engineTask
+            );
+
+
+            var health =
+                await healthTask;
+
+            var broker =
+                await brokerStatusTask;
+
+            var account =
+                await accountTask;
+
+            var positions =
+                await positionsTask;
+
+            var engine =
+                await engineTask;
+
+
+            _backendOnline =
+                health is not null;
+
+
+            ParseBrokerStatus(
+                broker
+            );
+
+
+            ParseAccount(
+                account
+            );
+
+
+            ParsePositions(
+                positions
+            );
+
+
+            ParseEngine(
+                engine
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+
+            StatusMessage =
+                "Unable to load PhoenixTrend settings status.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+    private void LoadAuthenticatedProfile()
+    {
+        if (Auth.CurrentUser is not { } user || user.ValueKind != JsonValueKind.Object) return;
+        FullName = ReadUserText(user, "display_name", ReadUserText(user, "username", "Account"));
+        Email = ReadUserText(user, "email", "—");
+    }
+
+    private static string ReadUserText(JsonElement user, string property, string fallback)
+    {
+        if (user.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String)
+        {
+            var text = value.GetString();
+            if (!string.IsNullOrWhiteSpace(text)) return text;
+        }
+        return fallback;
+    }
+
+    private string ProfileInitials
+    {
+        get
+        {
+            var parts = FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0) return "U";
+            if (parts.Length == 1) return parts[0][..1].ToUpperInvariant();
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+        }
+    }
+
+    // =========================================================
+    // BROKER STATUS
+    // =========================================================
+
+    private void ParseBrokerStatus(
+        JsonElement? result)
+    {
+        if (result is null)
+        {
+            _brokerConnected = false;
+
+            BrokerEnvironment = "—";
+
+            return;
+        }
+
+
+        _brokerConnected =
+            PhoenixApi
+                .Text(
+                    result,
+                    "connected",
+                    "false"
+                )
+                .Equals(
+                    "true",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+
+        var brokerName =
+            FirstText(
+                result.Value,
+                "broker",
+                "broker_name",
+                "provider"
+            );
+
+
+        if (!string.IsNullOrWhiteSpace(
+                brokerName))
+        {
+            BrokerName =
+                brokerName;
+        }
+
+
+        var environment =
+            FirstText(
+                result.Value,
+                "environment",
+                "mode"
+            );
+
+
+        if (!string.IsNullOrWhiteSpace(
+                environment))
+        {
+            BrokerEnvironment =
+                environment;
+        }
+        else
+        {
+            var paper =
+                FirstText(
+                    result.Value,
+                    "paper"
+                );
+
+
+            if (paper.Equals(
+                    "true",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                BrokerEnvironment =
+                    "Paper";
+            }
+        }
+    }
+
+
+    // =========================================================
+    // ACCOUNT
+    // =========================================================
+
+    private void ParseAccount(
+        JsonElement? result)
+    {
+        if (result is null)
+        {
+            BrokerAccountId = "—";
+
+            PortfolioValue = "—";
+
+            BuyingPower = "—";
+
+            return;
+        }
+
+
+        BrokerAccountId =
+            FirstText(
+                result.Value,
+                "account_number",
+                "account_id",
+                "id"
+            );
+
+
+        if (string.IsNullOrWhiteSpace(
+                BrokerAccountId))
+        {
+            BrokerAccountId = "—";
+        }
+
+
+        PortfolioValue =
+            FormatMoney(
+                FirstNumber(
+                    result.Value,
+                    "portfolio_value",
+                    "equity"
+                )
+            );
+
+
+        BuyingPower =
+            FormatMoney(
+                FirstNumber(
+                    result.Value,
+                    "buying_power"
+                )
+            );
+    }
+
+
+    // =========================================================
+    // POSITIONS
+    // =========================================================
+
+    private void ParsePositions(
+        JsonElement? result)
+    {
+        if (result is null)
+        {
+            PositionCount = "0";
+
+            return;
+        }
+
+
+        if (result.Value.ValueKind ==
+            JsonValueKind.Array)
+        {
+            PositionCount =
+                result.Value
+                    .GetArrayLength()
+                    .ToString();
+
+            return;
+        }
+
+
+        if (result.Value.ValueKind ==
+            JsonValueKind.Object)
+        {
+            foreach (var name in new[]
+                     {
+                         "positions",
+                         "data",
+                         "items"
+                     })
+            {
+                if (result.Value.TryGetProperty(
+                        name,
+                        out var positions) &&
+                    positions.ValueKind ==
+                        JsonValueKind.Array)
+                {
+                    PositionCount =
+                        positions
+                            .GetArrayLength()
+                            .ToString();
+
+                    return;
+                }
+            }
+        }
+
+
+        PositionCount = "0";
+    }
+
+
+    // =========================================================
+    // ENGINE
+    // =========================================================
+
+    private void ParseEngine(
+        JsonElement? result)
+    {
+        if (result is null)
+        {
+            EngineStatus =
+                "Unavailable";
+
+            return;
+        }
+
+
+        var mode =
+            FirstText(
+                result.Value,
+                "mode",
+                "status",
+                "state"
+            );
+
+
+        if (!string.IsNullOrWhiteSpace(
+                mode))
+        {
+            EngineStatus =
+                mode;
+
+            return;
+        }
+
+
+        var running =
+            FirstText(
+                result.Value,
+                "running"
+            );
+
+
+        if (running.Equals(
+                "true",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            EngineStatus =
+                "Running";
+        }
+        else
+        {
+            EngineStatus =
+                "Available";
+        }
+    }
+
+
+    // =========================================================
+    // BROKER ACTIONS
+    // =========================================================
+
+    private void OpenBrokerConnection()
+    {
+        Navigation.NavigateTo(
+            "/connect"
+        );
+    }
+
+
+    private async Task DisconnectBroker()
+    {
+        if (BrokerActionRunning)
+        {
+            return;
+        }
+
+
+        try
+        {
+            BrokerActionRunning = true;
+
+            StatusMessage =
+                "Disconnecting broker...";
+
+
+            var result =
+                await Api.DisconnectBroker();
+
+
+            if (result is null)
+            {
+                StatusMessage =
+                    "Broker disconnect request failed.";
+
+                return;
+            }
+
+
+            StatusMessage =
+                "Broker disconnected.";
+
+
+            await LoadAfterBrokerAction();
+        }
+        finally
+        {
+            BrokerActionRunning = false;
+        }
+    }
+
+
+    private async Task LoadAfterBrokerAction()
+    {
+        var broker =
+            await Api.BrokerStatus();
+
+
+        ParseBrokerStatus(
+            broker
+        );
+
+
+        if (!_brokerConnected)
+        {
+            BrokerAccountId = "—";
+
+            PortfolioValue = "—";
+
+            BuyingPower = "—";
+
+            PositionCount = "0";
+        }
+    }
+
+
+    // =========================================================
+    // LOCAL SETTINGS
+    // =========================================================
+
+    private void SaveLocalPreferences()
+    {
+        StatusMessage =
+            "Trading preferences applied to this UI session.";
+    }
+
+
+    private void ApplyRiskSettings()
+    {
+        StatusMessage =
+            "Risk preferences applied locally. Backend risk-setting persistence is not configured yet.";
+    }
+
+
+    private void SaveNotificationPreferences()
+    {
+        StatusMessage =
+            "Notification preferences applied to this UI session.";
+    }
+
+
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
+    private void OpenActivity()
+    {
+        Navigation.NavigateTo(
+            "/portfolio/activity"
+        );
+    }
+
+
+    private void OpenStrategies()
+    {
+        Navigation.NavigateTo(
+            "/strategies"
+        );
+    }
+
+
+    private void OpenRisk()
+    {
+        Navigation.NavigateTo(
+            "/risk"
+        );
+    }
+
+
+    // =========================================================
+    // TAB
+    // =========================================================
+
+    private void SelectTab(
+        string tab)
+    {
+        ActiveTab = tab;
+
+        StatusMessage =
+            string.Empty;
+    }
+
+
+    // =========================================================
+    // JSON HELPERS
+    // =========================================================
+
+    private static string FirstText(
+        JsonElement root,
+        params string[] properties)
+    {
+        if (root.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return string.Empty;
+        }
+
+
+        foreach (var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.Null)
+            {
+                continue;
+            }
+
+
+            var text =
+                value.ValueKind ==
+                    JsonValueKind.String
+                        ? value.GetString()
+                        : value.ToString();
+
+
+            if (!string.IsNullOrWhiteSpace(
+                    text))
+            {
+                return text;
+            }
+        }
+
+
+        return string.Empty;
+    }
+
+
+    private static double FirstNumber(
+        JsonElement root,
+        params string[] properties)
+    {
+        if (root.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return double.NaN;
+        }
+
+
+        foreach (var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.Number &&
+                value.TryGetDouble(
+                    out var number))
+            {
+                return number;
+            }
+
+
+            if (double.TryParse(
+                    value.ToString(),
+                    out number))
+            {
+                return number;
+            }
+        }
+
+
+        return double.NaN;
+    }
+
+
+    private static string FormatMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00"
+            );
+    }
+
+    private static string GetTabIcon(string tab) =>
+        tab switch
+        {
+            "Account" => "ph-user-circle",
+            "Brokers & Connections" => "ph-plugs-connected",
+            "Trading Preferences" => "ph-chart-line-up",
+            "Risk Settings" => "ph-shield-check",
+            "Notifications" => "ph-bell",
+            "Appearance" => "ph-palette",
+            "API & Integrations" => "ph-code",
+            "Security" => "ph-lock-key",
+            _ => "ph-circle"
+        };
+
+}

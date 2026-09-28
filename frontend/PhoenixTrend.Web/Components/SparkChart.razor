@@ -1,0 +1,152 @@
+<div class="spark-chart @ToneClass" aria-hidden="true">
+
+    @if (NormalizedHeights.Count > 0)
+    {
+        @foreach (var height in NormalizedHeights)
+        {
+            <span style="@($"--h:{height:0.##}%")"></span>
+        }
+    }
+    else
+    {
+        <span class="spark-empty"></span>
+    }
+
+</div>
+
+
+@code
+{
+    // =========================================================
+    // PARAMETERS
+    // =========================================================
+
+    [Parameter]
+    public string Tone { get; set; } = "green";
+
+
+    /// <summary>
+    /// Actual numeric series supplied by the parent page.
+    ///
+    /// Examples:
+    /// closing prices,
+    /// equity values,
+    /// portfolio values,
+    /// strategy performance values.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<double>? Values { get; set; }
+
+
+    // =========================================================
+    // NORMALIZED CHART VALUES
+    // =========================================================
+
+    private IReadOnlyList<double> NormalizedHeights
+    {
+        get
+        {
+            if (Values is null ||
+                Values.Count == 0)
+            {
+                return Array.Empty<double>();
+            }
+
+
+            var validValues =
+                Values
+                    .Where(double.IsFinite)
+                    .ToList();
+
+
+            if (validValues.Count == 0)
+            {
+                return Array.Empty<double>();
+            }
+
+
+            var minimum =
+                validValues.Min();
+
+
+            var maximum =
+                validValues.Max();
+
+
+            // Flat series.
+            if (Math.Abs(maximum - minimum) <
+                0.0000001)
+            {
+                return validValues
+                    .Select(_ => 50.0)
+                    .ToList();
+            }
+
+
+            const double minimumHeight = 15.0;
+
+            const double maximumHeight = 95.0;
+
+
+            return validValues
+                .Select(
+                    value =>
+                    {
+                        var normalized =
+                            (value - minimum) /
+                            (maximum - minimum);
+
+
+                        return
+                            minimumHeight +
+                            normalized *
+                            (maximumHeight - minimumHeight);
+                    })
+                .ToList();
+        }
+    }
+
+
+    // =========================================================
+    // TONE
+    // =========================================================
+
+    private string ToneClass
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Tone))
+            {
+                return "green";
+            }
+
+
+            return Tone
+                .Trim()
+                .ToLowerInvariant() switch
+            {
+                "positive" => "green",
+
+                "negative" => "red",
+
+                "bullish" => "green",
+
+                "bearish" => "red",
+
+                "green" => "green",
+
+                "red" => "red",
+
+                "orange" => "orange",
+
+                "purple" => "purple",
+
+                "blue" => "blue",
+
+                "cyan" => "cyan",
+
+                _ => Tone.Trim()
+            };
+        }
+    }
+}

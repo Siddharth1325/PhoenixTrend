@@ -1,0 +1,2053 @@
+@page "/analytics"
+@page "/portfolio/analytics"
+
+@inject PhoenixApi Api
+
+<PageTitle>PhoenixTrend | Analytics</PageTitle>
+
+<div class="pt-analytics">
+
+<PortfolioTabs />
+
+
+<PageHero
+    Title="Analytics"
+    Subtitle="Deep insights into your trading performance, strategies, risk, portfolio and opportunities."
+    Action="Refresh"
+    OnAction="Load" />
+
+
+<!-- =========================================================
+     TABS
+     ========================================================= -->
+
+<div class="tabbar">
+
+    @foreach (var tab in Tabs)
+    {
+        <button
+            class="@(ActiveTab == tab ? "active" : "")"
+            @onclick="() => SelectTab(tab)">
+
+            @tab
+
+        </button>
+    }
+
+</div>
+
+
+@if (Loading)
+{
+    <div class="connect-message">
+        Loading analytics...
+    </div>
+}
+
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="connect-message">
+        @ErrorMessage
+    </div>
+}
+
+
+<!-- =========================================================
+     TOP METRICS
+     ========================================================= -->
+
+<div class="metric-grid five">
+
+    <MetricCard
+        Icon="ph ph-currency-dollar"
+        Label="Total P&L"
+        Value="@TotalPnl"
+        Detail="@TotalReturn" />
+
+    <MetricCard
+        Icon="ph ph-target"
+        Label="Win Rate"
+        Value="@WinRate"
+        Detail="@($"{WinningTrades} winning trades")" />
+
+    <MetricCard
+        Icon="ph ph-chart-bar"
+        Label="Total Trades"
+        Value="@TotalTrades"
+        Detail="@($"{LosingTrades} losing trades")"
+        Tone="purple" />
+
+    <MetricCard
+        Icon="ph ph-trend-up"
+        Label="Profit Factor"
+        Value="@ProfitFactor"
+        Detail="Trading performance"
+        Tone="blue" />
+
+    <MetricCard
+        Icon="ph ph-trend-down"
+        Label="Max Drawdown"
+        Value="@MaxDrawdown"
+        Detail="Portfolio drawdown"
+        Tone="negative" />
+
+</div>
+
+
+<!-- =========================================================
+     PERFORMANCE
+     ========================================================= -->
+
+@if (ActiveTab == "Performance")
+{
+    <div class="analytics-layout">
+
+        <Panel
+            Title="Equity Curve"
+            Subtitle="Portfolio performance from available analytics data"
+            Class="span-2">
+
+            <div class="hero-chart">
+
+                <div class="chart-grid"></div>
+
+                @if (EquityPoints.Count > 1)
+                {
+                    <svg
+                        viewBox="0 0 900 260"
+                        preserveAspectRatio="none">
+
+                        <polyline
+                            class="line"
+                            points="@BuildPolyline(EquityPoints, 900, 260)" />
+
+                    </svg>
+                }
+                else
+                {
+                    <div class="connect-message">
+                        Historical equity-series data is not currently available.
+                    </div>
+                }
+
+            </div>
+
+        </Panel>
+
+
+        <Panel Title="Performance Metrics">
+
+            <div class="metrics-columns">
+
+                <div>
+
+                    <span>
+                        Total Return
+                        <b>@TotalReturn</b>
+                    </span>
+
+                    <span>
+                        Annualized Return
+                        <b>@AnnualizedReturn</b>
+                    </span>
+
+                    <span>
+                        Sharpe Ratio
+                        <b>@SharpeRatio</b>
+                    </span>
+
+                    <span>
+                        Sortino Ratio
+                        <b>@SortinoRatio</b>
+                    </span>
+
+                    <span>
+                        Profit Factor
+                        <b>@ProfitFactor</b>
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Total Trades
+                        <b>@TotalTrades</b>
+                    </span>
+
+                    <span>
+                        Winning Trades
+                        <b>@WinningTrades</b>
+                    </span>
+
+                    <span>
+                        Losing Trades
+                        <b>@LosingTrades</b>
+                    </span>
+
+                    <span>
+                        Average Win
+                        <b>@AverageWin</b>
+                    </span>
+
+                    <span>
+                        Max Drawdown
+                        <b class="red">@MaxDrawdown</b>
+                    </span>
+
+                </div>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel
+            Title="Strategy Performance"
+            Class="span-2">
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Strategy</th>
+                        <th>Trades</th>
+                        <th>Win Rate</th>
+                        <th>P&amp;L</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Strategies.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4">
+                                No strategy performance data is available.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var strategy in Strategies)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@strategy.Strategy</strong>
+                                </td>
+
+                                <td>@strategy.Trades</td>
+
+                                <td>@strategy.WinRate</td>
+
+                                <td class="@GetValueClass(strategy.Pnl)">
+                                    @strategy.Pnl
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </Panel>
+
+
+        <Panel Title="Trade Distribution">
+
+            <div class="donut">
+
+                <div>
+
+                    <b>
+                        @TotalTrades
+                    </b>
+
+                    <small>
+                        Trades
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="legend">
+
+                <span>
+
+                    <i class="c1"></i>
+
+                    Winning
+
+                    <b>
+                        @WinningTrades
+                    </b>
+
+                </span>
+
+
+                <span>
+
+                    <i class="c4"></i>
+
+                    Losing
+
+                    <b>
+                        @LosingTrades
+                    </b>
+
+                </span>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel
+            Title="Recent Trade P&L"
+            Class="span-2">
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Symbol</th>
+                        <th>Side</th>
+                        <th>Strategy</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>P&amp;L</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Trades.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7">
+                                No executed trade data is available.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var trade in Trades.Take(50))
+                        {
+                            <tr>
+                                <td>@trade.Time</td>
+
+                                <td>
+                                    <strong>@trade.Symbol</strong>
+                                </td>
+
+                                <td class="@GetSideClass(trade.Side)">
+                                    @trade.Side
+                                </td>
+
+                                <td>@trade.Strategy</td>
+
+                                <td>@trade.Quantity</td>
+
+                                <td>@trade.Price</td>
+
+                                <td class="@GetValueClass(trade.Pnl)">
+                                    @trade.Pnl
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     STRATEGY ANALYTICS
+     ========================================================= -->
+
+@if (ActiveTab == "Strategy Analytics")
+{
+    <Panel
+        Title="Strategy Analytics"
+        Subtitle="Performance grouped by strategy from available activity records">
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Strategy</th>
+                    <th>Trades</th>
+                    <th>Win Rate</th>
+                    <th>P&amp;L</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Strategies.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4">
+                            No strategy performance data is available.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var strategy in Strategies)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@strategy.Strategy</strong>
+                            </td>
+
+                            <td>@strategy.Trades</td>
+
+                            <td>@strategy.WinRate</td>
+
+                            <td class="@GetValueClass(strategy.Pnl)">
+                                @strategy.Pnl
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     TRADE ANALYSIS
+     ========================================================= -->
+
+@if (ActiveTab == "Trade Analysis")
+{
+    <div class="dashboard-grid">
+
+        <Panel Title="Trade Statistics">
+
+            <div class="status-list">
+
+                <div>
+                    <span>Total Trades</span>
+                    <b>@TotalTrades</b>
+                </div>
+
+                <div>
+                    <span>Winning Trades</span>
+                    <b class="green">@WinningTrades</b>
+                </div>
+
+                <div>
+                    <span>Losing Trades</span>
+                    <b class="red">@LosingTrades</b>
+                </div>
+
+                <div>
+                    <span>Win Rate</span>
+                    <b>@WinRate</b>
+                </div>
+
+                <div>
+                    <span>Average Win</span>
+                    <b class="green">@AverageWin</b>
+                </div>
+
+                <div>
+                    <span>Average Loss</span>
+                    <b class="red">@AverageLoss</b>
+                </div>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel
+            Title="Trades"
+            Class="span-2">
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Symbol</th>
+                        <th>Side</th>
+                        <th>Strategy</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>P&amp;L</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Trades.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7">
+                                No executed trade data is available.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var trade in Trades.Take(50))
+                        {
+                            <tr>
+                                <td>@trade.Time</td>
+
+                                <td>
+                                    <strong>@trade.Symbol</strong>
+                                </td>
+
+                                <td class="@GetSideClass(trade.Side)">
+                                    @trade.Side
+                                </td>
+
+                                <td>@trade.Strategy</td>
+
+                                <td>@trade.Quantity</td>
+
+                                <td>@trade.Price</td>
+
+                                <td class="@GetValueClass(trade.Pnl)">
+                                    @trade.Pnl
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     RISK ANALYTICS
+     ========================================================= -->
+
+@if (ActiveTab == "Risk Analytics")
+{
+    <div class="dashboard-grid">
+
+        <Panel Title="Risk Metrics">
+
+            <div class="status-list">
+
+                <div>
+                    <span>Maximum Drawdown</span>
+                    <b class="red">@MaxDrawdown</b>
+                </div>
+
+                <div>
+                    <span>Sharpe Ratio</span>
+                    <b>@SharpeRatio</b>
+                </div>
+
+                <div>
+                    <span>Sortino Ratio</span>
+                    <b>@SortinoRatio</b>
+                </div>
+
+                <div>
+                    <span>Profit Factor</span>
+                    <b>@ProfitFactor</b>
+                </div>
+
+                <div>
+                    <span>Win Rate</span>
+                    <b>@WinRate</b>
+                </div>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel
+            Title="Risk Performance"
+            Class="span-2">
+
+            <div class="performance-kpis">
+
+                <span>
+                    <b>@TotalReturn</b>
+                    Total Return
+                </span>
+
+                <span>
+                    <b>@TotalPnl</b>
+                    Total P&amp;L
+                </span>
+
+                <span>
+                    <b>@ProfitFactor</b>
+                    Profit Factor
+                </span>
+
+                <span>
+                    <b>@SharpeRatio</b>
+                    Sharpe
+                </span>
+
+                <span>
+                    <b class="red">@MaxDrawdown</b>
+                    Drawdown
+                </span>
+
+            </div>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     PORTFOLIO ANALYTICS
+     ========================================================= -->
+
+@if (ActiveTab == "Portfolio Analytics")
+{
+    <div class="dashboard-grid">
+
+        <Panel Title="Portfolio">
+
+            <div class="status-list">
+
+                <div>
+                    <span>Portfolio Value</span>
+                    <b>@PortfolioValue</b>
+                </div>
+
+                <div>
+                    <span>Buying Power</span>
+                    <b>@BuyingPower</b>
+                </div>
+
+                <div>
+                    <span>Cash</span>
+                    <b>@CashBalance</b>
+                </div>
+
+                <div>
+                    <span>Open Positions</span>
+                    <b>@OpenPositionCount</b>
+                </div>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel
+            Title="Position Allocation"
+            Class="span-2">
+
+            <div class="bar-list">
+
+                @if (PositionAllocations.Count == 0)
+                {
+                    <div>
+                        <span>No position data</span>
+                        <i style="--w:0%"></i>
+                        <b>—</b>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var row in PositionAllocations)
+                    {
+                        <div>
+
+                            <span>
+                                @row.Symbol
+                            </span>
+
+                            <i style="@($"--w:{row.Width}%")">
+                            </i>
+
+                            <b>
+                                @row.Percent
+                            </b>
+
+                        </div>
+                    }
+                }
+
+            </div>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     AI INSIGHTS
+     ========================================================= -->
+
+@if (ActiveTab == "AI Insights")
+{
+    <Panel
+        Title="Trady AI Insights"
+        Subtitle="Analytics-derived observations">
+
+        <div class="insight-list">
+
+            @if (Insights.Count == 0)
+            {
+                <article>
+                    Not enough analytics data is available to generate insights.
+                </article>
+            }
+            else
+            {
+                @foreach (var insight in Insights)
+                {
+                    <article>
+                        @insight
+                    </article>
+                }
+            }
+
+        </div>
+
+    </Panel>
+}
+
+
+</div>
+
+@code
+{
+    // =========================================================
+    // STATE
+    // =========================================================
+
+    private bool Loading;
+
+    private string ErrorMessage = string.Empty;
+
+    private string ActiveTab = "Performance";
+
+
+    private string TotalPnl = "—";
+
+    private string TotalReturn = "—";
+
+    private string WinRate = "—";
+
+    private string TotalTrades = "0";
+
+    private string WinningTrades = "0";
+
+    private string LosingTrades = "0";
+
+    private string ProfitFactor = "—";
+
+    private string MaxDrawdown = "—";
+
+    private string AnnualizedReturn = "—";
+
+    private string SharpeRatio = "—";
+
+    private string SortinoRatio = "—";
+
+    private string AverageWin = "—";
+
+    private string AverageLoss = "—";
+
+
+    private string PortfolioValue = "—";
+
+    private string BuyingPower = "—";
+
+    private string CashBalance = "—";
+
+    private string OpenPositionCount = "0";
+
+
+    private readonly List<TradeRow> Trades = new();
+
+    private readonly List<StrategyRow> Strategies = new();
+
+    private readonly List<AllocationRow> PositionAllocations = new();
+
+    private readonly List<double> EquityPoints = new();
+
+    private readonly List<string> Insights = new();
+
+
+    private readonly string[] Tabs =
+    {
+        "Performance",
+        "Strategy Analytics",
+        "Trade Analysis",
+        "Risk Analytics",
+        "Portfolio Analytics",
+        "AI Insights"
+    };
+
+
+    // =========================================================
+    // LOAD
+    // =========================================================
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+
+    private async Task Load()
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+
+        try
+        {
+            Loading = true;
+
+            ErrorMessage = string.Empty;
+
+
+            var analyticsTask =
+                Api.Analytics();
+
+            var activityTask =
+                Api.Activity();
+
+            var accountTask =
+                Api.BrokerAccount();
+
+            var positionsTask =
+                Api.BrokerPositions();
+
+
+            await Task.WhenAll(
+                analyticsTask,
+                activityTask,
+                accountTask,
+                positionsTask
+            );
+
+
+            ParseAnalytics(
+                await analyticsTask
+            );
+
+
+            ParseActivity(
+                await activityTask
+            );
+
+
+            ParseAccount(
+                await accountTask
+            );
+
+
+            ParsePositions(
+                await positionsTask
+            );
+
+
+            BuildTradeMetrics();
+
+            BuildStrategyAnalytics();
+
+            BuildInsights();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage =
+                "Unable to load PhoenixTrend analytics.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+    private void SelectTab(
+        string tab)
+    {
+        ActiveTab = tab;
+    }
+
+
+    // =========================================================
+    // ANALYTICS API
+    // =========================================================
+
+    private void ParseAnalytics(
+        JsonElement? result)
+    {
+        EquityPoints.Clear();
+
+
+        if (result is null ||
+            result.Value.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+
+        var root =
+            result.Value;
+
+
+        TotalPnl =
+            FormatSignedMoney(
+                FirstNumber(
+                    root,
+                    "total_pnl",
+                    "realized_pnl",
+                    "pnl"
+                )
+            );
+
+
+        TotalReturn =
+            FormatPercentAuto(
+                FirstNumber(
+                    root,
+                    "total_return",
+                    "return_percent",
+                    "return_pct"
+                )
+            );
+
+
+        WinRate =
+            FormatPercentAuto(
+                FirstNumber(
+                    root,
+                    "win_rate"
+                )
+            );
+
+
+        ProfitFactor =
+            FormatNumber(
+                FirstNumber(
+                    root,
+                    "profit_factor"
+                )
+            );
+
+
+        MaxDrawdown =
+            FormatPercentAuto(
+                FirstNumber(
+                    root,
+                    "max_drawdown"
+                )
+            );
+
+
+        AnnualizedReturn =
+            FormatPercentAuto(
+                FirstNumber(
+                    root,
+                    "annualized_return",
+                    "annual_return"
+                )
+            );
+
+
+        SharpeRatio =
+            FormatNumber(
+                FirstNumber(
+                    root,
+                    "sharpe_ratio",
+                    "sharpe"
+                )
+            );
+
+
+        SortinoRatio =
+            FormatNumber(
+                FirstNumber(
+                    root,
+                    "sortino_ratio",
+                    "sortino"
+                )
+            );
+
+
+        ExtractEquityCurve(
+            root
+        );
+    }
+
+
+    private void ExtractEquityCurve(
+        JsonElement root)
+    {
+        var names =
+            new[]
+            {
+                "equity_curve",
+                "equity",
+                "performance_history",
+                "history"
+            };
+
+
+        foreach (var name in names)
+        {
+            if (!root.TryGetProperty(
+                    name,
+                    out var series) ||
+                series.ValueKind != JsonValueKind.Array)
+            {
+                continue;
+            }
+
+
+            foreach (var item in series.EnumerateArray())
+            {
+                if (item.ValueKind ==
+                        JsonValueKind.Number &&
+                    item.TryGetDouble(
+                        out var directValue))
+                {
+                    EquityPoints.Add(
+                        directValue
+                    );
+
+                    continue;
+                }
+
+
+                if (item.ValueKind !=
+                    JsonValueKind.Object)
+                {
+                    continue;
+                }
+
+
+                var value =
+                    FirstNumber(
+                        item,
+                        "equity",
+                        "value",
+                        "portfolio_value",
+                        "balance"
+                    );
+
+
+                if (!double.IsNaN(value))
+                {
+                    EquityPoints.Add(
+                        value
+                    );
+                }
+            }
+
+
+            if (EquityPoints.Count > 0)
+            {
+                return;
+            }
+        }
+    }
+
+
+    // =========================================================
+    // ACTIVITY
+    // =========================================================
+
+    private void ParseActivity(
+        JsonElement? result)
+    {
+        Trades.Clear();
+
+
+        if (result is null ||
+            !TryGetArray(
+                result.Value,
+                out var items))
+        {
+            return;
+        }
+
+
+        foreach (var item in items.EnumerateArray())
+        {
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var type =
+                FirstText(
+                    item,
+                    "type",
+                    "event_type",
+                    "activity_type"
+                );
+
+
+            var status =
+                FirstText(
+                    item,
+                    "status",
+                    "state"
+                );
+
+
+            if (!IsTradeRecord(
+                    type,
+                    status))
+            {
+                continue;
+            }
+
+
+            var symbol =
+                FirstText(
+                    item,
+                    "symbol",
+                    "ticker",
+                    "asset"
+                );
+
+
+            var side =
+                FirstText(
+                    item,
+                    "side",
+                    "action"
+                );
+
+
+            var strategy =
+                FirstText(
+                    item,
+                    "strategy",
+                    "strategy_name",
+                    "source"
+                );
+
+
+            var quantity =
+                FirstNumber(
+                    item,
+                    "quantity",
+                    "qty",
+                    "filled_qty"
+                );
+
+
+            var price =
+                FirstNumber(
+                    item,
+                    "price",
+                    "fill_price",
+                    "filled_avg_price",
+                    "average_price"
+                );
+
+
+            var pnl =
+                FirstNumber(
+                    item,
+                    "pnl",
+                    "realized_pnl",
+                    "profit_loss"
+                );
+
+
+            var timestamp =
+                FirstText(
+                    item,
+                    "timestamp",
+                    "time",
+                    "created_at",
+                    "updated_at"
+                );
+
+
+            Trades.Add(
+                new TradeRow(
+                    EmptyValue(symbol),
+                    NormalizeUpper(side),
+                    EmptyValue(strategy),
+                    FormatQuantity(quantity),
+                    FormatPrice(price),
+                    FormatSignedMoney(pnl),
+                    pnl,
+                    FormatTimestamp(timestamp)
+                )
+            );
+        }
+    }
+
+
+    // =========================================================
+    // TRADE METRICS
+    // =========================================================
+
+    private void BuildTradeMetrics()
+    {
+        var pnlTrades =
+            Trades
+                .Where(
+                    x => !double.IsNaN(
+                        x.PnlRaw
+                    )
+                )
+                .ToList();
+
+
+        var winners =
+            pnlTrades
+                .Where(
+                    x => x.PnlRaw > 0
+                )
+                .ToList();
+
+
+        var losers =
+            pnlTrades
+                .Where(
+                    x => x.PnlRaw < 0
+                )
+                .ToList();
+
+
+        TotalTrades =
+            Trades.Count.ToString("N0");
+
+
+        WinningTrades =
+            winners.Count.ToString("N0");
+
+
+        LosingTrades =
+            losers.Count.ToString("N0");
+
+
+        if (pnlTrades.Count > 0)
+        {
+            var winRate =
+                winners.Count /
+                (double)pnlTrades.Count *
+                100;
+
+
+            WinRate =
+                $"{winRate:0.0}%";
+        }
+
+
+        if (winners.Count > 0)
+        {
+            AverageWin =
+                FormatMoney(
+                    winners.Average(
+                        x => x.PnlRaw
+                    )
+                );
+        }
+
+
+        if (losers.Count > 0)
+        {
+            AverageLoss =
+                FormatMoney(
+                    losers.Average(
+                        x => x.PnlRaw
+                    )
+                );
+        }
+
+
+        var grossProfit =
+            winners.Sum(
+                x => x.PnlRaw
+            );
+
+
+        var grossLoss =
+            Math.Abs(
+                losers.Sum(
+                    x => x.PnlRaw
+                )
+            );
+
+
+        if (grossLoss > 0)
+        {
+            ProfitFactor =
+                (grossProfit / grossLoss)
+                .ToString("0.00");
+        }
+    }
+
+
+    // =========================================================
+    // STRATEGIES
+    // =========================================================
+
+    private void BuildStrategyAnalytics()
+    {
+        Strategies.Clear();
+
+
+        var groups =
+            Trades
+                .Where(
+                    x =>
+                        !string.IsNullOrWhiteSpace(
+                            x.Strategy
+                        ) &&
+                        x.Strategy != "—"
+                )
+                .GroupBy(
+                    x => x.Strategy,
+                    StringComparer.OrdinalIgnoreCase
+                );
+
+
+        foreach (var group in groups)
+        {
+            var trades =
+                group.ToList();
+
+
+            var pnlTrades =
+                trades
+                    .Where(
+                        x => !double.IsNaN(
+                            x.PnlRaw
+                        )
+                    )
+                    .ToList();
+
+
+            var winners =
+                pnlTrades.Count(
+                    x => x.PnlRaw > 0
+                );
+
+
+            var winRate =
+                pnlTrades.Count > 0
+                    ? winners /
+                      (double)pnlTrades.Count *
+                      100
+                    : double.NaN;
+
+
+            var pnl =
+                pnlTrades.Sum(
+                    x => x.PnlRaw
+                );
+
+
+            Strategies.Add(
+                new StrategyRow(
+                    group.Key,
+                    trades.Count,
+                    double.IsNaN(winRate)
+                        ? "—"
+                        : $"{winRate:0.0}%",
+                    FormatSignedMoney(pnl),
+                    pnl
+                )
+            );
+        }
+
+
+        Strategies.Sort(
+            (a, b) =>
+                b.PnlRaw.CompareTo(
+                    a.PnlRaw
+                )
+        );
+    }
+
+
+    // =========================================================
+    // ACCOUNT
+    // =========================================================
+
+    private void ParseAccount(
+        JsonElement? result)
+    {
+        if (result is null)
+        {
+            return;
+        }
+
+
+        var portfolio =
+            FirstNumber(
+                result.Value,
+                "portfolio_value",
+                "equity"
+            );
+
+
+        var buyingPower =
+            FirstNumber(
+                result.Value,
+                "buying_power"
+            );
+
+
+        var cash =
+            FirstNumber(
+                result.Value,
+                "cash"
+            );
+
+
+        PortfolioValue =
+            FormatMoney(
+                portfolio
+            );
+
+
+        BuyingPower =
+            FormatMoney(
+                buyingPower
+            );
+
+
+        CashBalance =
+            FormatMoney(
+                cash
+            );
+    }
+
+
+    // =========================================================
+    // POSITIONS
+    // =========================================================
+
+    private void ParsePositions(
+        JsonElement? result)
+    {
+        PositionAllocations.Clear();
+
+
+        if (result is null ||
+            !TryGetArray(
+                result.Value,
+                out var positions))
+        {
+            OpenPositionCount = "0";
+
+            return;
+        }
+
+
+        var values =
+            new List<RawPosition>();
+
+
+        foreach (var item in positions.EnumerateArray())
+        {
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var symbol =
+                FirstText(
+                    item,
+                    "symbol",
+                    "ticker"
+                );
+
+
+            var marketValue =
+                FirstNumber(
+                    item,
+                    "market_value"
+                );
+
+
+            if (string.IsNullOrWhiteSpace(symbol) ||
+                double.IsNaN(marketValue))
+            {
+                continue;
+            }
+
+
+            values.Add(
+                new RawPosition(
+                    symbol,
+                    Math.Abs(marketValue)
+                )
+            );
+        }
+
+
+        OpenPositionCount =
+            values.Count.ToString();
+
+
+        var total =
+            values.Sum(
+                x => x.Value
+            );
+
+
+        if (total <= 0)
+        {
+            return;
+        }
+
+
+        foreach (var position in
+                 values
+                     .OrderByDescending(
+                         x => x.Value
+                     ))
+        {
+            var percent =
+                position.Value /
+                total *
+                100;
+
+
+            PositionAllocations.Add(
+                new AllocationRow(
+                    position.Symbol,
+                    $"{percent:0.0}%",
+                    Math.Clamp(
+                        percent,
+                        0,
+                        100
+                    )
+                )
+            );
+        }
+    }
+
+
+    // =========================================================
+    // AI-DERIVED OBSERVATIONS
+    // =========================================================
+
+    private void BuildInsights()
+    {
+        Insights.Clear();
+
+
+        if (Trades.Count > 0)
+        {
+            Insights.Add(
+                $"{Trades.Count:N0} trade records are available for analysis."
+            );
+        }
+
+
+        var bestStrategy =
+            Strategies
+                .OrderByDescending(
+                    x => x.PnlRaw
+                )
+                .FirstOrDefault();
+
+
+        if (bestStrategy is not null)
+        {
+            Insights.Add(
+                $"{bestStrategy.Strategy} has {bestStrategy.Trades} recorded trades with {bestStrategy.WinRate} win rate and {bestStrategy.Pnl} P&L in the available activity data."
+            );
+        }
+
+
+        if (WinRate != "—")
+        {
+            Insights.Add(
+                $"Recorded trade win rate is {WinRate}."
+            );
+        }
+
+
+        if (ProfitFactor != "—")
+        {
+            Insights.Add(
+                $"Current calculated profit factor is {ProfitFactor}."
+            );
+        }
+
+
+        if (MaxDrawdown != "—")
+        {
+            Insights.Add(
+                $"Maximum drawdown reported by analytics is {MaxDrawdown}."
+            );
+        }
+
+
+        var largest =
+            PositionAllocations
+                .FirstOrDefault();
+
+
+        if (largest is not null)
+        {
+            Insights.Add(
+                $"{largest.Symbol} is the largest current position allocation at {largest.Percent} of position market value."
+            );
+        }
+    }
+
+
+    // =========================================================
+    // JSON
+    // =========================================================
+
+    private static bool TryGetArray(
+        JsonElement root,
+        out JsonElement array)
+    {
+        if (root.ValueKind ==
+            JsonValueKind.Array)
+        {
+            array = root;
+
+            return true;
+        }
+
+
+        if (root.ValueKind ==
+            JsonValueKind.Object)
+        {
+            var names =
+                new[]
+                {
+                    "data",
+                    "items",
+                    "results",
+                    "activity",
+                    "activities",
+                    "events",
+                    "positions",
+                    "history"
+                };
+
+
+            foreach (var name in names)
+            {
+                if (root.TryGetProperty(
+                        name,
+                        out var candidate) &&
+                    candidate.ValueKind ==
+                        JsonValueKind.Array)
+                {
+                    array = candidate;
+
+                    return true;
+                }
+            }
+        }
+
+
+        array = default;
+
+        return false;
+    }
+
+
+    private static double FirstNumber(
+        JsonElement root,
+        params string[] properties)
+    {
+        foreach (var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.Number &&
+                value.TryGetDouble(
+                    out var number))
+            {
+                return number;
+            }
+
+
+            if (double.TryParse(
+                    value.ToString(),
+                    out number))
+            {
+                return number;
+            }
+        }
+
+
+        return double.NaN;
+    }
+
+
+    private static string FirstText(
+        JsonElement root,
+        params string[] properties)
+    {
+        foreach (var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.Null)
+            {
+                continue;
+            }
+
+
+            var text =
+                value.ValueKind ==
+                    JsonValueKind.String
+                        ? value.GetString()
+                        : value.ToString();
+
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+        }
+
+
+        return string.Empty;
+    }
+
+
+    // =========================================================
+    // CHART
+    // =========================================================
+
+    private static string BuildPolyline(
+        List<double> values,
+        double width,
+        double height)
+    {
+        if (values.Count < 2)
+        {
+            return string.Empty;
+        }
+
+
+        var min =
+            values.Min();
+
+
+        var max =
+            values.Max();
+
+
+        var range =
+            max - min;
+
+
+        if (range <= 0)
+        {
+            range = 1;
+        }
+
+
+        var output =
+            new List<string>();
+
+
+        for (var i = 0;
+             i < values.Count;
+             i++)
+        {
+            var x =
+                i /
+                (double)(values.Count - 1) *
+                width;
+
+
+            var normalized =
+                (values[i] - min) /
+                range;
+
+
+            var y =
+                height -
+                20 -
+                normalized *
+                (height - 40);
+
+
+            output.Add(
+                $"{x:0.##},{y:0.##}"
+            );
+        }
+
+
+        return string.Join(
+            " ",
+            output
+        );
+    }
+
+
+    // =========================================================
+    // HELPERS
+    // =========================================================
+
+    private static bool IsTradeRecord(
+        string type,
+        string status)
+    {
+        return
+            Contains(type, "trade") ||
+            Contains(type, "execution") ||
+            Contains(type, "fill") ||
+            Contains(status, "filled") ||
+            Contains(status, "executed");
+    }
+
+
+    private static bool Contains(
+        string? value,
+        string text)
+    {
+        return
+            !string.IsNullOrWhiteSpace(value) &&
+            value.Contains(
+                text,
+                StringComparison.OrdinalIgnoreCase
+            );
+    }
+
+
+    private static string EmptyValue(
+        string value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "—"
+            : value;
+    }
+
+
+    private static string NormalizeUpper(
+        string value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "—"
+            : value.Trim().ToUpperInvariant();
+    }
+
+
+    // =========================================================
+    // FORMATTING
+    // =========================================================
+
+    private static string FormatMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00"
+            );
+    }
+
+
+    private static string FormatSignedMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "+$#,##0.00;-$#,##0.00;$0.00"
+            );
+    }
+
+
+    private static string FormatPercentAuto(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) <= 1)
+        {
+            value *= 100;
+        }
+
+
+        return
+            $"{value:+0.00;-0.00;0.00}%";
+    }
+
+
+    private static string FormatNumber(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString("0.00");
+    }
+
+
+    private static string FormatPrice(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00####"
+            );
+    }
+
+
+    private static string FormatQuantity(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "#,##0.####"
+            );
+    }
+
+
+    private static string FormatTimestamp(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "—";
+        }
+
+
+        if (DateTimeOffset.TryParse(
+                value,
+                out var timestamp))
+        {
+            return timestamp
+                .ToLocalTime()
+                .ToString(
+                    "MMM d, h:mm tt"
+                );
+        }
+
+
+        return value;
+    }
+
+
+    private static string GetValueClass(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) ||
+            value == "—")
+        {
+            return "";
+        }
+
+
+        return value
+            .TrimStart()
+            .StartsWith("-")
+                ? "red"
+                : "green";
+    }
+
+
+    private static string GetSideClass(
+        string side)
+    {
+        if (side.Equals(
+            "SELL",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return "red";
+        }
+
+
+        if (side.Equals(
+            "BUY",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return "green";
+        }
+
+
+        return "";
+    }
+
+
+    // =========================================================
+    // MODELS
+    // =========================================================
+
+    private sealed record TradeRow(
+        string Symbol,
+        string Side,
+        string Strategy,
+        string Quantity,
+        string Price,
+        string Pnl,
+        double PnlRaw,
+        string Time
+    );
+
+
+    private sealed record StrategyRow(
+        string Strategy,
+        int Trades,
+        string WinRate,
+        string Pnl,
+        double PnlRaw
+    );
+
+
+    private sealed record RawPosition(
+        string Symbol,
+        double Value
+    );
+
+
+    private sealed record AllocationRow(
+        string Symbol,
+        string Percent,
+        double Width
+    );
+}

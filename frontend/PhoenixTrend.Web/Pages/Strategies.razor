@@ -1,0 +1,3335 @@
+@page "/strategies"
+
+@using System.Globalization
+@using System.Text.Json
+@using PhoenixTrend.Web.Services
+
+@inject PhoenixApi Api
+
+<PageTitle>PhoenixTrend | Strategies</PageTitle>
+
+<div class="pt-strategies">
+
+    <section class="strategies-hero">
+        <div class="strategies-hero-content">
+
+            <div class="strategies-hero-copy">
+
+                <span class="hero-eyebrow">
+                    <i class="ph ph-strategy"></i>
+                    PHOENIXTREND STRATEGY ENGINE
+                </span>
+
+                <h1>Strategies</h1>
+
+                <p>
+                    Build, analyze and deploy systematic trading strategies
+                    through the PhoenixTrend execution engine.
+                </p>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <section class="strategy-tabs-shell">
+
+        <div class="strategy-tabs">
+
+            @foreach (var tab in Tabs)
+            {
+                <button type="button"
+                        class="strategy-tab @(ActiveTab == tab.Name ? "active" : "")"
+                        @onclick="() => SelectCategory(tab.Name)">
+
+                    <i class="@tab.Icon"></i>
+
+                    <span>
+                        @tab.Name
+                    </span>
+
+                </button>
+            }
+
+        </div>
+
+    </section>
+
+
+    <section class="strategy-action-bar">
+
+        <div class="strategy-search-box">
+
+            <i class="ph ph-magnifying-glass"></i>
+
+            <input @bind="SearchText"
+                   @bind:event="oninput"
+                   placeholder="Search strategies" />
+
+        </div>
+
+        <button type="button"
+                class="strategy-primary-action"
+                @onclick="OpenCreate">
+
+            <i class="ph ph-plus"></i>
+
+            Create Strategy
+
+        </button>
+
+    </section>
+
+
+    @if (Loading)
+    {
+        <div class="strategy-message loading">
+
+            <i class="ph ph-spinner-gap spin"></i>
+
+            <div>
+
+                <strong>
+                    Loading Strategies
+                </strong>
+
+                <span>
+                    Connecting to the PhoenixTrend strategy engine...
+                </span>
+
+            </div>
+
+        </div>
+    }
+
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="strategy-message error">
+
+            <i class="ph ph-warning-circle"></i>
+
+            <div>
+
+                <strong>
+                    Strategy Data Unavailable
+                </strong>
+
+                <span>
+                    @ErrorMessage
+                </span>
+
+            </div>
+
+        </div>
+    }
+
+
+    <section class="strategy-summary-grid">
+
+        <article class="strategy-summary-card">
+
+            <div class="summary-icon cyan">
+                <i class="ph ph-stack"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <span>
+                    Total Strategies
+                </span>
+
+                <strong>
+                    @StrategyItems.Count
+                </strong>
+
+                <small>
+                    @ActiveCount Enabled · @InactiveCount Disabled
+                </small>
+
+            </div>
+
+        </article>
+
+
+        <article class="strategy-summary-card">
+
+            <div class="summary-icon green">
+                <i class="ph ph-currency-dollar"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <span>
+                    Strategy P&amp;L
+                </span>
+
+                <strong class="@ValueClass(TotalPnl)">
+                    @FormatMoney(TotalPnl)
+                </strong>
+
+                <small>
+                    @(HasPnlData
+                        ? "Recorded strategy performance"
+                        : "Awaiting strategy performance")
+                </small>
+
+            </div>
+
+        </article>
+
+
+        <article class="strategy-summary-card">
+
+            <div class="summary-icon green">
+                <i class="ph ph-chart-line-up"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <span>
+                    Average Win Rate
+                </span>
+
+                <strong>
+                    @FormatPercent(AverageWinRate)
+                </strong>
+
+                <small>
+                    @(HasWinRateData
+                        ? "Across strategies with trade history"
+                        : "Awaiting strategy performance")
+                </small>
+
+            </div>
+
+        </article>
+
+
+        <article class="strategy-summary-card">
+
+            <div class="summary-icon purple">
+                <i class="ph ph-arrows-left-right"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <span>
+                    Total Trades
+                </span>
+
+                <strong>
+                    @TotalTrades.ToString("N0")
+                </strong>
+
+                <small>
+                    Across available strategies
+                </small>
+
+            </div>
+
+        </article>
+
+
+        <article class="strategy-summary-card">
+
+            <div class="summary-icon orange">
+                <i class="ph ph-lightning"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <span>
+                    Running Strategies
+                </span>
+
+                <strong class="orange-value">
+                    @RunningCount/@StrategyItems.Count
+                </strong>
+
+                <small>
+                    @EngineStatusText
+                </small>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <section class="strategy-workspace">
+
+        <section class="strategy-library-panel">
+
+            <header class="panel-header">
+
+                <div>
+
+                    <span class="panel-kicker">
+
+                        <i class="ph ph-books"></i>
+
+                        STRATEGY LIBRARY
+
+                    </span>
+
+                    <h2>
+                        Strategy Library
+                    </h2>
+
+                    <p>
+                        Real strategies registered with the PhoenixTrend backend.
+                    </p>
+
+                </div>
+
+                <div class="panel-count">
+
+                    <i class="ph ph-stack"></i>
+
+                    <span>
+                        @FilteredStrategies.Count
+                    </span>
+
+                </div>
+
+            </header>
+
+
+            @if (!Loading && FilteredStrategies.Count == 0)
+            {
+                <div class="strategy-empty">
+
+                    <div class="strategy-empty-icon">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </div>
+
+                    <strong>
+                        No Strategies Found
+                    </strong>
+
+                    <span>
+                        No strategies are available in this category.
+                    </span>
+
+                </div>
+            }
+            else
+            {
+                <div class="strategy-grid">
+
+                    @foreach (var strategy in FilteredStrategies)
+                    {
+                        <article class="strategy-card @(IsSelected(strategy) ? "selected" : "")"
+                                 @onclick="() => SelectStrategy(strategy)">
+
+                            <div class="strategy-card-accent"></div>
+
+
+                            @* =====================================================
+                               TOP ROW
+                               ICON LEFT
+                               ENABLE/DISABLE SWITCH RIGHT
+                               ===================================================== *@
+
+                            <header class="pt-strategy-card-top">
+
+                                <div class="pt-strategy-card-icon">
+
+                                    <i class="@StrategyIcon(strategy)"></i>
+
+                                </div>
+
+
+                                @if (strategy.Enabled.HasValue)
+                                {
+                                    <button type="button"
+                                            class="pt-strategy-card-toggle @(strategy.Enabled.Value ? "enabled" : "disabled")"
+                                            title="@(strategy.Enabled.Value ? "Disable strategy" : "Enable strategy")"
+                                            @onclick:stopPropagation="true"
+                                            @onclick="() => ToggleStrategy(strategy)">
+
+                                        <span class="pt-strategy-toggle-state">
+                                            @(strategy.Enabled.Value
+                                                ? "Enabled"
+                                                : "Disabled")
+                                        </span>
+
+                                        <span class="pt-strategy-switch @(strategy.Enabled.Value ? "on" : "off")">
+
+                                            <span class="pt-strategy-switch-light"></span>
+
+                                            <span class="pt-strategy-switch-knob"></span>
+
+                                        </span>
+
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="pt-strategy-card-toggle unavailable">
+
+                                        <span class="pt-strategy-toggle-state">
+                                            Unavailable
+                                        </span>
+
+                                        <span class="pt-strategy-switch off">
+
+                                            <span class="pt-strategy-switch-light"></span>
+
+                                            <span class="pt-strategy-switch-knob"></span>
+
+                                        </span>
+
+                                    </div>
+                                }
+
+                            </header>
+
+
+                            @* =====================================================
+                               TEXT AREA
+                               TITLE / CATEGORY / DESCRIPTION ARE SEPARATE
+                               ===================================================== *@
+
+                            <div class="pt-strategy-card-copy">
+
+                                <strong class="pt-strategy-card-title">
+                                    @strategy.Name
+                                </strong>
+
+                                <span class="pt-strategy-card-category">
+                                    @strategy.Category
+                                </span>
+
+                                <p class="pt-strategy-card-description">
+                                    @StrategyDescription(strategy)
+                                </p>
+
+                            </div>
+
+
+                            @* =====================================================
+                               PERFORMANCE
+                               ===================================================== *@
+
+                            <div class="strategy-visual">
+
+                                <div class="strategy-chart-label">
+
+                                    <div>
+
+                                        <span>
+                                            REALIZED P&amp;L
+                                        </span>
+
+                                        <small>
+                                            Persisted trades
+                                        </small>
+
+                                    </div>
+
+                                    <strong class="@ValueClass(strategy.TotalPnl)">
+                                        @(strategy.TotalPnl.HasValue
+                                            ? FormatMoney(strategy.TotalPnl)
+                                            : "Awaiting data")
+                                    </strong>
+
+                                </div>
+
+
+                                @if (strategy.HasPerformance)
+                                {
+                                    <div class="strategy-visual-value">
+
+                                        <i class="ph ph-chart-line-up"></i>
+
+                                        <div>
+
+                                            <strong class="@ValueClass(strategy.TotalPnl)">
+                                                @FormatMoney(strategy.TotalPnl)
+                                            </strong>
+
+                                            <span>
+                                                @strategy.TotalTrades.ToString("N0")
+                                                closed
+                                                @(strategy.TotalTrades == 1 ? "trade" : "trades")
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="strategy-visual-empty">
+
+                                        <i class="ph ph-chart-line"></i>
+
+                                        <span>
+                                            No closed trades recorded
+                                        </span>
+
+                                    </div>
+                                }
+
+                            </div>
+
+
+                            @* =====================================================
+                               METRICS
+                               ===================================================== *@
+
+                            <div class="strategy-card-metrics">
+
+                                <div class="strategy-card-metric">
+
+                                    <span>
+                                        Total Return
+                                    </span>
+
+                                    <strong class="@ValueClass(strategy.TotalReturn)">
+                                        @FormatPercent(strategy.TotalReturn)
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="strategy-card-metric">
+
+                                    <span>
+                                        Win Rate
+                                    </span>
+
+                                    <strong>
+                                        @FormatPercent(strategy.WinRate)
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="strategy-card-metric">
+
+                                    <span>
+                                        Profit Factor
+                                    </span>
+
+                                    <strong>
+                                        @FormatNumber(strategy.ProfitFactor)
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            @* =====================================================
+                               ACTIONS
+                               NO BOTTOM ENABLE/DISABLE BUTTON
+                               ===================================================== *@
+
+                            <footer class="strategy-card-actions"
+                                    @onclick:stopPropagation="true">
+
+                                <button type="button"
+                                        class="strategy-configure-button"
+                                        @onclick="() => ConfigureStrategy(strategy)">
+
+                                    <i class="ph ph-sliders-horizontal"></i>
+
+                                    Configure
+
+                                </button>
+
+
+                                <button type="button"
+                                        class="strategy-secondary-action"
+                                        @onclick="() => ViewStrategyDetails(strategy)">
+
+                                    <i class="ph ph-eye"></i>
+
+                                    View Details
+
+                                </button>
+
+                            </footer>
+
+                        </article>
+                    }
+
+                </div>
+            }
+
+        </section>
+
+
+        @* =========================================================
+           INSPECTOR
+           ========================================================= *@
+
+        <aside class="strategy-inspector">
+
+            @if (SelectedStrategy is null)
+            {
+                <div class="inspector-empty">
+
+                    <div class="inspector-empty-icon">
+                        <i class="ph ph-cursor-click"></i>
+                    </div>
+
+                    <h3>
+                        Select a Strategy
+                    </h3>
+
+                    <p>
+                        Choose a strategy from the library to inspect its
+                        configuration and performance.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <header class="inspector-header">
+
+                    <div class="inspector-title-row">
+
+                        <div class="inspector-strategy-icon">
+
+                            <i class="@StrategyIcon(SelectedStrategy)"></i>
+
+                        </div>
+
+                        <div>
+
+                            <span class="inspector-eyebrow">
+                                STRATEGY INSPECTOR
+                            </span>
+
+                            <h2>
+                                @SelectedStrategy.Name
+                            </h2>
+
+                            <span class="inspector-category">
+                                @SelectedStrategy.Category
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="strategy-status @StatusClass(SelectedStrategy)">
+
+                        <span class="status-dot"></span>
+
+                        @DisplayStatus(SelectedStrategy)
+
+                    </span>
+
+                </header>
+
+
+                <div class="inspector-description">
+
+                    <i class="ph ph-info"></i>
+
+                    <p>
+                        @StrategyDescription(SelectedStrategy)
+                    </p>
+
+                </div>
+
+
+                <section class="inspector-section">
+
+                    <header class="inspector-section-header">
+
+                        <div>
+
+                            <i class="ph ph-chart-line-up"></i>
+
+                            <span>
+                                Performance
+                            </span>
+
+                        </div>
+
+                        <small>
+                            Persisted trades
+                        </small>
+
+                    </header>
+
+
+                    <div class="inspector-kpis">
+
+                        <div class="inspector-kpi">
+
+                            <span>
+                                Total Return
+                            </span>
+
+                            <strong class="@ValueClass(SelectedStrategy.TotalReturn)">
+                                @FormatPercent(SelectedStrategy.TotalReturn)
+                            </strong>
+
+                        </div>
+
+
+                        <div class="inspector-kpi">
+
+                            <span>
+                                Win Rate
+                            </span>
+
+                            <strong>
+                                @FormatPercent(SelectedStrategy.WinRate)
+                            </strong>
+
+                        </div>
+
+
+                        <div class="inspector-kpi">
+
+                            <span>
+                                Profit Factor
+                            </span>
+
+                            <strong>
+                                @FormatNumber(SelectedStrategy.ProfitFactor)
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="inspector-chart">
+
+                        <div class="inspector-chart-header">
+
+                            <div>
+
+                                <span>
+                                    Realized P&amp;L
+                                </span>
+
+                                <small>
+                                    @(SelectedStrategy.HasPerformance
+                                        ? "Recorded performance"
+                                        : "Performance unavailable")
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        @if (!SelectedStrategy.HasPerformance)
+                        {
+                            <div class="inspector-performance-empty">
+
+                                <i class="ph ph-chart-line"></i>
+
+                                <strong>
+                                    No closed trades recorded
+                                </strong>
+
+                                <span>
+                                    Performance will appear when real trades close.
+                                </span>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="inspector-performance-state">
+
+                                <i class="ph ph-chart-line-up"></i>
+
+                                <strong class="@ValueClass(SelectedStrategy.TotalPnl)">
+                                    @FormatMoney(SelectedStrategy.TotalPnl)
+                                </strong>
+
+                                <span>
+                                    @SelectedStrategy.TotalTrades.ToString("N0")
+                                    closed
+                                    @(SelectedStrategy.TotalTrades == 1 ? "trade" : "trades")
+                                </span>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </section>
+
+
+                <section class="inspector-section">
+
+                    <header class="inspector-section-header">
+
+                        <div>
+
+                            <i class="ph ph-sliders-horizontal"></i>
+
+                            <span>
+                                Configuration
+                            </span>
+
+                        </div>
+
+                    </header>
+
+
+                    <div class="strategy-detail-list">
+
+                        <div class="strategy-detail-row">
+
+                            <div>
+
+                                <i class="ph ph-pulse"></i>
+
+                                <span>
+                                    Status
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @DisplayStatus(SelectedStrategy)
+                            </strong>
+
+                        </div>
+
+
+                        <div class="strategy-detail-row">
+
+                            <div>
+
+                                <i class="ph ph-tag"></i>
+
+                                <span>
+                                    Category
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @SelectedStrategy.Category
+                            </strong>
+
+                        </div>
+
+
+                        <div class="strategy-detail-row">
+
+                            <div>
+
+                                <i class="ph ph-arrows-left-right"></i>
+
+                                <span>
+                                    Trades
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @SelectedStrategy.TotalTrades.ToString("N0")
+                            </strong>
+
+                        </div>
+
+
+                        <div class="strategy-detail-row">
+
+                            <div>
+
+                                <i class="ph ph-clock"></i>
+
+                                <span>
+                                    Timeframe
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @DisplayText(SelectedStrategy.Timeframe)
+                            </strong>
+
+                        </div>
+
+
+                        <div class="strategy-detail-row">
+
+                            <div>
+
+                                <i class="ph ph-globe"></i>
+
+                                <span>
+                                    Markets
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @DisplayText(SelectedStrategy.Markets)
+                            </strong>
+
+                        </div>
+
+
+                        <div class="strategy-detail-row">
+
+                            <div>
+
+                                <i class="ph ph-function"></i>
+
+                                <span>
+                                    Indicators
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @DisplayText(SelectedStrategy.Indicators)
+                            </strong>
+
+                        </div>
+
+
+                        <div class="strategy-detail-row">
+
+                            <div>
+
+                                <i class="ph ph-shield-check"></i>
+
+                                <span>
+                                    Risk per Trade
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                @FormatPercent(SelectedStrategy.RiskPerTrade)
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                @if (!SelectedStrategy.EditingSupported)
+                {
+                    <div class="strategy-backend-notice">
+
+                        <div class="backend-notice-icon">
+
+                            <i class="ph ph-lock-key"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Configuration Locked
+                            </strong>
+
+                            <span>
+                                Strategy editing is not exposed by the backend.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="strategy-configure-button inspector-main-action"
+                            disabled>
+
+                        <i class="ph ph-sliders-horizontal"></i>
+
+                        Strategy Editing Not Exposed
+
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            class="strategy-primary-action inspector-main-action"
+                            @onclick="() => ConfigureStrategy(SelectedStrategy)">
+
+                        <i class="ph ph-pencil-simple"></i>
+
+                        Edit Strategy
+
+                    </button>
+                }
+
+
+                @if (SelectedStrategy.Enabled.HasValue)
+                {
+                    <button type="button"
+                            class="strategy-configure-button inspector-toggle-action"
+                            @onclick="() => ToggleStrategy(SelectedStrategy)">
+
+                        <i class="ph ph-power"></i>
+
+                        @(SelectedStrategy.Enabled.Value
+                            ? "Disable Strategy"
+                            : "Enable Strategy")
+
+                    </button>
+                }
+
+            }
+
+        </aside>
+
+    </section>
+
+
+    @* =========================================================
+       CONFIGURATION MODAL
+       ========================================================= *@
+
+    @if (EditorOpen && EditorStrategy is not null)
+    {
+        <div class="strategy-modal-backdrop"
+             @onclick="CloseEditor">
+
+            <section class="strategy-modal"
+                     @onclick:stopPropagation="true">
+
+                <div class="strategy-modal-glow"></div>
+
+                <header>
+
+                    <div>
+
+                        <span class="panel-kicker">
+                            STRATEGY CONFIGURATION
+                        </span>
+
+                        <h2>
+                            @EditorStrategy.Name
+                        </h2>
+
+                    </div>
+
+                    <button type="button"
+                            title="Close"
+                            @onclick="CloseEditor">
+
+                        <i class="ph ph-x"></i>
+
+                    </button>
+
+                </header>
+
+
+                @if (EditorValues.Count == 0)
+                {
+                    <div class="strategy-backend-notice">
+
+                        <div class="backend-notice-icon">
+
+                            <i class="ph ph-info"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                No Editable Parameters
+                            </strong>
+
+                            <span>
+                                The backend has not returned editable configuration
+                                values for this strategy.
+                            </span>
+
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="strategy-config-grid">
+
+                        @foreach (var key in EditorValues.Keys.ToList())
+                        {
+                            <label>
+
+                                <span>
+                                    @Humanize(key)
+                                </span>
+
+                                <input value="@EditorValues[key]"
+                                       @oninput="e => EditorValues[key] = e.Value?.ToString() ?? string.Empty" />
+
+                            </label>
+                        }
+
+                    </div>
+                }
+
+
+                <footer>
+
+                    <div>
+
+                        <button type="button"
+                                class="strategy-configure-button"
+                                @onclick="ResetEditor">
+
+                            <i class="ph ph-arrow-counter-clockwise"></i>
+
+                            Reset Defaults
+
+                        </button>
+
+
+                        @if (EditorStrategy.Custom)
+                        {
+                            <button type="button"
+                                    class="strategy-danger-action"
+                                    @onclick="DeleteCustom">
+
+                                <i class="ph ph-trash"></i>
+
+                                Delete Custom
+
+                            </button>
+                        }
+
+                    </div>
+
+
+                    <button type="button"
+                            class="strategy-primary-action"
+                            disabled="@(EditorValues.Count == 0)"
+                            @onclick="SaveEditor">
+
+                        <i class="ph ph-floppy-disk"></i>
+
+                        Save Configuration
+
+                    </button>
+
+                </footer>
+
+            </section>
+
+        </div>
+    }
+
+
+    @* =========================================================
+       CREATE STRATEGY MODAL
+       ========================================================= *@
+
+    @if (CreateOpen)
+    {
+        <div class="strategy-modal-backdrop"
+             @onclick="CloseCreate">
+
+            <section class="strategy-modal"
+                     @onclick:stopPropagation="true">
+
+                <div class="strategy-modal-glow"></div>
+
+                <header>
+
+                    <div>
+
+                        <span class="panel-kicker">
+                            CUSTOM STRATEGY
+                        </span>
+
+                        <h2>
+                            Create Strategy
+                        </h2>
+
+                    </div>
+
+                    <button type="button"
+                            title="Close"
+                            @onclick="CloseCreate">
+
+                        <i class="ph ph-x"></i>
+
+                    </button>
+
+                </header>
+
+
+                <div class="strategy-config-grid">
+
+                    <label>
+
+                        <span>
+                            Name
+                        </span>
+
+                        <input @bind="CustomName"
+                               placeholder="My Strategy" />
+
+                    </label>
+
+
+                    <label>
+
+                        <span>
+                            Base Strategy
+                        </span>
+
+                        <select @bind="CustomBase">
+
+                            @foreach (var item in StrategyItems.Where(x => !x.Custom))
+                            {
+                                <option value="@item.Name">
+                                    @item.Name
+                                </option>
+                            }
+
+                        </select>
+
+                    </label>
+
+                </div>
+
+
+                <p class="strategy-modal-note">
+                    The custom strategy uses the selected registered strategy
+                    implementation and can be configured independently when
+                    backend editing support is available.
+                </p>
+
+
+                <footer>
+
+                    <div>
+
+                        <button type="button"
+                                class="strategy-secondary-action"
+                                @onclick="CloseCreate">
+
+                            Cancel
+
+                        </button>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="strategy-primary-action"
+                            disabled="@string.IsNullOrWhiteSpace(CustomName)"
+                            @onclick="CreateCustom">
+
+                        <i class="ph ph-plus"></i>
+
+                        Create Strategy
+
+                    </button>
+
+                </footer>
+
+            </section>
+
+        </div>
+    }
+
+</div>
+
+
+@code {
+
+    private bool Loading;
+
+    private string ErrorMessage = string.Empty;
+
+    private string ActiveTab = "All Strategies";
+
+    private string EngineStatusText =
+        "Engine status unavailable";
+
+    private string SearchText =
+        string.Empty;
+
+    private bool EditorOpen;
+
+    private bool CreateOpen;
+
+    private StrategyView? EditorStrategy;
+
+    private StrategyView? SelectedStrategy;
+
+    private Dictionary<string, string> EditorValues =
+        new();
+
+    private string CustomName =
+        string.Empty;
+
+    private string CustomBase =
+        "Momentum";
+
+
+    /*
+     * The component class is named Strategies.
+     * Do not name this collection "Strategies" because that
+     * causes CS0542.
+     */
+    private readonly List<StrategyView> StrategyItems =
+        new();
+
+
+    private readonly StrategyTab[] Tabs =
+    {
+        new(
+            "All Strategies",
+            "ph ph-stack"
+        ),
+
+        new(
+            "Momentum",
+            "ph ph-trend-up"
+        ),
+
+        new(
+            "Breakout",
+            "ph ph-arrow-square-out"
+        ),
+
+        new(
+            "Swing",
+            "ph ph-wave-sine"
+        ),
+
+        new(
+            "Mean Reversion",
+            "ph ph-arrows-left-right"
+        ),
+
+        new(
+            "Options",
+            "ph ph-chart-donut"
+        ),
+
+        new(
+            "Scalping",
+            "ph ph-lightning"
+        ),
+
+        new(
+            "Trend Following",
+            "ph ph-chart-line-up"
+        ),
+
+        new(
+            "Custom",
+            "ph ph-sliders-horizontal"
+        )
+    };
+
+
+    private List<StrategyView> FilteredStrategies
+    {
+        get
+        {
+            var items =
+                StrategyItems.AsEnumerable();
+
+            if (ActiveTab !=
+                "All Strategies")
+            {
+                items =
+                    ActiveTab == "Custom"
+                        ? items.Where(
+                            strategy =>
+                                strategy.Custom
+                        )
+                        : items.Where(
+                            strategy =>
+                                MatchesCategory(
+                                    strategy,
+                                    ActiveTab
+                                )
+                        );
+            }
+
+            if (!string.IsNullOrWhiteSpace(
+                    SearchText))
+            {
+                items =
+                    items.Where(
+                        strategy =>
+                            strategy.Name.Contains(
+                                SearchText,
+                                StringComparison.OrdinalIgnoreCase
+                            ) ||
+                            strategy.Category.Contains(
+                                SearchText,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                    );
+            }
+
+            return items.ToList();
+        }
+    }
+
+
+    private int ActiveCount =>
+        StrategyItems.Count(
+            strategy =>
+                IsActive(strategy)
+        );
+
+
+    private int InactiveCount =>
+        Math.Max(
+            0,
+            StrategyItems.Count -
+            ActiveCount
+        );
+
+
+    private int RunningCount =>
+        StrategyItems.Count(
+            strategy =>
+                IsRunning(strategy)
+        );
+
+
+    private int TotalTrades =>
+        StrategyItems.Sum(
+            strategy =>
+                strategy.TotalTrades
+        );
+
+
+    private bool HasPnlData =>
+        StrategyItems.Any(
+            strategy =>
+                strategy.TotalPnl.HasValue
+        );
+
+
+    private decimal? TotalPnl
+    {
+        get
+        {
+            var values =
+                StrategyItems
+                    .Where(
+                        strategy =>
+                            strategy.TotalPnl.HasValue
+                    )
+                    .Select(
+                        strategy =>
+                            strategy.TotalPnl!.Value
+                    )
+                    .ToList();
+
+            return values.Count == 0
+                ? null
+                : values.Sum();
+        }
+    }
+
+
+    private bool HasWinRateData =>
+        StrategyItems.Any(
+            strategy =>
+                strategy.WinRate.HasValue
+        );
+
+
+    private decimal? AverageWinRate
+    {
+        get
+        {
+            var values =
+                StrategyItems
+                    .Where(
+                        strategy =>
+                            strategy.WinRate.HasValue
+                    )
+                    .Select(
+                        strategy =>
+                            strategy.WinRate!.Value
+                    )
+                    .ToList();
+
+            return values.Count == 0
+                ? null
+                : values.Average();
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStrategies();
+    }
+
+
+    private async Task LoadStrategies()
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+        Loading = true;
+
+        ErrorMessage =
+            string.Empty;
+
+        try
+        {
+            var strategiesTask =
+                Api.Strategies();
+
+            var engineTask =
+                Api.EngineStatus();
+
+            await Task.WhenAll(
+                strategiesTask,
+                engineTask
+            );
+
+            ParseStrategies(
+                await strategiesTask
+            );
+
+            ParseEngineStatus(
+                await engineTask
+            );
+
+            if (SelectedStrategy is null &&
+                StrategyItems.Count > 0)
+            {
+                SelectedStrategy =
+                    StrategyItems[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(
+                ex
+            );
+
+            ErrorMessage =
+                "PhoenixTrend could not load strategy data from the backend.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+    private void ParseStrategies(
+        JsonElement? response)
+    {
+        StrategyItems.Clear();
+
+        if (response is null)
+        {
+            return;
+        }
+
+        if (!TryGetStrategyArray(
+                response.Value,
+                out var array))
+        {
+            return;
+        }
+
+        foreach (var element in
+                 array.EnumerateArray())
+        {
+            if (element.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var name =
+                ReadString(
+                    element,
+                    "name",
+                    "strategy_name",
+                    "strategy",
+                    "id"
+                );
+
+            if (string.IsNullOrWhiteSpace(
+                    name))
+            {
+                continue;
+            }
+
+
+            var category =
+                ReadString(
+                    element,
+                    "category",
+                    "type",
+                    "strategy_type"
+                );
+
+            if (string.IsNullOrWhiteSpace(
+                    category))
+            {
+                category =
+                    InferCategory(
+                        name
+                    );
+            }
+
+
+            var id =
+                ReadString(
+                    element,
+                    "id",
+                    "strategy_id"
+                );
+
+            if (string.IsNullOrWhiteSpace(
+                    id))
+            {
+                id =
+                    NormalizeId(
+                        name
+                    );
+            }
+
+
+            var status =
+                ReadString(
+                    element,
+                    "status",
+                    "state"
+                );
+
+
+            var enabled =
+                ReadBoolean(
+                    element,
+                    "enabled",
+                    "active"
+                );
+
+
+            var running =
+                ReadBoolean(
+                    element,
+                    "running"
+                );
+
+
+            JsonElement performance =
+                default;
+
+            var hasPerformance =
+                element.TryGetProperty(
+                    "performance",
+                    out performance
+                ) &&
+                performance.ValueKind ==
+                JsonValueKind.Object;
+
+
+            var totalReturn =
+                ReadDecimal(
+                    element,
+                    "total_return",
+                    "return",
+                    "return_pct",
+                    "return_percent"
+                );
+
+
+            if (!totalReturn.HasValue &&
+                hasPerformance)
+            {
+                totalReturn =
+                    ReadDecimal(
+                        performance,
+                        "total_return",
+                        "return",
+                        "return_pct",
+                        "return_percent"
+                    );
+            }
+
+
+            decimal? winRate =
+                null;
+
+            decimal? profitFactor =
+                null;
+
+            decimal? totalPnl =
+                null;
+
+            var totalTrades =
+                0;
+
+
+            if (hasPerformance)
+            {
+                winRate =
+                    ReadDecimal(
+                        performance,
+                        "win_rate"
+                    );
+
+                profitFactor =
+                    ReadDecimal(
+                        performance,
+                        "profit_factor"
+                    );
+
+                totalPnl =
+                    ReadDecimal(
+                        performance,
+                        "realized_pnl",
+                        "total_pnl",
+                        "pnl"
+                    );
+
+                totalTrades =
+                    ReadInt(
+                        performance,
+                        "trades",
+                        "total_trades",
+                        "trade_count"
+                    );
+            }
+
+
+            var timeframe =
+                ReadString(
+                    element,
+                    "timeframe"
+                );
+
+
+            var markets =
+                ReadStringOrArray(
+                    element,
+                    "markets",
+                    "market",
+                    "symbols"
+                );
+
+
+            var indicators =
+                ReadStringOrArray(
+                    element,
+                    "indicators"
+                );
+
+
+            var riskPerTrade =
+                ReadDecimal(
+                    element,
+                    "risk_per_trade",
+                    "risk_pct",
+                    "risk_percent"
+                );
+
+
+            var description =
+                ReadString(
+                    element,
+                    "description",
+                    "summary"
+                );
+
+
+            var editingSupported =
+                ReadBoolean(
+                    element,
+                    "editing_supported",
+                    "editable",
+                    "configuration_editable"
+                ) ?? false;
+
+
+            var defaults =
+                ReadConfiguration(
+                    element,
+                    "default_configuration"
+                );
+
+
+            var configured =
+                ReadConfiguration(
+                    element,
+                    "configuration"
+                );
+
+
+            var custom =
+                ReadBoolean(
+                    element,
+                    "custom"
+                ) ?? false;
+
+
+            StrategyItems.Add(
+                new StrategyView
+                {
+                    Id =
+                        id,
+
+                    Name =
+                        name,
+
+                    Category =
+                        category,
+
+                    Status =
+                        status,
+
+                    Enabled =
+                        enabled,
+
+                    Running =
+                        running,
+
+                    TotalReturn =
+                        totalReturn,
+
+                    WinRate =
+                        winRate,
+
+                    ProfitFactor =
+                        profitFactor,
+
+                    TotalPnl =
+                        totalPnl,
+
+                    TotalTrades =
+                        totalTrades,
+
+                    Timeframe =
+                        timeframe,
+
+                    Markets =
+                        markets,
+
+                    Indicators =
+                        indicators,
+
+                    RiskPerTrade =
+                        riskPerTrade,
+
+                    Description =
+                        description,
+
+                    EditingSupported =
+                        editingSupported,
+
+                    DefaultConfiguration =
+                        defaults,
+
+                    Configuration =
+                        configured,
+
+                    Custom =
+                        custom
+                }
+            );
+        }
+
+
+        if (SelectedStrategy is not null)
+        {
+            SelectedStrategy =
+                StrategyItems.FirstOrDefault(
+                    strategy =>
+                        string.Equals(
+                            strategy.Id,
+                            SelectedStrategy.Id,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                );
+        }
+    }
+
+
+    private void ParseEngineStatus(
+        JsonElement? response)
+    {
+        if (response is null)
+        {
+            EngineStatusText =
+                "Engine status unavailable";
+
+            return;
+        }
+
+
+        var state =
+            ReadString(
+                response.Value,
+                "state",
+                "status",
+                "mode"
+            );
+
+
+        if (!string.IsNullOrWhiteSpace(
+                state))
+        {
+            EngineStatusText =
+                Humanize(
+                    state
+                );
+
+            return;
+        }
+
+
+        var running =
+            ReadBoolean(
+                response.Value,
+                "running"
+            );
+
+
+        EngineStatusText =
+            running switch
+            {
+                true =>
+                    "Engine Running",
+
+                false =>
+                    "Engine Stopped",
+
+                _ =>
+                    "Engine Available"
+            };
+    }
+
+
+    private void SelectCategory(
+        string category)
+    {
+        ActiveTab =
+            category;
+
+        var available =
+            FilteredStrategies;
+
+
+        if (available.Count == 0)
+        {
+            SelectedStrategy =
+                null;
+
+            return;
+        }
+
+
+        if (SelectedStrategy is null ||
+            !available.Any(
+                strategy =>
+                    strategy.Id.Equals(
+                        SelectedStrategy.Id,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+            ))
+        {
+            SelectedStrategy =
+                available[0];
+        }
+    }
+
+
+    private void SelectStrategy(
+        StrategyView strategy)
+    {
+        SelectedStrategy =
+            strategy;
+    }
+
+
+    private void ViewStrategyDetails(
+        StrategyView strategy)
+    {
+        SelectedStrategy =
+            strategy;
+    }
+
+
+    private void ConfigureStrategy(
+        StrategyView strategy)
+    {
+        SelectedStrategy =
+            strategy;
+
+        EditorStrategy =
+            strategy;
+
+
+        EditorValues =
+            strategy.DefaultConfiguration
+                .ToDictionary(
+                    item =>
+                        item.Key,
+
+                    item =>
+                        strategy.Configuration.TryGetValue(
+                            item.Key,
+                            out var configuredValue
+                        )
+                            ? configuredValue
+                            : item.Value,
+
+                    StringComparer.OrdinalIgnoreCase
+                );
+
+
+        foreach (var configured in
+                 strategy.Configuration)
+        {
+            if (!EditorValues.ContainsKey(
+                    configured.Key))
+            {
+                EditorValues[
+                    configured.Key
+                ] =
+                    configured.Value;
+            }
+        }
+
+
+        EditorOpen =
+            true;
+    }
+
+
+    private void CloseEditor()
+    {
+        EditorOpen =
+            false;
+
+        EditorStrategy =
+            null;
+
+        EditorValues.Clear();
+    }
+
+
+    private void OpenCreate()
+    {
+        CustomName =
+            string.Empty;
+
+
+        CustomBase =
+            StrategyItems
+                .FirstOrDefault(
+                    strategy =>
+                        !strategy.Custom
+                )
+                ?.Name
+            ?? string.Empty;
+
+
+        CreateOpen =
+            true;
+    }
+
+
+    private void CloseCreate()
+    {
+        CreateOpen =
+            false;
+    }
+
+
+    private async Task SaveEditor()
+    {
+        if (EditorStrategy is null ||
+            EditorValues.Count == 0)
+        {
+            return;
+        }
+
+
+        var values =
+            new Dictionary<string, object>(
+                StringComparer.OrdinalIgnoreCase
+            );
+
+
+        foreach (var item in
+                 EditorValues)
+        {
+            if (double.TryParse(
+                    item.Value,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var number))
+            {
+                values[
+                    item.Key
+                ] =
+                    number;
+
+                continue;
+            }
+
+
+            if (bool.TryParse(
+                    item.Value,
+                    out var boolean))
+            {
+                values[
+                    item.Key
+                ] =
+                    boolean;
+
+                continue;
+            }
+
+
+            values[
+                item.Key
+            ] =
+                item.Value;
+        }
+
+
+        var result =
+            await Api.ConfigureStrategy(
+                EditorStrategy.Name,
+                values
+            );
+
+
+        if (result is null)
+        {
+            ErrorMessage =
+                "Strategy configuration could not be saved.";
+
+            return;
+        }
+
+
+        EditorOpen =
+            false;
+
+        EditorStrategy =
+            null;
+
+        await LoadStrategies();
+    }
+
+
+    private async Task ResetEditor()
+    {
+        if (EditorStrategy is null)
+        {
+            return;
+        }
+
+
+        var result =
+            await Api.ResetStrategy(
+                EditorStrategy.Name
+            );
+
+
+        if (result is null)
+        {
+            ErrorMessage =
+                "Strategy configuration could not be reset.";
+
+            return;
+        }
+
+
+        EditorOpen =
+            false;
+
+        EditorStrategy =
+            null;
+
+        await LoadStrategies();
+    }
+
+
+    private async Task DeleteCustom()
+    {
+        if (EditorStrategy is null ||
+            !EditorStrategy.Custom)
+        {
+            return;
+        }
+
+
+        var result =
+            await Api.DeleteCustomStrategy(
+                EditorStrategy.Name
+            );
+
+
+        if (result is null)
+        {
+            ErrorMessage =
+                "Custom strategy could not be deleted.";
+
+            return;
+        }
+
+
+        EditorOpen =
+            false;
+
+        EditorStrategy =
+            null;
+
+        SelectedStrategy =
+            null;
+
+
+        await LoadStrategies();
+    }
+
+
+    private async Task ToggleStrategy(
+        StrategyView strategy)
+    {
+        if (!strategy.Enabled.HasValue)
+        {
+            ErrorMessage =
+                "The backend did not expose an enabled state for this strategy.";
+
+            return;
+        }
+
+
+        JsonElement? result;
+
+
+        if (strategy.Enabled.Value)
+        {
+            result =
+                await Api.DisableStrategy(
+                    strategy.Name
+                );
+        }
+        else
+        {
+            result =
+                await Api.EnableStrategy(
+                    strategy.Name
+                );
+        }
+
+
+        if (result is null)
+        {
+            ErrorMessage =
+                "Strategy state could not be updated.";
+
+            return;
+        }
+
+
+        await LoadStrategies();
+    }
+
+
+    private async Task CreateCustom()
+    {
+        if (string.IsNullOrWhiteSpace(
+                CustomName) ||
+            string.IsNullOrWhiteSpace(
+                CustomBase))
+        {
+            return;
+        }
+
+
+        var result =
+            await Api.CreateCustomStrategy(
+                CustomName.Trim(),
+                CustomBase,
+                new Dictionary<string, object>()
+            );
+
+
+        if (result is null)
+        {
+            ErrorMessage =
+                "Custom strategy could not be created. Check the name and try again.";
+
+            return;
+        }
+
+
+        CreateOpen =
+            false;
+
+
+        await LoadStrategies();
+    }
+
+
+    private static Dictionary<string, string> ReadConfiguration(
+        JsonElement element,
+        string property)
+    {
+        var result =
+            new Dictionary<string, string>(
+                StringComparer.OrdinalIgnoreCase
+            );
+
+
+        if (!TryGetPropertyIgnoreCase(
+                element,
+                property,
+                out var config) ||
+            config.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return result;
+        }
+
+
+        foreach (var item in
+                 config.EnumerateObject())
+        {
+            result[
+                item.Name
+            ] =
+                item.Value.ToString();
+        }
+
+
+        return result;
+    }
+
+
+    private bool IsSelected(
+        StrategyView strategy)
+    {
+        return
+            SelectedStrategy is not null &&
+            strategy.Id.Equals(
+                SelectedStrategy.Id,
+                StringComparison.OrdinalIgnoreCase
+            );
+    }
+
+
+    private static bool MatchesCategory(
+        StrategyView strategy,
+        string category)
+    {
+        if (Contains(
+                strategy.Category,
+                category))
+        {
+            return true;
+        }
+
+
+        return category switch
+        {
+            "Momentum" =>
+                Contains(
+                    strategy.Name,
+                    "momentum"
+                ),
+
+            "Breakout" =>
+                Contains(
+                    strategy.Name,
+                    "breakout"
+                ),
+
+            "Swing" =>
+                Contains(
+                    strategy.Name,
+                    "swing"
+                ),
+
+            "Mean Reversion" =>
+                Contains(
+                    strategy.Name,
+                    "mean"
+                ) ||
+                Contains(
+                    strategy.Name,
+                    "reversion"
+                ),
+
+            "Options" =>
+                Contains(
+                    strategy.Name,
+                    "option"
+                ),
+
+            "Scalping" =>
+                Contains(
+                    strategy.Name,
+                    "scalp"
+                ),
+
+            "Trend Following" =>
+                Contains(
+                    strategy.Name,
+                    "trend"
+                ),
+
+            "Custom" =>
+                strategy.Custom,
+
+            _ =>
+                false
+        };
+    }
+
+
+    private static string StrategyIcon(
+        StrategyView strategy)
+    {
+        var value =
+            $"{strategy.Category} {strategy.Name}"
+                .ToLowerInvariant();
+
+
+        if (value.Contains(
+                "momentum"))
+        {
+            return
+                "ph ph-trend-up";
+        }
+
+
+        if (value.Contains(
+                "breakout"))
+        {
+            return
+                "ph ph-arrow-square-out";
+        }
+
+
+        if (value.Contains(
+                "swing"))
+        {
+            return
+                "ph ph-wave-sine";
+        }
+
+
+        if (value.Contains("mean") ||
+            value.Contains("reversion"))
+        {
+            return
+                "ph ph-arrows-left-right";
+        }
+
+
+        if (value.Contains(
+                "option"))
+        {
+            return
+                "ph ph-chart-donut";
+        }
+
+
+        if (value.Contains(
+                "scalp"))
+        {
+            return
+                "ph ph-lightning";
+        }
+
+
+        if (value.Contains(
+                "trend"))
+        {
+            return
+                "ph ph-chart-line-up";
+        }
+
+
+        if (value.Contains(
+                "vwap"))
+        {
+            return
+                "ph ph-chart-line";
+        }
+
+
+        if (value.Contains(
+                "orb"))
+        {
+            return
+                "ph ph-crosshair";
+        }
+
+
+        if (value.Contains(
+                "gap"))
+        {
+            return
+                "ph ph-arrows-out-line-horizontal";
+        }
+
+
+        if (value.Contains(
+                "pullback"))
+        {
+            return
+                "ph ph-arrow-bend-down-left";
+        }
+
+
+        return
+            "ph ph-strategy";
+    }
+
+
+    private static string StrategyDescription(
+        StrategyView strategy)
+    {
+        if (!string.IsNullOrWhiteSpace(
+                strategy.Description))
+        {
+            return
+                strategy.Description;
+        }
+
+
+        /*
+         * Do not repeat the strategy name here.
+         * The name and category are already displayed above.
+         */
+        return
+            "Registered with the PhoenixTrend strategy engine.";
+    }
+
+
+    private static string DisplayStatus(
+        StrategyView strategy)
+    {
+        if (strategy.Running == true)
+        {
+            return
+                "Running";
+        }
+
+
+        if (strategy.Enabled == true)
+        {
+            return
+                "Enabled";
+        }
+
+
+        if (strategy.Enabled == false)
+        {
+            return
+                "Disabled";
+        }
+
+
+        if (!string.IsNullOrWhiteSpace(
+                strategy.Status))
+        {
+            return
+                Humanize(
+                    strategy.Status
+                );
+        }
+
+
+        return
+            "Unavailable";
+    }
+
+
+    private static string StatusClass(
+        StrategyView strategy)
+    {
+        var status =
+            DisplayStatus(
+                strategy
+            );
+
+
+        if (Contains(
+                status,
+                "running") ||
+            Contains(
+                status,
+                "enabled") ||
+            Contains(
+                status,
+                "active"))
+        {
+            return
+                "green";
+        }
+
+
+        if (Contains(
+                status,
+                "error") ||
+            Contains(
+                status,
+                "failed") ||
+            Contains(
+                status,
+                "rejected"))
+        {
+            return
+                "red";
+        }
+
+
+        return
+            "muted";
+    }
+
+
+    private static bool IsActive(
+        StrategyView strategy)
+    {
+        if (strategy.Enabled.HasValue)
+        {
+            return
+                strategy.Enabled.Value;
+        }
+
+
+        var status =
+            DisplayStatus(
+                strategy
+            );
+
+
+        return
+            Contains(
+                status,
+                "active"
+            ) ||
+            Contains(
+                status,
+                "running"
+            ) ||
+            Contains(
+                status,
+                "enabled"
+            );
+    }
+
+
+    private static bool IsRunning(
+        StrategyView strategy)
+    {
+        if (strategy.Running.HasValue)
+        {
+            return
+                strategy.Running.Value;
+        }
+
+
+        return
+            Contains(
+                DisplayStatus(
+                    strategy
+                ),
+                "running"
+            );
+    }
+
+
+    private static string ValueClass(
+        decimal? value)
+    {
+        if (!value.HasValue)
+        {
+            return
+                string.Empty;
+        }
+
+
+        if (value.Value > 0)
+        {
+            return
+                "green";
+        }
+
+
+        if (value.Value < 0)
+        {
+            return
+                "red";
+        }
+
+
+        return
+            string.Empty;
+    }
+
+
+    private static string FormatPercent(
+        decimal? value)
+    {
+        if (!value.HasValue)
+        {
+            return
+                "—";
+        }
+
+
+        var number =
+            value.Value;
+
+
+        if (Math.Abs(
+                number) <= 1m)
+        {
+            number *=
+                100m;
+        }
+
+
+        return
+            $"{number:0.##}%";
+    }
+
+
+    private static string FormatMoney(
+        decimal? value)
+    {
+        if (!value.HasValue)
+        {
+            return
+                "—";
+        }
+
+
+        if (value.Value > 0)
+        {
+            return
+                $"+${value.Value:N2}";
+        }
+
+
+        if (value.Value < 0)
+        {
+            return
+                $"-${Math.Abs(value.Value):N2}";
+        }
+
+
+        return
+            "$0.00";
+    }
+
+
+    private static string FormatNumber(
+        decimal? value)
+    {
+        return
+            value.HasValue
+                ? value.Value.ToString(
+                    "0.##",
+                    CultureInfo.InvariantCulture
+                )
+                : "—";
+    }
+
+
+    private static string DisplayText(
+        string? value)
+    {
+        return
+            string.IsNullOrWhiteSpace(
+                value)
+                ? "—"
+                : value;
+    }
+
+
+    private static string InferCategory(
+        string name)
+    {
+        if (Contains(
+                name,
+                "momentum"))
+        {
+            return
+                "Momentum";
+        }
+
+
+        if (Contains(
+                name,
+                "breakout"))
+        {
+            return
+                "Breakout";
+        }
+
+
+        if (Contains(
+                name,
+                "swing"))
+        {
+            return
+                "Swing";
+        }
+
+
+        if (Contains(
+                name,
+                "mean") ||
+            Contains(
+                name,
+                "reversion"))
+        {
+            return
+                "Mean Reversion";
+        }
+
+
+        if (Contains(
+                name,
+                "option"))
+        {
+            return
+                "Options";
+        }
+
+
+        if (Contains(
+                name,
+                "scalp"))
+        {
+            return
+                "Scalping";
+        }
+
+
+        if (Contains(
+                name,
+                "trend"))
+        {
+            return
+                "Trend Following";
+        }
+
+
+        return
+            "Other";
+    }
+
+
+    private static bool Contains(
+        string? value,
+        string search)
+    {
+        return
+            !string.IsNullOrWhiteSpace(
+                value) &&
+            value.Contains(
+                search,
+                StringComparison.OrdinalIgnoreCase
+            );
+    }
+
+
+    private static string Humanize(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(
+                value))
+        {
+            return
+                string.Empty;
+        }
+
+
+        var normalized =
+            value
+                .Replace(
+                    "_",
+                    " "
+                )
+                .Replace(
+                    "-",
+                    " "
+                )
+                .Trim()
+                .ToLowerInvariant();
+
+
+        return
+            CultureInfo
+                .InvariantCulture
+                .TextInfo
+                .ToTitleCase(
+                    normalized
+                );
+    }
+
+
+    private static string NormalizeId(
+        string value)
+    {
+        var characters =
+            value
+                .Where(
+                    char.IsLetterOrDigit
+                )
+                .Select(
+                    char.ToLowerInvariant
+                )
+                .ToArray();
+
+
+        return
+            new string(
+                characters
+            );
+    }
+
+
+    private static bool TryGetStrategyArray(
+        JsonElement root,
+        out JsonElement array)
+    {
+        if (root.ValueKind ==
+            JsonValueKind.Array)
+        {
+            array =
+                root;
+
+            return
+                true;
+        }
+
+
+        if (root.ValueKind ==
+            JsonValueKind.Object)
+        {
+            foreach (var property in
+                     new[]
+                     {
+                         "strategies",
+                         "items",
+                         "data",
+                         "results"
+                     })
+            {
+                if (TryGetPropertyIgnoreCase(
+                        root,
+                        property,
+                        out var candidate) &&
+                    candidate.ValueKind ==
+                    JsonValueKind.Array)
+                {
+                    array =
+                        candidate;
+
+                    return
+                        true;
+                }
+            }
+        }
+
+
+        array =
+            default;
+
+        return
+            false;
+    }
+
+
+    private static string ReadString(
+        JsonElement root,
+        params string[] names)
+    {
+        foreach (var name in
+                 names)
+        {
+            if (!TryGetPropertyIgnoreCase(
+                    root,
+                    name,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.String)
+            {
+                return
+                    value
+                        .GetString()
+                        ?.Trim()
+                    ?? string.Empty;
+            }
+
+
+            if (value.ValueKind is
+                JsonValueKind.Number or
+                JsonValueKind.True or
+                JsonValueKind.False)
+            {
+                return
+                    value.ToString();
+            }
+        }
+
+
+        return
+            string.Empty;
+    }
+
+
+    private static string ReadStringOrArray(
+        JsonElement root,
+        params string[] names)
+    {
+        foreach (var name in
+                 names)
+        {
+            if (!TryGetPropertyIgnoreCase(
+                    root,
+                    name,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.String)
+            {
+                return
+                    value
+                        .GetString()
+                        ?.Trim()
+                    ?? string.Empty;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.Array)
+            {
+                var values =
+                    new List<string>();
+
+
+                foreach (var item in
+                         value.EnumerateArray())
+                {
+                    if (item.ValueKind ==
+                        JsonValueKind.String)
+                    {
+                        var text =
+                            item.GetString();
+
+
+                        if (!string.IsNullOrWhiteSpace(
+                                text))
+                        {
+                            values.Add(
+                                text
+                            );
+                        }
+                    }
+                    else if (item.ValueKind is
+                             JsonValueKind.Number or
+                             JsonValueKind.True or
+                             JsonValueKind.False)
+                    {
+                        values.Add(
+                            item.ToString()
+                        );
+                    }
+                }
+
+
+                return
+                    string.Join(
+                        ", ",
+                        values
+                    );
+            }
+        }
+
+
+        return
+            string.Empty;
+    }
+
+
+    private static decimal? ReadDecimal(
+        JsonElement root,
+        params string[] names)
+    {
+        foreach (var name in
+                 names)
+        {
+            if (!TryGetPropertyIgnoreCase(
+                    root,
+                    name,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.Number &&
+                value.TryGetDecimal(
+                    out var number))
+            {
+                return
+                    number;
+            }
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.String &&
+                decimal.TryParse(
+                    value.GetString(),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out number))
+            {
+                return
+                    number;
+            }
+        }
+
+
+        return
+            null;
+    }
+
+
+    private static int ReadInt(
+        JsonElement root,
+        params string[] names)
+    {
+        var value =
+            ReadDecimal(
+                root,
+                names
+            );
+
+
+        if (!value.HasValue)
+        {
+            return
+                0;
+        }
+
+
+        return
+            Math.Max(
+                0,
+                decimal.ToInt32(
+                    decimal.Round(
+                        value.Value,
+                        0,
+                        MidpointRounding.AwayFromZero
+                    )
+                )
+            );
+    }
+
+
+    private static bool? ReadBoolean(
+        JsonElement root,
+        params string[] names)
+    {
+        foreach (var name in
+                 names)
+        {
+            if (!TryGetPropertyIgnoreCase(
+                    root,
+                    name,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.True)
+            {
+                return
+                    true;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.False)
+            {
+                return
+                    false;
+            }
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.String &&
+                bool.TryParse(
+                    value.GetString(),
+                    out var parsed))
+            {
+                return
+                    parsed;
+            }
+        }
+
+
+        return
+            null;
+    }
+
+
+    private static bool TryGetPropertyIgnoreCase(
+        JsonElement root,
+        string name,
+        out JsonElement value)
+    {
+        if (root.ValueKind !=
+            JsonValueKind.Object)
+        {
+            value =
+                default;
+
+            return
+                false;
+        }
+
+
+        if (root.TryGetProperty(
+                name,
+                out value))
+        {
+            return
+                true;
+        }
+
+
+        foreach (var property in
+                 root.EnumerateObject())
+        {
+            if (property.Name.Equals(
+                    name,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                value =
+                    property.Value;
+
+                return
+                    true;
+            }
+        }
+
+
+        value =
+            default;
+
+        return
+            false;
+    }
+
+
+    private sealed record StrategyTab(
+        string Name,
+        string Icon
+    );
+
+
+    private sealed class StrategyView
+    {
+        public string Id { get; init; } =
+            string.Empty;
+
+        public string Name { get; init; } =
+            string.Empty;
+
+        public string Category { get; init; } =
+            string.Empty;
+
+        public string Status { get; init; } =
+            string.Empty;
+
+        public bool? Enabled { get; init; }
+
+        public bool? Running { get; init; }
+
+        public decimal? TotalReturn { get; init; }
+
+        public decimal? WinRate { get; init; }
+
+        public decimal? ProfitFactor { get; init; }
+
+        public decimal? TotalPnl { get; init; }
+
+        public int TotalTrades { get; init; }
+
+        public string Timeframe { get; init; } =
+            string.Empty;
+
+        public string Markets { get; init; } =
+            string.Empty;
+
+        public string Indicators { get; init; } =
+            string.Empty;
+
+        public decimal? RiskPerTrade { get; init; }
+
+        public string Description { get; init; } =
+            string.Empty;
+
+        public bool EditingSupported { get; init; }
+
+        public bool Custom { get; init; }
+
+        public Dictionary<string, string> DefaultConfiguration { get; init; } =
+            new();
+
+        public Dictionary<string, string> Configuration { get; init; } =
+            new();
+
+
+        public bool HasPerformance =>
+            TotalReturn.HasValue ||
+            WinRate.HasValue ||
+            ProfitFactor.HasValue ||
+            TotalPnl.HasValue ||
+            TotalTrades > 0;
+    }
+}

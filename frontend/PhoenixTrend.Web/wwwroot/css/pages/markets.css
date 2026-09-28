@@ -1,0 +1,1025 @@
+/* ============================================================
+   PHOENIXTREND MARKETS — APPROVED REBUILD
+   Fully isolated under .ptm-page
+   ============================================================ */
+
+.ptm-page{
+    --ptm-card:#061522;
+    --ptm-card2:#081b2a;
+    --ptm-border:rgba(104,153,186,.28);
+    --ptm-line:rgba(108,155,187,.17);
+    --ptm-text:#f7f9fb;
+    --ptm-muted:#91a6b8;
+    --ptm-orange:#ff9d1c;
+    --ptm-orange2:#ffc15c;
+    --ptm-green:#00e6a0;
+    --ptm-red:#ff5266;
+    width:100%;
+    min-width:0;
+    display:grid;
+    gap:14px;
+    color:var(--ptm-text);
+    padding-bottom:26px;
+}
+
+.ptm-page *{box-sizing:border-box}
+.ptm-page .ptm-positive{color:var(--ptm-green)!important}
+.ptm-page .ptm-negative{color:var(--ptm-red)!important}
+.ptm-page .ptm-neutral{color:var(--ptm-muted)!important}
+
+/* HOME-STYLE BANNER */
+.ptm-page .ptm-hero{
+    position:relative;
+    isolation:isolate;
+    min-height:168px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    padding:28px 30px;
+    border:1px solid rgba(255,166,42,.30);
+    border-radius:18px;
+    background:
+        linear-gradient(90deg,
+            rgba(2,8,15,.94) 0%,
+            rgba(2,8,15,.72) 28%,
+            rgba(2,8,15,.24) 60%,
+            rgba(2,8,15,.08) 100%),
+        url("/assets/phoenix-mountain-horizontal.png") center 39%/cover no-repeat;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        0 18px 42px rgba(0,0,0,.22);
+}
+
+.ptm-page .ptm-hero::after{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    inset:0;
+    background:
+        radial-gradient(circle at 72% 38%,rgba(255,146,25,.16),transparent 27%),
+        linear-gradient(180deg,transparent 48%,rgba(2,9,16,.35));
+    pointer-events:none;
+}
+
+.ptm-page .ptm-hero-copy h1{
+    margin:0;
+    font-size:38px;
+    line-height:1;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.ptm-page .ptm-hero-copy p{
+    margin:10px 0 0;
+    color:#cbd6df;
+    font-size:15px;
+    line-height:1.45;
+}
+
+.ptm-page .ptm-refresh{
+    height:42px;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:0 18px;
+    border:1px solid rgba(255,184,78,.80);
+    border-radius:10px;
+    background:linear-gradient(180deg,#ffc761,#ff981b);
+    color:#211100;
+    font-size:13px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 0 24px rgba(255,147,20,.15);
+}
+
+.ptm-page .ptm-refresh:disabled{opacity:.62;cursor:wait}
+
+.ptm-page .ptm-message{
+    min-height:42px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 13px;
+    border:1px solid var(--ptm-border);
+    border-radius:10px;
+    background:rgba(5,19,31,.94);
+    color:#b2c1cd;
+    font-size:13px;
+}
+.ptm-page .ptm-message-error{border-color:rgba(255,82,102,.38);color:#ff9aa6}
+
+/* INDEXES */
+.ptm-page .ptm-index-grid{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:11px;
+}
+
+.ptm-page .ptm-index-card{
+    min-width:0;
+    min-height:104px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 15px;
+    border:1px solid var(--ptm-border);
+    border-radius:12px;
+    background:linear-gradient(145deg,rgba(8,25,39,.98),rgba(3,14,24,.97));
+}
+
+.ptm-page .ptm-index-card:first-child{
+    border-color:rgba(255,159,31,.55);
+    box-shadow:0 0 20px rgba(255,140,18,.07);
+}
+
+.ptm-page .ptm-index-copy{min-width:112px}
+.ptm-page .ptm-index-copy>span{
+    display:block;
+    color:#c8d4de;
+    font-size:12px;
+    font-weight:800;
+}
+.ptm-page .ptm-index-copy>strong{
+    display:block;
+    margin-top:5px;
+    font-size:21px;
+    line-height:1.05;
+}
+.ptm-page .ptm-index-copy>small{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:7px;
+    font-size:11px;
+    font-weight:900;
+}
+.ptm-page .ptm-index-copy>small b{font:inherit}
+
+.ptm-page .ptm-mini-spark{
+    width:104px;
+    height:48px;
+    overflow:hidden;
+}
+.ptm-page .ptm-mini-spark svg{width:100%;height:100%;display:block;overflow:visible}
+.ptm-page .ptm-mini-spark polyline{
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2.2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    vector-effect:non-scaling-stroke;
+}
+
+/* CONTROLS */
+.ptm-page .ptm-controls{
+    display:grid;
+    grid-template-columns:minmax(650px,1fr) 250px 150px 42px;
+    gap:10px;
+    align-items:center;
+}
+
+.ptm-page .ptm-asset-tabs{
+    min-width:0;
+    display:grid;
+    grid-template-columns:repeat(8,minmax(78px,1fr));
+    overflow:hidden;
+    border:1px solid var(--ptm-border);
+    border-radius:9px;
+    background:#04111c;
+}
+
+.ptm-page .ptm-asset-tabs button{
+    height:40px;
+    border:0;
+    border-right:1px solid var(--ptm-border);
+    background:transparent;
+    color:#aebdca;
+    font-size:13px;
+    cursor:pointer;
+}
+.ptm-page .ptm-asset-tabs button:last-child{border-right:0}
+.ptm-page .ptm-asset-tabs button.ptm-active{
+    color:#fff;
+    font-weight:800;
+    background:linear-gradient(180deg,rgba(132,72,10,.92),rgba(72,36,5,.91));
+    box-shadow:inset 0 0 0 1px rgba(255,165,38,.85);
+}
+
+.ptm-page .ptm-search{
+    height:40px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:0 12px;
+    border:1px solid var(--ptm-border);
+    border-radius:9px;
+    background:#04111c;
+}
+.ptm-page .ptm-search i{color:#d5dfe8;font-size:17px}
+.ptm-page .ptm-search input{
+    width:100%;min-width:0;border:0;outline:0;background:transparent;color:#fff;font-size:13px;
+}
+.ptm-page .ptm-segment,.ptm-page .ptm-filter{
+    height:40px;border:1px solid var(--ptm-border);border-radius:9px;background:#061521;color:#d6e0e8;
+}
+.ptm-page .ptm-segment{padding:0 10px;font-size:12px}
+.ptm-page .ptm-filter{display:grid;place-items:center;font-size:18px;cursor:pointer}
+
+/* CARDS */
+.ptm-page .ptm-card{
+    min-width:0;
+    overflow:hidden;
+    border:1px solid var(--ptm-border);
+    border-radius:13px;
+    background:linear-gradient(145deg,rgba(5,19,31,.99),rgba(3,14,24,.98));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.ptm-page .ptm-card-head{
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--ptm-line);
+}
+.ptm-page .ptm-card-head h2,.ptm-page .ptm-detail-head h2{
+    margin:0;font-size:17px;font-weight:900;
+}
+.ptm-page .ptm-card-head span,.ptm-page .ptm-detail-head span{
+    display:block;margin-top:3px;color:var(--ptm-muted);font-size:11px;
+}
+
+.ptm-page .ptm-main-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1.78fr) minmax(390px,.95fr);
+    gap:14px;
+    align-items:stretch;
+}
+
+/* WATCHLIST */
+.ptm-page .ptm-watch-tools{display:flex;gap:8px}
+.ptm-page .ptm-watch-tools button{
+    height:33px;display:inline-flex;align-items:center;gap:6px;padding:0 11px;
+    border:1px solid var(--ptm-border);border-radius:8px;background:#071826;
+    color:#d8e2ea;font-size:11px;cursor:pointer;
+}
+.ptm-page .ptm-watch-tools button.ptm-add{border-color:rgba(255,158,29,.66);color:var(--ptm-orange2)}
+.ptm-page .ptm-table-scroll{width:100%;overflow:auto}
+.ptm-page .ptm-watch-table{width:100%;min-width:850px;border-collapse:collapse;table-layout:fixed}
+.ptm-page .ptm-watch-table th{
+    height:38px;padding:0 8px;text-align:left;color:#91a5b7;font-size:11px;font-weight:800;
+    border-bottom:1px solid var(--ptm-line);
+}
+.ptm-page .ptm-watch-table td{
+    height:48px;padding:5px 8px;color:#dce6ef;font-size:12px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid rgba(109,156,188,.13);
+}
+.ptm-page .ptm-watch-table tbody tr{cursor:pointer;transition:background .14s ease}
+.ptm-page .ptm-watch-table tbody tr:hover{background:rgba(255,255,255,.025)}
+.ptm-page .ptm-watch-table tbody tr.ptm-selected-row{
+    background:linear-gradient(90deg,rgba(255,146,18,.10),rgba(10,42,61,.06));
+    box-shadow:inset 3px 0 0 var(--ptm-orange);
+}
+.ptm-page .ptm-watch-table th:nth-child(1),.ptm-page .ptm-watch-table td:nth-child(1){width:30px}
+.ptm-page .ptm-watch-table th:nth-child(2),.ptm-page .ptm-watch-table td:nth-child(2){width:100px}
+.ptm-page .ptm-watch-table th:nth-child(3),.ptm-page .ptm-watch-table td:nth-child(3){width:140px}
+.ptm-page .ptm-watch-table th:nth-child(4),.ptm-page .ptm-watch-table td:nth-child(4){width:82px}
+.ptm-page .ptm-watch-table th:nth-child(5),.ptm-page .ptm-watch-table td:nth-child(5){width:78px}
+.ptm-page .ptm-watch-table th:nth-child(6),.ptm-page .ptm-watch-table td:nth-child(6){width:82px}
+.ptm-page .ptm-watch-table th:nth-child(7),.ptm-page .ptm-watch-table td:nth-child(7){width:80px}
+.ptm-page .ptm-watch-table th:nth-child(8),.ptm-page .ptm-watch-table td:nth-child(8){width:94px}
+.ptm-page .ptm-watch-table th:nth-child(9),.ptm-page .ptm-watch-table td:nth-child(9){width:86px}
+.ptm-page .ptm-checkbox{width:13px;height:13px;display:block;border:1px solid #71899c;border-radius:3px}
+.ptm-page .ptm-symbol{display:flex;align-items:center;gap:8px}
+.ptm-page .ptm-symbol strong{font-size:13px}
+.ptm-page .ptm-company{color:#9eafbe!important}
+.ptm-page .ptm-price{font-weight:900}
+.ptm-page .ptm-row-spark{width:76px;height:28px}
+.ptm-page .ptm-row-spark svg{width:100%;height:100%;display:block}
+.ptm-page .ptm-row-spark polyline{
+    fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;
+    vector-effect:non-scaling-stroke;
+}
+.ptm-page .ptm-row-actions{display:flex;align-items:center;gap:3px}
+.ptm-page .ptm-row-actions button{
+    width:25px;height:25px;display:grid;place-items:center;padding:0;border:0;background:transparent;
+    color:#a8bac9;font-size:14px;cursor:pointer;
+}
+.ptm-page .ptm-row-actions button:hover{color:var(--ptm-orange2)}
+
+/* SELECTED SYMBOL */
+.ptm-page .ptm-detail-card{padding-bottom:10px}
+.ptm-page .ptm-detail-head{
+    min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px 5px;
+}
+.ptm-page .ptm-detail-symbol{display:flex;align-items:center;gap:10px}
+.ptm-page .ptm-detail-symbol h2{font-size:22px}
+.ptm-page .ptm-detail-actions{display:flex;gap:7px}
+.ptm-page .ptm-detail-actions button{
+    height:32px;display:inline-flex;align-items:center;gap:5px;padding:0 10px;border:1px solid var(--ptm-border);
+    border-radius:7px;background:#071724;color:#dce5ed;font-size:11px;cursor:pointer;
+}
+.ptm-page .ptm-detail-actions button.ptm-trade{
+    border-color:#ffae39;background:linear-gradient(180deg,#ffc35f,#ff991d);color:#251300;font-weight:900;
+}
+.ptm-page .ptm-selected-price{display:flex;align-items:baseline;gap:9px;padding:0 14px 10px}
+.ptm-page .ptm-selected-price>strong{font-size:30px}
+.ptm-page .ptm-selected-price>span{font-size:13px;font-weight:900}
+.ptm-page .ptm-selected-price b{font:inherit}
+.ptm-page .ptm-timeframes{
+    display:grid;grid-template-columns:repeat(6,1fr);margin:0 13px;overflow:hidden;
+    border:1px solid var(--ptm-line);border-radius:8px;
+}
+.ptm-page .ptm-timeframes button{
+    height:34px;border:0;border-right:1px solid var(--ptm-line);background:#071724;
+    color:#9aabba;font-size:11px;cursor:pointer;
+}
+.ptm-page .ptm-timeframes button:last-child{border-right:0}
+.ptm-page .ptm-timeframes button.ptm-active{
+    color:#fff;font-weight:800;background:rgba(255,146,18,.14);box-shadow:inset 0 0 0 1px var(--ptm-orange);
+}
+
+/* REAL PRICE CHART */
+.ptm-page .ptm-chart{
+    position:relative;
+    isolation:isolate;
+    height:275px;
+    margin:11px 13px 9px;
+    overflow:hidden;
+    border:1px solid rgba(100,150,184,.18);
+    border-radius:7px;
+    background:
+        linear-gradient(180deg,rgba(3,15,24,.78),rgba(2,11,19,.52));
+}
+.ptm-page .ptm-chart-grid{
+    position:absolute;z-index:0;inset:0;display:grid;grid-template-rows:repeat(4,1fr);pointer-events:none;
+}
+.ptm-page .ptm-chart-grid i{display:block;border-bottom:1px solid rgba(106,153,185,.12)}
+.ptm-page .ptm-price-chart{
+    position:absolute;z-index:1;inset:0;width:100%;height:100%;display:block;overflow:hidden;
+}
+.ptm-page .ptm-chart-line{
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2.2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    vector-effect:non-scaling-stroke;
+}
+.ptm-page .ptm-chart-area{
+    fill:url(#ptmChartFill);
+    stroke:none;
+    color:inherit;
+}
+.ptm-page .ptm-chart-range{
+    position:absolute;z-index:2;inset:8px 9px auto 9px;display:flex;justify-content:space-between;
+    color:#8298aa;font-size:10px;pointer-events:none;
+}
+.ptm-page .ptm-chart-empty{
+    position:absolute;inset:0;display:grid;place-content:center;gap:6px;padding:20px;text-align:center;color:#71899d;
+}
+.ptm-page .ptm-chart-empty i{font-size:30px;color:#16a9dd}
+.ptm-page .ptm-chart-empty strong{color:#cbd7e1;font-size:13px}
+.ptm-page .ptm-chart-empty span{font-size:11px}
+.ptm-page .ptm-stats{display:grid;grid-template-columns:repeat(2,1fr);margin:0 13px}
+.ptm-page .ptm-stats>div{
+    min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:7px;
+    padding:0 5px;border-bottom:1px solid var(--ptm-line);
+}
+.ptm-page .ptm-stats>div:nth-child(odd){padding-right:13px;border-right:1px solid var(--ptm-line)}
+.ptm-page .ptm-stats>div:nth-child(even){padding-left:13px}
+.ptm-page .ptm-stats span{color:#91a6b8;font-size:11px}
+.ptm-page .ptm-stats strong{font-size:12px}
+
+/* LOWER PANELS */
+.ptm-page .ptm-bottom-grid{
+    display:grid;
+    grid-template-columns:minmax(350px,.98fr) minmax(320px,.76fr) minmax(350px,.82fr);
+    gap:14px;
+}
+.ptm-page .ptm-compact-head{min-height:50px}
+.ptm-page .ptm-small-tabs{display:flex;gap:5px}
+.ptm-page .ptm-small-tabs button,.ptm-page .ptm-mover-tabs button{
+    min-height:29px;padding:0 10px;border:1px solid var(--ptm-border);border-radius:7px;
+    background:#071724;color:#a6b7c5;font-size:10px;cursor:pointer;
+}
+.ptm-page .ptm-small-tabs button.ptm-active,.ptm-page .ptm-mover-tabs button.ptm-active{
+    border-color:var(--ptm-orange);color:#fff;background:rgba(255,146,18,.12);
+}
+.ptm-page .ptm-heatmap{
+    min-height:235px;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(96px,1fr);gap:5px;padding:8px;
+}
+.ptm-page .ptm-heatmap button{
+    min-width:0;display:grid;place-items:center;align-content:center;gap:4px;border:1px solid rgba(255,255,255,.10);
+    border-radius:6px;color:#fff!important;cursor:pointer;
+}
+.ptm-page .ptm-heatmap button.ptm-positive{background:linear-gradient(145deg,#087b48,#075d39)}
+.ptm-page .ptm-heatmap button.ptm-negative{background:linear-gradient(145deg,#922a3a,#611e2a)}
+.ptm-page .ptm-heatmap button.ptm-neutral{background:#173044}
+.ptm-page .ptm-heatmap strong{font-size:13px}
+.ptm-page .ptm-heatmap span{font-size:11px;font-weight:900}
+.ptm-page .ptm-heatmap small{font-size:9px;opacity:.80}
+
+.ptm-page .ptm-movers-card,.ptm-page .ptm-news-card{min-height:280px}
+.ptm-page .ptm-mover-tabs{
+    height:48px;display:flex;align-items:center;gap:5px;padding:7px;border-bottom:1px solid var(--ptm-line);
+}
+.ptm-page .ptm-mover-tabs button{flex:1}
+.ptm-page .ptm-movers-scroll{overflow:auto}
+.ptm-page .ptm-movers-table{width:100%;border-collapse:collapse}
+.ptm-page .ptm-movers-table th,.ptm-page .ptm-movers-table td{
+    height:32px;padding:0 8px;text-align:left;border-bottom:1px solid rgba(108,154,185,.13);font-size:11px;
+}
+.ptm-page .ptm-movers-table th{color:#91a5b7;font-weight:700}
+.ptm-page .ptm-movers-table tbody tr{cursor:pointer}
+.ptm-page .ptm-movers-table tbody tr:hover{background:rgba(255,255,255,.025)}
+
+.ptm-page .ptm-news-list{padding:4px 9px}
+.ptm-page .ptm-news-list>article{
+    min-height:44px;display:grid;grid-template-columns:31px 74px minmax(0,1fr);gap:8px;
+    align-items:center;border-bottom:1px solid rgba(110,157,189,.13);
+}
+.ptm-page .ptm-news-icon{
+    width:29px;height:29px;display:grid;place-items:center;border-radius:7px;
+    background:rgba(255,255,255,.055);color:#cbd7e1;
+}
+.ptm-page .ptm-news-source{font-size:10px;font-weight:900}
+.ptm-page .ptm-news-title{
+    min-width:0;color:#c4d0da;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ptm-page .ptm-news-empty{
+    min-height:190px;display:grid;place-content:center;gap:7px;text-align:center;color:#8095a7;font-size:11px;
+}
+.ptm-page .ptm-news-empty i{font-size:26px}
+
+@media(max-width:1450px){
+    .ptm-page .ptm-controls{grid-template-columns:1fr 220px 130px 40px}
+    .ptm-page .ptm-main-grid{grid-template-columns:minmax(0,1.55fr) minmax(370px,.9fr)}
+}
+@media(max-width:1180px){
+    .ptm-page .ptm-index-grid{grid-template-columns:repeat(3,1fr)}
+    .ptm-page .ptm-controls{grid-template-columns:1fr 1fr}
+    .ptm-page .ptm-asset-tabs{grid-column:1/-1}
+    .ptm-page .ptm-main-grid{grid-template-columns:1fr}
+    .ptm-page .ptm-bottom-grid{grid-template-columns:1fr 1fr}
+    .ptm-page .ptm-news-card{grid-column:1/-1}
+}
+@media(max-width:760px){
+    .ptm-page .ptm-hero{min-height:175px;align-items:flex-end;padding:22px}
+    .ptm-page .ptm-hero-copy h1{font-size:32px}
+    .ptm-page .ptm-index-grid{grid-template-columns:1fr}
+    .ptm-page .ptm-controls{grid-template-columns:1fr}
+    .ptm-page .ptm-asset-tabs{grid-template-columns:repeat(4,1fr)}
+    .ptm-page .ptm-bottom-grid{grid-template-columns:1fr}
+    .ptm-page .ptm-news-card{grid-column:auto}
+    .ptm-page .ptm-heatmap{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ============================================================
+   PHOENIXTREND MARKETS — CHART TOP DATA STRIP
+   Replace the previous "INTERACTIVE CHART ADDITIONS" block
+   at the bottom of markets.css with this complete block.
+   ============================================================ */
+
+.ptm-chart-shell {
+    position: relative;
+    width: 100%;
+}
+
+/* ------------------------------------------------------------
+   FIXED OHLCV STRIP ABOVE THE GRAPH
+   ------------------------------------------------------------ */
+
+.ptm-chart-data-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    min-height: 58px;
+    padding: 9px 12px;
+
+    border-left: 1px solid rgba(255, 255, 255, .10);
+    border-right: 1px solid rgba(255, 255, 255, .10);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(8, 24, 37, .96),
+            rgba(5, 18, 29, .94)
+        );
+}
+
+.ptm-chart-data-symbol {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 128px;
+}
+
+.ptm-chart-data-symbol > div {
+    min-width: 0;
+}
+
+.ptm-chart-data-symbol strong {
+    display: block;
+    color: #f7fbff;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: .02em;
+}
+
+.ptm-chart-data-symbol span {
+    display: block;
+    margin-top: 3px;
+    color: #7890a3;
+    font-size: 9px;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+.ptm-chart-data-values {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(64px, 1fr));
+    align-items: center;
+}
+
+.ptm-chart-data-values > div {
+    min-width: 0;
+    padding: 0 12px;
+    border-left: 1px solid rgba(255, 255, 255, .07);
+}
+
+.ptm-chart-data-values span {
+    display: block;
+    margin-bottom: 3px;
+
+    color: #71899c;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.ptm-chart-data-values strong {
+    display: block;
+
+    color: #edf6fc;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.15;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ptm-chart-data-values strong.ptm-positive {
+    color: #0ff5c2;
+}
+
+.ptm-chart-data-values strong.ptm-negative {
+    color: #ff4d67;
+}
+
+/* ------------------------------------------------------------
+   GRAPH
+   ------------------------------------------------------------ */
+
+.ptm-chart {
+    position: relative;
+    overflow: hidden;
+}
+
+.ptm-price-chart {
+    position: relative;
+    z-index: 2;
+}
+
+/* Invisible mouse targets. Each one represents a real candle. */
+.ptm-chart-hit {
+    fill: transparent;
+    pointer-events: all;
+    cursor: crosshair;
+}
+
+/* Vertical pointer guide */
+.ptm-chart-crosshair {
+    stroke: rgba(255, 255, 255, .50);
+    stroke-width: 1;
+    stroke-dasharray: 5 5;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+
+/* Horizontal price guide */
+.ptm-chart-crosshair-horizontal {
+    stroke: rgba(255, 255, 255, .18);
+    stroke-width: 1;
+    stroke-dasharray: 4 6;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+
+/* Hover point */
+.ptm-chart-hover-ring {
+    fill: rgba(15, 245, 194, .10);
+    stroke: rgba(15, 245, 194, .38);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+
+.ptm-chart-hover-dot {
+    fill: #ffffff;
+    stroke: #0ff5c2;
+    stroke-width: 3;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 7px rgba(15, 245, 194, .90));
+    pointer-events: none;
+}
+
+.ptm-chart-hover-ring.ptm-negative {
+    fill: rgba(255, 77, 103, .10);
+    stroke: rgba(255, 77, 103, .38);
+}
+
+.ptm-chart-hover-dot.ptm-negative {
+    stroke: #ff4d67;
+    filter: drop-shadow(0 0 7px rgba(255, 77, 103, .85));
+}
+
+/* Price label at right edge */
+.ptm-chart-price-tag {
+    position: absolute;
+    z-index: 9;
+    right: 5px;
+
+    transform: translateY(-50%);
+
+    padding: 4px 7px;
+
+    border: 1px solid rgba(15, 245, 194, .48);
+    border-radius: 5px;
+
+    background: rgba(4, 21, 31, .96);
+    box-shadow: 0 0 12px rgba(15, 245, 194, .10);
+
+    color: #e8fff9;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+
+    pointer-events: none;
+}
+
+/* ------------------------------------------------------------
+   REMOVE OLD FLOATING TOOLTIP
+   ------------------------------------------------------------ */
+
+.ptm-chart-tooltip,
+.ptm-chart-tooltip-right,
+.ptm-chart-tooltip-left,
+.ptm-chart-tooltip-head,
+.ptm-chart-tooltip-grid,
+.ptm-chart-tooltip-volume {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE
+   ------------------------------------------------------------ */
+
+@media (max-width: 1180px) {
+    .ptm-chart-data-strip {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .ptm-chart-data-values {
+        width: 100%;
+    }
+
+    .ptm-chart-data-values > div:first-child {
+        border-left: 0;
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 760px) {
+    .ptm-chart-data-values {
+        grid-template-columns: repeat(3, 1fr);
+        row-gap: 10px;
+    }
+
+    .ptm-chart-data-values > div {
+        padding: 0 8px;
+    }
+
+    .ptm-chart-data-values > div:nth-child(4) {
+        border-left: 0;
+        padding-left: 0;
+    }
+}
+
+/* ============================================================
+   PHOENIXTREND — PREMIUM MARKET CHART CURSOR
+   ============================================================ */
+.ptm-page .ptm-chart-hit{cursor:default}
+
+.ptm-page .ptm-chart-crosshair{
+    stroke:rgba(133,166,188,.30);
+    stroke-width:1;
+    stroke-dasharray:none;
+    vector-effect:non-scaling-stroke;
+    pointer-events:none;
+}
+
+.ptm-page .ptm-chart-crosshair-horizontal{display:none}
+.ptm-page .ptm-chart-hover-ring{display:none}
+
+.ptm-page .ptm-chart-hover-dot{
+    fill:#071923;
+    stroke:#00e6a0;
+    stroke-width:2.1;
+    vector-effect:non-scaling-stroke;
+    filter:
+        drop-shadow(0 0 3px rgba(0,230,160,.95))
+        drop-shadow(0 0 8px rgba(0,230,160,.35));
+    pointer-events:none;
+}
+
+.ptm-page .ptm-chart-hover-dot.ptm-negative{
+    fill:#170b11;
+    stroke:#ff5266;
+    filter:
+        drop-shadow(0 0 3px rgba(255,82,102,.95))
+        drop-shadow(0 0 8px rgba(255,82,102,.34));
+}
+
+.ptm-page .ptm-chart-price-tag{
+    right:6px;
+    padding:4px 7px;
+    border:1px solid rgba(0,230,160,.46);
+    border-radius:5px;
+    background:rgba(3,17,26,.96);
+    box-shadow:0 0 12px rgba(0,230,160,.10);
+    color:#ecfff9;
+    font-size:9px;
+    font-weight:800;
+}
+
+/* ============================================================
+   PHOENIXTREND MARKETS — LIVE SCROLLING NEWS
+   ============================================================ */
+
+.ptm-page .ptm-news-card{
+    min-height:280px;
+}
+
+.ptm-page .ptm-news-head{
+    position:relative;
+    z-index:3;
+    background:rgba(4,17,28,.96);
+}
+
+.ptm-page .ptm-news-live{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 8px;
+    border:1px solid rgba(0,230,160,.25);
+    border-radius:999px;
+    background:rgba(0,230,160,.06);
+    color:#9ff5d7;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+
+.ptm-page .ptm-news-live i{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--ptm-green);
+    box-shadow:0 0 9px rgba(0,230,160,.72);
+    animation:ptm-news-live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes ptm-news-live-pulse{
+    0%,100%{opacity:.45;transform:scale(.88)}
+    50%{opacity:1;transform:scale(1)}
+}
+
+.ptm-page .ptm-news-viewport{
+    position:relative;
+    height:236px;
+    overflow:hidden;
+    background:
+        linear-gradient(180deg,rgba(2,12,20,.08),rgba(2,12,20,.40));
+}
+
+.ptm-page .ptm-news-viewport::before,
+.ptm-page .ptm-news-viewport::after{
+    content:"";
+    position:absolute;
+    z-index:2;
+    left:0;
+    right:0;
+    height:18px;
+    pointer-events:none;
+}
+
+.ptm-page .ptm-news-viewport::before{
+    top:0;
+    background:linear-gradient(180deg,#04111c,transparent);
+}
+
+.ptm-page .ptm-news-viewport::after{
+    bottom:0;
+    background:linear-gradient(0deg,#03101a,transparent);
+}
+
+.ptm-page .ptm-news-track{
+    display:flex;
+    flex-direction:column;
+    will-change:transform;
+    animation:ptm-news-scroll 58s linear infinite;
+}
+
+.ptm-page .ptm-news-viewport:hover .ptm-news-track,
+.ptm-page .ptm-news-viewport:focus-within .ptm-news-track{
+    animation-play-state:paused;
+}
+
+@keyframes ptm-news-scroll{
+    from{transform:translate3d(0,0,0)}
+    to{transform:translate3d(0,-50%,0)}
+}
+
+.ptm-page .ptm-news-item{
+    min-height:96px;
+    display:grid;
+    grid-template-columns:112px minmax(0,1fr);
+    gap:11px;
+    padding:9px;
+    border-bottom:1px solid rgba(110,157,189,.13);
+    color:inherit;
+    text-decoration:none;
+    background:transparent;
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease;
+}
+
+.ptm-page .ptm-news-item:hover,
+.ptm-page .ptm-news-item:focus-visible{
+    outline:none;
+    background:
+        linear-gradient(90deg,rgba(255,157,28,.075),rgba(9,38,55,.08));
+    border-color:rgba(255,157,28,.22);
+}
+
+.ptm-page .ptm-news-media{
+    position:relative;
+    width:112px;
+    height:76px;
+    overflow:hidden;
+    align-self:center;
+    border:1px solid rgba(111,159,191,.18);
+    border-radius:8px;
+    background:#071724;
+}
+
+.ptm-page .ptm-news-media img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    transition:transform .35s ease,filter .35s ease;
+}
+
+.ptm-page .ptm-news-item:hover .ptm-news-media img{
+    transform:scale(1.035);
+    filter:brightness(1.05);
+}
+
+.ptm-page .ptm-news-image-fallback{
+    width:100%;
+    height:100%;
+    display:grid;
+    place-items:center;
+    background:
+        radial-gradient(circle at 50% 42%,rgba(255,157,28,.12),transparent 44%),
+        linear-gradient(145deg,#0a2030,#06131f);
+    color:#718a9d;
+    font-size:24px;
+}
+
+.ptm-page .ptm-news-copy{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:5px;
+}
+
+.ptm-page .ptm-news-meta{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+}
+
+.ptm-page .ptm-news-meta strong{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--ptm-orange2);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+}
+
+.ptm-page .ptm-news-meta span{
+    flex:0 0 auto;
+    color:#71899d;
+    font-size:9px;
+    font-weight:700;
+}
+
+.ptm-page .ptm-news-title{
+    display:-webkit-box;
+    min-width:0;
+    overflow:hidden;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    color:#d7e2ea;
+    font-size:11px;
+    font-weight:760;
+    line-height:1.35;
+    white-space:normal;
+}
+
+.ptm-page .ptm-news-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+}
+
+.ptm-page .ptm-news-footer>span{
+    display:inline-flex;
+    align-items:center;
+    min-height:17px;
+    padding:0 6px;
+    border:1px solid rgba(86,147,185,.22);
+    border-radius:999px;
+    background:rgba(11,45,64,.38);
+    color:#9bb1c2;
+    font-size:8px;
+    font-weight:900;
+}
+
+.ptm-page .ptm-news-footer small{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    color:#71899d;
+    font-size:8px;
+    font-weight:700;
+}
+
+.ptm-page .ptm-news-item:hover .ptm-news-footer small{
+    color:#b7c8d5;
+}
+
+.ptm-page .ptm-news-empty{
+    min-height:236px;
+}
+
+@media(max-width:760px){
+    .ptm-page .ptm-news-viewport{height:270px}
+    .ptm-page .ptm-news-item{grid-template-columns:96px minmax(0,1fr)}
+    .ptm-page .ptm-news-media{width:96px;height:70px}
+}
+
+@media(prefers-reduced-motion:reduce){
+    .ptm-page .ptm-news-track{animation:none}
+    .ptm-page .ptm-news-live i{animation:none}
+}
+

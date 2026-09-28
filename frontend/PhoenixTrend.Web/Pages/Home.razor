@@ -1,0 +1,2341 @@
+@page "/home"
+
+@using System.Globalization
+@using System.Text.Json
+
+@inject PhoenixApi Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<PageTitle>PhoenixTrend | Home</PageTitle>
+
+
+<div class="pt-home-v2">
+
+
+    <!-- =========================================================
+         WELCOME / COMMAND CENTER
+         ========================================================= -->
+
+    <section class="home-welcome">
+
+        <div class="home-welcome-copy">
+
+            <span class="home-eyebrow">
+                PHOENIXTREND COMMAND CENTER
+            </span>
+
+            <h1>
+                Welcome Back,
+                <span>@WelcomeName</span>
+            </h1>
+
+            <p>
+                Here's your trading overview. Monitor your portfolio,
+                Phoenix Engine and live market data from one place.
+            </p>
+
+        </div>
+
+
+        <div class="home-welcome-actions">
+
+            <div class="home-market-state @MarketStateClass">
+
+                <span class="state-dot"></span>
+
+                <span>
+                    @MarketState
+                </span>
+
+            </div>
+
+
+            <button type="button"
+                    class="home-refresh-button"
+                    disabled="@IsLoading"
+                    @onclick="Load">
+
+                <i class="ph ph-arrows-clockwise"></i>
+
+                <span>
+                    @(IsLoading ? "Refreshing..." : "Refresh")
+                </span>
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================================================
+         KPI CARDS
+         ========================================================= -->
+
+    <section class="metric-grid five home-kpis">
+
+
+        <MetricCard
+            Icon="ph ph-wallet"
+            Label="Portfolio Value"
+            Value="@PortfolioValue"
+            Detail="@PortfolioDetail"
+            Tone="positive"
+            ShowSpark="false" />
+
+
+        <MetricCard
+            Icon="ph ph-trend-up"
+            Label="Day P&L"
+            Value="@DayPnl"
+            Detail="Today's performance"
+            Tone="@DayPnlTone"
+            ShowSpark="false" />
+
+
+        <MetricCard
+            Icon="ph ph-chart-line-up"
+            Label="Open Positions"
+            Value="@OpenPositions"
+            Detail="Broker positions"
+            Tone="blue"
+            ShowSpark="false" />
+
+
+        <MetricCard
+            Icon="ph ph-stack"
+            Label="Strategies"
+            Value="@StrategyCount"
+            Detail="Available strategies"
+            Tone="purple"
+            ShowSpark="false" />
+
+
+        <MetricCard
+            Icon="ph ph-robot"
+            Label="Automations"
+            Value="@AutomationCount"
+            Detail="Configured automations"
+            Tone="orange"
+            ShowSpark="false" />
+
+
+    </section>
+
+
+
+    <!-- =========================================================
+         MAIN DASHBOARD
+         ========================================================= -->
+
+    <section class="home-primary-grid">
+
+
+        <!-- =====================================================
+             PORTFOLIO
+             ===================================================== -->
+
+        <Panel
+            Title="Portfolio Performance"
+            Subtitle="Live broker account"
+            Class="home-performance-panel">
+
+
+            <div class="portfolio-head">
+
+                <div>
+
+                    <span>
+                        Current Portfolio Value
+                    </span>
+
+                    <strong>
+                        @PortfolioValue
+                    </strong>
+
+                    <small class="@DayPnlClass">
+                        @DayPnl today
+                    </small>
+
+                </div>
+
+
+                <div class="portfolio-head-icon">
+
+                    <i class="ph ph-chart-line-up"></i>
+
+                </div>
+
+            </div>
+
+
+
+            @if (PortfolioHistory.Count >= 2)
+            {
+                <div class="portfolio-chart">
+
+                    <svg viewBox="0 0 1000 260"
+                         preserveAspectRatio="none"
+                         role="img"
+                         aria-label="Portfolio performance">
+
+                        <defs>
+
+                            <linearGradient id="portfolioAreaGradient"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1">
+
+                                <stop offset="0%"
+                                      stop-color="currentColor"
+                                      stop-opacity=".30" />
+
+                                <stop offset="100%"
+                                      stop-color="currentColor"
+                                      stop-opacity="0" />
+
+                            </linearGradient>
+
+                        </defs>
+
+
+                        <polyline class="portfolio-area"
+                                  points="@PortfolioAreaPoints" />
+
+
+                        <polyline class="portfolio-line"
+                                  points="@PortfolioLinePoints" />
+
+                    </svg>
+
+                </div>
+            }
+            else
+            {
+                <div class="home-empty-chart">
+
+                    <div class="empty-chart-icon">
+
+                        <i class="ph ph-chart-line-up"></i>
+
+                    </div>
+
+                    <strong>
+                        Portfolio history unavailable
+                    </strong>
+
+                    <p>
+                        PhoenixTrend will display the real equity curve
+                        here when historical portfolio data is returned
+                        by the analytics API.
+                    </p>
+
+                </div>
+            }
+
+
+        </Panel>
+
+
+
+        <!-- =====================================================
+             ACCOUNT SUMMARY
+             ===================================================== -->
+
+        <Panel
+            Title="Account Summary"
+            Subtitle="Connected trading account"
+            Class="home-account-panel">
+
+
+            <div class="account-main-value">
+
+                <span>
+                    Portfolio Value
+                </span>
+
+                <strong>
+                    @PortfolioValue
+                </strong>
+
+                <small class="@DayPnlClass">
+                    @DayPnl today
+                </small>
+
+            </div>
+
+
+
+            <div class="account-info-grid">
+
+
+                <div>
+
+                    <span>
+                        Cash
+                    </span>
+
+                    <strong>
+                        @CashValue
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Buying Power
+                    </span>
+
+                    <strong>
+                        @BuyingPower
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Positions
+                    </span>
+
+                    <strong>
+                        @OpenPositions
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Broker
+                    </span>
+
+                    <strong class="@BrokerClass">
+                        @BrokerState
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+        </Panel>
+
+
+
+        <!-- =====================================================
+             ENGINE
+             ===================================================== -->
+
+        <Panel
+            Title="Phoenix Engine"
+            Subtitle="Trading system status"
+            Class="home-engine-panel">
+
+
+            <div class="engine-summary">
+
+                <div class="engine-icon">
+
+                    <i class="ph ph-lightning"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Current Mode
+                    </span>
+
+                    <strong>
+                        @EngineMode
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="home-status-list">
+
+
+                <div>
+
+                    <span>
+                        Backend
+                    </span>
+
+                    <strong class="@BackendClass">
+                        @BackendState
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Phoenix Engine
+                    </span>
+
+                    <strong class="@EngineClass">
+                        @EngineMode
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Broker
+                    </span>
+
+                    <strong class="@BrokerClass">
+                        @BrokerState
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Market Data
+                    </span>
+
+                    <strong class="@MarketStateClass">
+                        @MarketState
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+        </Panel>
+
+
+    </section>
+
+
+
+    <!-- =========================================================
+         MARKET CARDS
+         ========================================================= -->
+
+    <section class="home-market-strip">
+
+
+        @foreach (var quote in Quotes)
+        {
+            <button type="button"
+                    class="home-market-card"
+                    @onclick="() => OpenChart(quote.Symbol)">
+
+
+                <div class="market-company">
+
+
+                    <!--
+                        Actual company/ticker image component.
+                        StockLogo owns the image-source logic.
+                    -->
+
+                    <StockLogo
+                        Symbol="@quote.Symbol" />
+
+
+                    <div>
+
+                        <strong>
+                            @quote.Symbol
+                        </strong>
+
+                        <small>
+                            @GetCompanyName(quote.Symbol)
+                        </small>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="market-quote">
+
+
+                    <strong>
+                        @quote.Price
+                    </strong>
+
+
+                    <span class="@GetChangeClass(quote.Change)">
+                        @quote.Change
+                    </span>
+
+
+                </div>
+
+
+            </button>
+        }
+
+
+    </section>
+
+
+
+    <!-- =========================================================
+         LOWER DASHBOARD
+         ========================================================= -->
+
+    <section class="home-secondary-grid">
+
+
+        <!-- =====================================================
+             WATCHLIST
+             ===================================================== -->
+
+        <Panel
+            Title="Watchlist"
+            Subtitle="Live market quotes"
+            Class="home-watchlist-panel">
+
+
+            <div class="home-table-wrap">
+
+                <table class="data-table home-watchlist-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Symbol
+                            </th>
+
+                            <th>
+                                Price
+                            </th>
+
+                            <th>
+                                Change
+                            </th>
+
+                            <th>
+                                Data
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+
+                    <tbody>
+
+
+                        @if (Quotes.Count == 0)
+                        {
+                            <tr>
+
+                                <td colspan="4"
+                                    class="home-table-empty">
+
+                                    Market data unavailable.
+
+                                </td>
+
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var quote in Quotes)
+                            {
+                                <tr @onclick="() => OpenChart(quote.Symbol)">
+
+
+                                    <td>
+
+
+                                        <div class="watch-symbol">
+
+
+                                            <StockLogo
+                                                Symbol="@quote.Symbol"
+                                                Size="small" />
+
+
+                                            <div>
+
+                                                <strong>
+                                                    @quote.Symbol
+                                                </strong>
+
+                                                <small>
+                                                    @GetCompanyName(quote.Symbol)
+                                                </small>
+
+                                            </div>
+
+
+                                        </div>
+
+
+                                    </td>
+
+
+
+                                    <td>
+
+                                        <strong>
+                                            @quote.Price
+                                        </strong>
+
+                                    </td>
+
+
+
+                                    <td class="@GetChangeClass(quote.Change)">
+
+                                        @quote.Change
+
+                                    </td>
+
+
+
+                                    <td>
+
+
+                                        @if (quote.IsAvailable)
+                                        {
+                                            <span class="quote-status live">
+
+                                                <span></span>
+
+                                                Live
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="quote-status unavailable">
+
+                                                Unavailable
+
+                                            </span>
+                                        }
+
+
+                                    </td>
+
+
+                                </tr>
+                            }
+                        }
+
+
+                    </tbody>
+
+
+                </table>
+
+            </div>
+
+
+        </Panel>
+
+
+
+        <!-- =====================================================
+             RIGHT COLUMN
+             ===================================================== -->
+
+        <div class="home-right-column">
+
+
+
+            <!-- =================================================
+                 TRADING SYSTEM
+                 ================================================= -->
+
+            <Panel
+                Title="Trading System"
+                Subtitle="Strategies and automations">
+
+
+                <div class="trading-system-list">
+
+
+
+                    <button type="button"
+                            @onclick='() => Navigate("/strategies")'>
+
+
+                        <span class="system-item-icon purple">
+
+                            <i class="ph ph-stack"></i>
+
+                        </span>
+
+
+                        <div>
+
+                            <small>
+                                Strategies
+                            </small>
+
+                            <strong>
+                                @StrategyCount
+                            </strong>
+
+                        </div>
+
+
+                        <i class="ph ph-caret-right"></i>
+
+
+                    </button>
+
+
+
+                    <button type="button"
+                            @onclick='() => Navigate("/automations")'>
+
+
+                        <span class="system-item-icon orange">
+
+                            <i class="ph ph-robot"></i>
+
+                        </span>
+
+
+                        <div>
+
+                            <small>
+                                Automations
+                            </small>
+
+                            <strong>
+                                @AutomationCount
+                            </strong>
+
+                        </div>
+
+
+                        <i class="ph ph-caret-right"></i>
+
+
+                    </button>
+
+
+
+                    <button type="button"
+                            @onclick='() => Navigate("/portfolio")'>
+
+
+                        <span class="system-item-icon green">
+
+                            <i class="ph ph-wallet"></i>
+
+                        </span>
+
+
+                        <div>
+
+                            <small>
+                                Open Positions
+                            </small>
+
+                            <strong>
+                                @OpenPositions
+                            </strong>
+
+                        </div>
+
+
+                        <i class="ph ph-caret-right"></i>
+
+
+                    </button>
+
+
+                </div>
+
+
+            </Panel>
+
+
+
+            <!-- =================================================
+                 RECENT ACTIVITY
+                 ================================================= -->
+
+            <Panel
+                Title="Recent Activity"
+                Subtitle="Latest PhoenixTrend events">
+
+
+                @if (RecentActivity.Count == 0)
+                {
+                    <div class="home-activity-empty">
+
+
+                        <i class="ph ph-clock-counter-clockwise"></i>
+
+
+                        <span>
+                            No activity returned by the API.
+                        </span>
+
+
+                    </div>
+                }
+                else
+                {
+                    <div class="home-activity-list">
+
+
+                        @foreach (var activity in RecentActivity.Take(5))
+                        {
+                            <article>
+
+
+                                <span class="activity-marker"></span>
+
+
+                                <div>
+
+
+                                    <strong>
+                                        @activity.Title
+                                    </strong>
+
+
+                                    @if (!string.IsNullOrWhiteSpace(activity.Detail))
+                                    {
+                                        <small>
+                                            @activity.Detail
+                                        </small>
+                                    }
+
+
+                                </div>
+
+
+                                @if (!string.IsNullOrWhiteSpace(activity.Time))
+                                {
+                                    <time>
+                                        @activity.Time
+                                    </time>
+                                }
+
+
+                            </article>
+                        }
+
+
+                    </div>
+                }
+
+
+            </Panel>
+
+
+        </div>
+
+
+    </section>
+
+
+</div>
+
+
+
+@code
+{
+    private string WelcomeName
+    {
+        get
+        {
+            if (Auth.CurrentUser is { } user && user.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var key in new[] { "display_name", "username" })
+                {
+                    if (user.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.String)
+                    {
+                        var text = value.GetString();
+                        if (!string.IsNullOrWhiteSpace(text)) return text.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
+                    }
+                }
+            }
+            return "Trader";
+        }
+    }
+
+
+    // =========================================================
+    // ACCOUNT
+    // =========================================================
+
+    private string PortfolioValue = "—";
+
+    private string PortfolioDetail =
+        "Broker account";
+
+    private string DayPnl = "—";
+
+    private string DayPnlTone =
+        "neutral";
+
+    private string CashValue = "—";
+
+    private string BuyingPower = "—";
+
+
+
+    // =========================================================
+    // SYSTEM
+    // =========================================================
+
+    private string EngineMode =
+        "Loading...";
+
+    private string BrokerState =
+        "Loading...";
+
+    private string BackendState =
+        "Loading...";
+
+    private string MarketState =
+        "Checking...";
+
+
+
+    // =========================================================
+    // COUNTS
+    // =========================================================
+
+    private string OpenPositions = "—";
+
+    private string StrategyCount = "—";
+
+    private string AutomationCount = "—";
+
+
+
+    // =========================================================
+    // STATE
+    // =========================================================
+
+    private bool IsLoading;
+
+    private bool BackendOnline;
+
+    private bool BrokerConnected;
+
+    private bool EngineAvailable;
+
+    private bool MarketAvailable;
+
+
+
+    // =========================================================
+    // COLLECTIONS
+    // =========================================================
+
+    private readonly List<QuoteRow> Quotes =
+        new();
+
+    private readonly List<ActivityRow> RecentActivity =
+        new();
+
+    private readonly List<double> PortfolioHistory =
+        new();
+
+
+
+    // =========================================================
+    // UI CLASSES
+    // =========================================================
+
+    private string BrokerClass =>
+        BrokerConnected
+            ? "green"
+            : "orange";
+
+
+    private string BackendClass =>
+        BackendOnline
+            ? "green"
+            : "red";
+
+
+    private string EngineClass =>
+        EngineAvailable
+            ? "green"
+            : "orange";
+
+
+    private string MarketStateClass =>
+        MarketAvailable
+            ? "green"
+            : "orange";
+
+
+    private string DayPnlClass =>
+        DayPnl.StartsWith("-")
+            ? "red"
+            : DayPnl == "—"
+                ? ""
+                : "green";
+
+
+
+    // =========================================================
+    // CHART
+    // =========================================================
+
+    private string PortfolioLinePoints =>
+        BuildChartPoints(
+            PortfolioHistory,
+            includeBaseline: false
+        );
+
+
+    private string PortfolioAreaPoints =>
+        BuildChartPoints(
+            PortfolioHistory,
+            includeBaseline: true
+        );
+
+
+
+    // =========================================================
+    // INITIAL LOAD
+    // =========================================================
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+
+
+    // =========================================================
+    // LOAD
+    // =========================================================
+
+    private async Task Load()
+    {
+        if (IsLoading)
+        {
+            return;
+        }
+
+
+        try
+        {
+            IsLoading = true;
+
+
+            var healthTask =
+                Api.Health();
+
+
+            var accountTask =
+                Api.BrokerAccount();
+
+
+            var brokerTask =
+                Api.BrokerStatus();
+
+
+            var positionsTask =
+                Api.BrokerPositions();
+
+
+            var engineTask =
+                Api.EngineStatus();
+
+
+            var strategiesTask =
+                Api.Strategies();
+
+
+            var automationsTask =
+                Api.Automations();
+
+
+            var activityTask =
+                Api.Activity();
+
+
+            var analyticsTask =
+                Api.Analytics();
+
+
+            var quotesTask =
+                LoadQuotes();
+
+
+
+            await Task.WhenAll(
+                healthTask,
+                accountTask,
+                brokerTask,
+                positionsTask,
+                engineTask,
+                strategiesTask,
+                automationsTask,
+                activityTask,
+                analyticsTask,
+                quotesTask
+            );
+
+
+
+            LoadHealth(
+                await healthTask
+            );
+
+
+            LoadBrokerAccount(
+                await accountTask
+            );
+
+
+            LoadBrokerStatus(
+                await brokerTask
+            );
+
+
+            LoadPositions(
+                await positionsTask
+            );
+
+
+            LoadEngineStatus(
+                await engineTask
+            );
+
+
+            LoadStrategyCount(
+                await strategiesTask
+            );
+
+
+            LoadAutomationCount(
+                await automationsTask
+            );
+
+
+            LoadActivity(
+                await activityTask
+            );
+
+
+            LoadPortfolioHistory(
+                await analyticsTask
+            );
+
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+
+
+    // =========================================================
+    // HEALTH
+    // =========================================================
+
+    private void LoadHealth(
+        JsonElement? health)
+    {
+        BackendOnline =
+            health is not null;
+
+
+        BackendState =
+            BackendOnline
+                ? "Online"
+                : "Offline";
+    }
+
+
+
+    // =========================================================
+    // BROKER ACCOUNT
+    // =========================================================
+
+    private void LoadBrokerAccount(
+        JsonElement? account)
+    {
+        if (account is null)
+        {
+            PortfolioValue = "—";
+
+            DayPnl = "—";
+
+            CashValue = "—";
+
+            BuyingPower = "—";
+
+            DayPnlTone =
+                "neutral";
+
+            return;
+        }
+
+
+
+        PortfolioValue =
+            FormatCurrency(
+                ReadFirstNumber(
+                    account,
+                    "portfolio_value",
+                    "equity"
+                )
+            );
+
+
+
+        var dayPnl =
+            ReadFirstNumber(
+                account,
+                "day_pnl",
+                "daily_pnl"
+            );
+
+
+        DayPnl =
+            FormatSignedCurrency(
+                dayPnl
+            );
+
+
+        DayPnlTone =
+            !dayPnl.HasValue
+                ? "neutral"
+                : dayPnl.Value < 0
+                    ? "negative"
+                    : "positive";
+
+
+
+        CashValue =
+            FormatCurrency(
+                ReadFirstNumber(
+                    account,
+                    "cash",
+                    "cash_balance"
+                )
+            );
+
+
+
+        BuyingPower =
+            FormatCurrency(
+                ReadFirstNumber(
+                    account,
+                    "buying_power"
+                )
+            );
+    }
+
+
+
+    // =========================================================
+    // BROKER STATUS
+    // =========================================================
+
+    private void LoadBrokerStatus(
+        JsonElement? status)
+    {
+        if (status is null)
+        {
+            BrokerConnected = false;
+
+            BrokerState =
+                "Disconnected";
+
+            PortfolioDetail =
+                "Broker unavailable";
+
+            return;
+        }
+
+
+
+        BrokerConnected =
+            ReadBool(
+                status,
+                "connected"
+            );
+
+
+
+        if (BrokerConnected)
+        {
+            BrokerState =
+                "Connected";
+
+            PortfolioDetail =
+                "Live broker account";
+
+            return;
+        }
+
+
+
+        var state =
+            ReadFirstString(
+                status,
+                "status",
+                "state"
+            );
+
+
+        BrokerState =
+            string.IsNullOrWhiteSpace(state)
+                ? "Disconnected"
+                : state;
+
+
+        PortfolioDetail =
+            "Broker disconnected";
+    }
+
+
+
+    // =========================================================
+    // POSITIONS
+    // =========================================================
+
+    private void LoadPositions(
+        JsonElement? root)
+    {
+        var count =
+            CountCollection(
+                root,
+                "positions",
+                "items",
+                "data"
+            );
+
+
+        OpenPositions =
+            count.HasValue
+                ? count.Value.ToString(
+                    CultureInfo.InvariantCulture
+                )
+                : "—";
+    }
+
+
+
+    // =========================================================
+    // ENGINE
+    // =========================================================
+
+    private void LoadEngineStatus(
+        JsonElement? status)
+    {
+        EngineAvailable =
+            status is not null;
+
+
+        if (status is null)
+        {
+            EngineMode =
+                "Unavailable";
+
+            return;
+        }
+
+
+
+        var mode =
+            ReadFirstString(
+                status,
+                "mode",
+                "status"
+            );
+
+
+        if (!string.IsNullOrWhiteSpace(mode))
+        {
+            EngineMode =
+                mode;
+
+            return;
+        }
+
+
+
+        EngineMode =
+            ReadBool(
+                status,
+                "running"
+            )
+                ? "Running"
+                : "Stopped";
+    }
+
+
+
+    // =========================================================
+    // STRATEGIES
+    // =========================================================
+
+    private void LoadStrategyCount(
+        JsonElement? root)
+    {
+        var count =
+            CountCollection(
+                root,
+                "strategies",
+                "items",
+                "data"
+            );
+
+
+        StrategyCount =
+            count.HasValue
+                ? count.Value.ToString(
+                    CultureInfo.InvariantCulture
+                )
+                : "—";
+    }
+
+
+
+    // =========================================================
+    // AUTOMATIONS
+    // =========================================================
+
+    private void LoadAutomationCount(
+        JsonElement? root)
+    {
+        var count =
+            CountCollection(
+                root,
+                "automations",
+                "items",
+                "data"
+            );
+
+
+        AutomationCount =
+            count.HasValue
+                ? count.Value.ToString(
+                    CultureInfo.InvariantCulture
+                )
+                : "—";
+    }
+
+
+
+    // =========================================================
+    // ACTIVITY
+    // =========================================================
+
+    private void LoadActivity(
+        JsonElement? root)
+    {
+        RecentActivity.Clear();
+
+
+        var items =
+            FindArray(
+                root,
+                "activity",
+                "activities",
+                "items",
+                "events",
+                "data"
+            );
+
+
+        if (items is null)
+        {
+            return;
+        }
+
+
+
+        foreach (
+            var item in
+            items.Value.EnumerateArray())
+        {
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+
+            var title =
+                ReadFirstString(
+                    item,
+                    "title",
+                    "action",
+                    "type",
+                    "event",
+                    "message"
+                );
+
+
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                title =
+                    "PhoenixTrend activity";
+            }
+
+
+
+            var detail =
+                ReadFirstString(
+                    item,
+                    "detail",
+                    "description",
+                    "symbol",
+                    "status"
+                );
+
+
+
+            var time =
+                ReadFirstString(
+                    item,
+                    "time",
+                    "timestamp",
+                    "created_at"
+                );
+
+
+
+            RecentActivity.Add(
+                new ActivityRow(
+                    title,
+                    detail,
+                    time
+                )
+            );
+        }
+    }
+
+
+
+    // =========================================================
+    // ANALYTICS / PORTFOLIO HISTORY
+    // =========================================================
+
+    private void LoadPortfolioHistory(
+        JsonElement? root)
+    {
+        PortfolioHistory.Clear();
+
+
+        var history =
+            FindArray(
+                root,
+                "equity_history",
+                "portfolio_history",
+                "equity_curve",
+                "history"
+            );
+
+
+        if (history is null)
+        {
+            return;
+        }
+
+
+
+        foreach (
+            var item in
+            history.Value.EnumerateArray())
+        {
+
+            if (item.ValueKind ==
+                JsonValueKind.Number)
+            {
+                if (item.TryGetDouble(
+                    out var directValue))
+                {
+                    PortfolioHistory.Add(
+                        directValue
+                    );
+                }
+
+
+                continue;
+            }
+
+
+
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+
+            var value =
+                ReadFirstNumber(
+                    item,
+                    "equity",
+                    "portfolio_value",
+                    "value",
+                    "balance"
+                );
+
+
+            if (value.HasValue)
+            {
+                PortfolioHistory.Add(
+                    value.Value
+                );
+            }
+
+        }
+    }
+
+
+
+    // =========================================================
+    // QUOTES
+    // =========================================================
+
+    private async Task LoadQuotes()
+    {
+        var symbols =
+            new[]
+            {
+                "AAPL",
+                "TSLA",
+                "NVDA",
+                "MSFT",
+                "AMZN"
+            };
+
+
+
+        var tasks =
+            symbols.Select(
+                async symbol =>
+                {
+
+                    var quote =
+                        await Api.Quote(
+                            symbol
+                        );
+
+
+                    if (quote is null)
+                    {
+                        return new QuoteRow(
+                            symbol,
+                            "—",
+                            "—",
+                            false
+                        );
+                    }
+
+
+
+                    var price =
+                        ReadFirstNumber(
+                            quote,
+                            "price",
+                            "last",
+                            "last_price"
+                        );
+
+
+
+                    var changePercent =
+                        ReadFirstNumber(
+                            quote,
+                            "changePercent",
+            "change_percent",
+                            "change_pct"
+                        );
+
+
+
+                    var priceText =
+                        price.HasValue
+                            ? price.Value.ToString(
+                                "$#,##0.00",
+                                CultureInfo.InvariantCulture
+                            )
+                            : PhoenixApi.Text(
+                                quote,
+                                "price",
+                                "—"
+                            );
+
+
+
+                    string changeText;
+
+
+                    if (changePercent.HasValue)
+                    {
+                        changeText =
+                            FormatPercent(
+                                changePercent.Value
+                            );
+                    }
+                    else
+                    {
+                        changeText =
+                            PhoenixApi.Text(
+                                quote,
+                                "change",
+                                "—"
+                            );
+                    }
+
+
+
+                    return new QuoteRow(
+                        symbol,
+                        priceText,
+                        changeText,
+                        price.HasValue
+                    );
+
+                }
+            )
+            .ToArray();
+
+
+
+        var result =
+            await Task.WhenAll(
+                tasks
+            );
+
+
+
+        Quotes.Clear();
+
+        Quotes.AddRange(
+            result
+        );
+
+
+
+        MarketAvailable =
+            Quotes.Any(
+                x => x.IsAvailable
+            );
+
+
+
+        MarketState =
+            MarketAvailable
+                ? "Market Data Live"
+                : "Market Data Unavailable";
+    }
+
+
+
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
+    private void Navigate(
+        string path)
+    {
+        Nav.NavigateTo(
+            path
+        );
+    }
+
+
+
+    private void OpenChart(
+        string symbol)
+    {
+        Nav.NavigateTo(
+            $"/charts?symbol={Uri.EscapeDataString(symbol)}"
+        );
+    }
+
+
+
+    // =========================================================
+    // COMPANY DISPLAY NAMES
+    //
+    // This is metadata only.
+    // The actual company image is handled by StockLogo.
+    // =========================================================
+
+    private static string GetCompanyName(
+        string symbol)
+    {
+        return symbol switch
+        {
+            "AAPL" => "Apple",
+
+            "TSLA" => "Tesla",
+
+            "NVDA" => "NVIDIA",
+
+            "MSFT" => "Microsoft",
+
+            "AMZN" => "Amazon",
+
+            _ => symbol
+        };
+    }
+
+
+
+    // =========================================================
+    // CHANGE CLASS
+    // =========================================================
+
+    private static string GetChangeClass(
+        string change)
+    {
+        if (string.IsNullOrWhiteSpace(change) ||
+            change == "—")
+        {
+            return "";
+        }
+
+
+        return change.StartsWith("-")
+            ? "red"
+            : "green";
+    }
+
+
+
+    // =========================================================
+    // FORMAT
+    // =========================================================
+
+    private static string FormatCurrency(
+        double? value)
+    {
+        return value.HasValue
+            ? value.Value.ToString(
+                "$#,##0.00",
+                CultureInfo.InvariantCulture
+            )
+            : "—";
+    }
+
+
+
+    private static string FormatSignedCurrency(
+        double? value)
+    {
+        return value.HasValue
+            ? value.Value.ToString(
+                "+$#,##0.00;-$#,##0.00;$0.00",
+                CultureInfo.InvariantCulture
+            )
+            : "—";
+    }
+
+
+
+    private static string FormatPercent(
+        double value)
+    {
+        /*
+           Backend change_percent is already a percentage value.
+
+           Example:
+           0.3264 -> +0.33%
+          -0.3264 -> -0.33%
+
+           Do not use the .NET % numeric format here because
+           that format multiplies the value by 100.
+        */
+
+        return value.ToString(
+            "+0.00;-0.00;0.00",
+            CultureInfo.InvariantCulture
+        ) + "%";
+    }
+
+
+
+    // =========================================================
+    // JSON STRING
+    // =========================================================
+
+    private static string ReadFirstString(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null)
+        {
+            return "";
+        }
+
+
+        return ReadFirstString(
+            root.Value,
+            properties
+        );
+    }
+
+
+
+    private static string ReadFirstString(
+        JsonElement root,
+        params string[] properties)
+    {
+        if (root.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return "";
+        }
+
+
+
+        foreach (
+            var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+
+            var text =
+                value.ValueKind switch
+                {
+                    JsonValueKind.String =>
+                        value.GetString(),
+
+                    JsonValueKind.Number =>
+                        value.ToString(),
+
+                    JsonValueKind.True =>
+                        "true",
+
+                    JsonValueKind.False =>
+                        "false",
+
+                    _ =>
+                        null
+                };
+
+
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+
+        }
+
+
+        return "";
+    }
+
+
+
+    // =========================================================
+    // JSON NUMBER
+    // =========================================================
+
+    private static double? ReadFirstNumber(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null)
+        {
+            return null;
+        }
+
+
+        return ReadFirstNumber(
+            root.Value,
+            properties
+        );
+    }
+
+
+
+    private static double? ReadFirstNumber(
+        JsonElement root,
+        params string[] properties)
+    {
+        if (root.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return null;
+        }
+
+
+
+        foreach (
+            var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.Number &&
+                value.TryGetDouble(
+                    out var number))
+            {
+                return number;
+            }
+
+
+
+            if (double.TryParse(
+                    value.ToString(),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out number))
+            {
+                return number;
+            }
+
+        }
+
+
+        return null;
+    }
+
+
+
+    // =========================================================
+    // JSON BOOL
+    // =========================================================
+
+    private static bool ReadBool(
+        JsonElement? root,
+        string property)
+    {
+        if (root is null ||
+            root.Value.ValueKind !=
+                JsonValueKind.Object ||
+            !root.Value.TryGetProperty(
+                property,
+                out var value))
+        {
+            return false;
+        }
+
+
+
+        if (value.ValueKind ==
+            JsonValueKind.True)
+        {
+            return true;
+        }
+
+
+
+        if (value.ValueKind ==
+            JsonValueKind.False)
+        {
+            return false;
+        }
+
+
+
+        return bool.TryParse(
+                   value.ToString(),
+                   out var result
+               )
+               &&
+               result;
+    }
+
+
+
+    // =========================================================
+    // ARRAY
+    // =========================================================
+
+    private static JsonElement? FindArray(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null)
+        {
+            return null;
+        }
+
+
+
+        if (root.Value.ValueKind ==
+            JsonValueKind.Array)
+        {
+            return root.Value;
+        }
+
+
+
+        if (root.Value.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return null;
+        }
+
+
+
+        foreach (
+            var property in properties)
+        {
+            if (root.Value.TryGetProperty(
+                    property,
+                    out var value)
+                &&
+                value.ValueKind ==
+                    JsonValueKind.Array)
+            {
+                return value;
+            }
+        }
+
+
+
+        return null;
+    }
+
+
+
+    // =========================================================
+    // COLLECTION COUNT
+    // =========================================================
+
+    private static int? CountCollection(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null)
+        {
+            return null;
+        }
+
+
+
+        if (root.Value.ValueKind ==
+            JsonValueKind.Array)
+        {
+            return root.Value.GetArrayLength();
+        }
+
+
+
+        if (root.Value.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return null;
+        }
+
+
+
+        foreach (
+            var property in properties)
+        {
+            if (!root.Value.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+
+            if (value.ValueKind ==
+                JsonValueKind.Array)
+            {
+                return value.GetArrayLength();
+            }
+
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.Number &&
+                value.TryGetInt32(
+                    out var count))
+            {
+                return count;
+            }
+
+        }
+
+
+
+        return null;
+    }
+
+
+
+    // =========================================================
+    // CHART POINT GENERATOR
+    // =========================================================
+
+    private static string BuildChartPoints(
+        IReadOnlyList<double> values,
+        bool includeBaseline)
+    {
+        if (values.Count < 2)
+        {
+            return "";
+        }
+
+
+
+        var min =
+            values.Min();
+
+
+        var max =
+            values.Max();
+
+
+        var range =
+            max - min;
+
+
+        if (Math.Abs(range) <
+            0.000001)
+        {
+            range = 1;
+        }
+
+
+
+        const double width =
+            1000;
+
+
+        const double top =
+            20;
+
+
+        const double bottom =
+            225;
+
+
+        var usableHeight =
+            bottom - top;
+
+
+
+        var points =
+            new List<string>();
+
+
+
+        for (
+            var index = 0;
+            index < values.Count;
+            index++)
+        {
+            var x =
+                width *
+                index /
+                (values.Count - 1);
+
+
+
+            var normalized =
+                (values[index] - min) /
+                range;
+
+
+
+            var y =
+                bottom -
+                normalized *
+                usableHeight;
+
+
+
+            points.Add(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0:0.##},{1:0.##}",
+                    x,
+                    y
+                )
+            );
+        }
+
+
+
+        if (!includeBaseline)
+        {
+            return string.Join(
+                " ",
+                points
+            );
+        }
+
+
+
+        return
+            $"0,250 {string.Join(" ", points)} 1000,250";
+    }
+
+
+
+    // =========================================================
+    // RECORDS
+    // =========================================================
+
+    private sealed record QuoteRow(
+        string Symbol,
+        string Price,
+        string Change,
+        bool IsAvailable
+    );
+
+
+
+    private sealed record ActivityRow(
+        string Title,
+        string Detail,
+        string Time
+    );
+
+}

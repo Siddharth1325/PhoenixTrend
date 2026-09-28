@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: phoenixtrend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true

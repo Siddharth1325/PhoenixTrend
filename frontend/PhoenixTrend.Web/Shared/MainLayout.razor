@@ -1,0 +1,777 @@
+@inherits LayoutComponentBase
+@implements IAsyncDisposable
+
+@inject PhoenixApi Api
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<div class="pt-shell">
+
+    <!-- =========================================================
+         SIDEBAR
+         ========================================================= -->
+
+    <aside class="pt-sidebar">
+
+        <div class="sidebar-art"></div>
+        <div class="sidebar-overlay"></div>
+
+        <div class="sidebar-inner">
+
+            <!-- BRAND -->
+
+            <a href="/home"
+               class="brand-lockup"
+               aria-label="PhoenixTrend Home">
+
+                <img src="/assets/phoenixtrend-logo.png"
+                     alt="PhoenixTrend"
+                     class="brand-logo" />
+
+
+            </a>
+
+
+            <!-- NAVIGATION -->
+
+            <nav class="pt-nav">
+
+                @foreach (var item in PrimaryNav)
+                {
+                    <NavLink href="@item.Href"
+                             Match="@item.Match"
+                             class="pt-nav-item">
+
+                        <span class="nav-icon"
+                              aria-hidden="true">
+
+                            <i class="@item.Icon"></i>
+
+                        </span>
+
+                        <span class="nav-label">
+                            @item.Name
+                        </span>
+
+                        <span class="nav-active-mark"></span>
+
+                    </NavLink>
+                }
+
+            </nav>
+
+            <NavLink href="/ai" class="trady-glass-launcher" aria-label="Open Trady AI">
+                <span class="trady-glass-mark"><i class="ph-duotone ph-sparkle"></i></span>
+                <span class="trady-glass-copy"><strong>Trady AI</strong><small>Ask · Analyze · Trade smarter</small></span>
+                <i class="ph ph-arrow-up-right trady-glass-arrow"></i>
+            </NavLink>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================================
+         APPLICATION
+         ========================================================= -->
+
+    <section class="pt-app">
+
+
+        <!-- =====================================================
+             TOP BAR
+             ===================================================== -->
+
+        <header class="pt-topbar">
+
+
+            <!-- SEARCH -->
+
+            <div class="global-search">
+
+                <i class="ph ph-magnifying-glass"
+                   aria-hidden="true"></i>
+
+                <input @bind="SearchText"
+                       @bind:event="oninput"
+                       @onkeydown="HandleSearchKey"
+                       placeholder="Search symbols, strategies, or ask Trady AI..."
+                       aria-label="Search PhoenixTrend" />
+
+                <kbd>/</kbd>
+
+            </div>
+
+
+            <!-- MARKET STRIP -->
+
+            <div class="market-strip">
+
+                @foreach (var market in HeaderMarkets)
+                {
+                    <div class="@(market.ChangePercent < 0 ? "down" : "")">
+                        <small>@market.Name</small>
+
+                        <span class="market-value-row">
+                            <strong>@FormatHeaderPrice(market)</strong>
+                            <em>@FormatHeaderChange(market.ChangePercent)</em>
+                        </span>
+                    </div>
+                }
+
+            </div>
+
+
+            <!-- BROKER CONNECTION -->
+
+            <button type="button"
+                    class="top-broker-glass @(_brokerConnected ? "connected" : "disconnected")"
+                    title="@(_brokerConnected ? "Manage broker connection" : "Connect trading account")"
+                    aria-label="@(_brokerConnected ? "Manage broker connection" : "Connect trading account")"
+                    @onclick="OpenBrokerConnection">
+                <span class="top-broker-glass-icon" aria-hidden="true">
+                    <i class="@(_brokerConnected ? "ph ph-plugs-connected" : "ph ph-plug")"></i>
+                </span>
+                <span class="top-broker-glass-copy">
+                    <small>Broker</small>
+                    <strong>@(_brokerConnected ? "Connected" : "Connect")</strong>
+                </span>
+                <span class="top-broker-glass-dot" aria-hidden="true"></span>
+            </button>
+
+            <!-- NOTIFICATIONS -->
+
+            <div class="top-notification-wrap">
+                <button type="button"
+                        class="top-icon"
+                        title="Notifications"
+                        aria-label="Notifications"
+                        aria-expanded="@_notificationsOpen"
+                        @onclick="ToggleNotifications">
+                    <i class="ph ph-bell"></i>
+                    @if (_notificationCount > 0)
+                    {
+                        <b>@_notificationCount</b>
+                    }
+                </button>
+                @if (_notificationsOpen)
+                {
+                    <div class="top-notification-panel">
+                        <div class="top-notification-title"><strong>Notifications</strong><span>Live</span></div>
+                        <div class="top-notification-item"><i class="ph ph-plugs-connected"></i><div><b>Broker</b><small>@(_brokerConnected ? "Alpaca is connected." : "Broker is disconnected.")</small></div></div>
+                        <div class="top-notification-item"><i class="ph ph-shield-check"></i><div><b>Risk engine</b><small>@(_riskEngineReady ? "Risk controls are ready." : "Risk engine is unavailable.")</small></div></div>
+                        <div class="top-notification-item"><i class="ph ph-chart-line-up"></i><div><b>Market data</b><small>@(_marketDataOnline ? "Market data is live." : "Market data is unavailable.")</small></div></div>
+                    </div>
+                }
+            </div>
+
+            <!-- USER -->
+
+            <div class="user-menu-wrap">
+                <button type="button"
+                        class="user-menu"
+                        aria-expanded="@_userMenuOpen"
+                        aria-label="Open account menu"
+                        @onclick="ToggleUserMenu">
+                    <span class="user-avatar">@UserInitials</span>
+                    <div class="user-copy">
+                        <strong>@UserDisplayName</strong>
+                        <small>@UserSecondaryText</small>
+                    </div>
+                    <i class="ph ph-caret-down user-chevron"></i>
+                </button>
+
+                @if (_userMenuOpen)
+                {
+                    <div class="user-dropdown">
+                        <div class="user-dropdown-head">
+                            <span class="user-avatar">@UserInitials</span>
+                            <div><strong>@UserDisplayName</strong><small>@UserEmail</small></div>
+                        </div>
+                        <button type="button" @onclick='() => GoUserMenu("/settings")'><i class="ph ph-user-circle"></i><span>Account</span></button>
+                        <button type="button" @onclick='() => GoUserMenu("/connect")'><i class="ph ph-plugs-connected"></i><span>Broker Connection</span></button>
+                        <button type="button" @onclick='() => GoUserMenu("/settings")'><i class="ph ph-gear-six"></i><span>Settings</span></button>
+                        <button type="button" class="signout" @onclick="SignOut"><i class="ph ph-sign-out"></i><span>Sign Out</span></button>
+                    </div>
+                }
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             SHARED PAGE BANNER
+             Uses the existing global .shell-banner CSS unchanged.
+             ===================================================== -->
+
+        <div class="shell-banner"
+             aria-hidden="true">
+        </div>
+
+
+        <!-- =====================================================
+             PAGE CONTENT
+             ===================================================== -->
+
+        <main class="pt-content">
+
+            @Body
+
+        </main>
+
+
+        <!-- =====================================================
+             SYSTEM STATUS
+             ===================================================== -->
+
+        <footer class="statusbar">
+
+            <span class="@(_backendOnline ? "ok" : "bad")">
+
+                <i></i>
+
+                @(_backendOnline
+                    ? "Backend Online"
+                    : "Backend Offline")
+
+            </span>
+
+
+            <span class="@(_marketDataOnline ? "ok" : "warn")">
+
+                <i></i>
+
+                @(_marketDataOnline
+                    ? "Market Data Live"
+                    : "Market Data Unavailable")
+
+            </span>
+
+
+            <span class="@(_brokerConnected ? "ok" : "warn")">
+
+                <i></i>
+
+                @(_brokerConnected
+                    ? "Broker Connected"
+                    : "Broker Disconnected")
+
+            </span>
+
+
+            <span class="@(_riskEngineReady ? "push ok" : "push warn")">
+
+                <i></i>
+
+                @(_riskEngineReady
+                    ? "Risk Engine Ready"
+                    : "Risk Engine Unavailable")
+
+            </span>
+
+        </footer>
+
+    </section>
+
+</div>
+
+
+@code
+{
+
+    // =========================================================
+    // SYSTEM STATE
+    // =========================================================
+
+    private bool _backendOnline;
+
+    private bool _brokerConnected;
+
+    private bool _marketDataOnline;
+
+    private bool _riskEngineReady;
+
+    private string SearchText = string.Empty;
+
+    private readonly CancellationTokenSource _headerMarketRefreshCts = new();
+    private Task? _headerMarketRefreshTask;
+    private Task? _systemStatusRefreshTask;
+    private static readonly TimeSpan HeaderMarketRefreshInterval =
+        TimeSpan.FromMinutes(2);
+
+    private bool _notificationsOpen;
+    private bool _userMenuOpen;
+
+    private string UserDisplayName => UserValue("display_name", UserValue("username", "Account"));
+    private string UserEmail => UserValue("email", "");
+    private string UserSecondaryText => string.IsNullOrWhiteSpace(UserEmail) ? "PhoenixTrend" : UserEmail;
+    private string UserInitials
+    {
+        get
+        {
+            var parts = UserDisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0) return "U";
+            if (parts.Length == 1) return parts[0][..1].ToUpperInvariant();
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+        }
+    }
+
+    private string UserValue(string property, string fallback)
+    {
+        if (Auth.CurrentUser is { } user && user.ValueKind == System.Text.Json.JsonValueKind.Object &&
+            user.TryGetProperty(property, out var value) && value.ValueKind == System.Text.Json.JsonValueKind.String)
+        {
+            var text = value.GetString();
+            if (!string.IsNullOrWhiteSpace(text)) return text;
+        }
+        return fallback;
+    }
+
+    private void ToggleUserMenu()
+    {
+        _notificationsOpen = false;
+        _userMenuOpen = !_userMenuOpen;
+    }
+
+    private void GoUserMenu(string path)
+    {
+        _userMenuOpen = false;
+        Navigation.NavigateTo(path);
+    }
+
+    private async Task SignOut()
+    {
+        _userMenuOpen = false;
+        await Auth.LogoutAsync();
+        Navigation.NavigateTo("/login", replace: true);
+    }
+
+    private int _notificationCount => (!_brokerConnected ? 1 : 0) + (!_riskEngineReady ? 1 : 0) + (!_marketDataOnline ? 1 : 0);
+    private void ToggleNotifications() => _notificationsOpen = !_notificationsOpen;
+
+    private readonly HeaderMarketRow[] HeaderMarkets =
+    {
+        new("S&P 500", "^GSPC"),
+        new("NASDAQ", "^IXIC"),
+        new("DOW", "^DJI"),
+        new("VIX", "^VIX")
+    };
+
+
+    // =========================================================
+    // INITIALIZATION
+    // =========================================================
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Restore the PhoenixTrend session before any protected page or
+        // layout API request is allowed to run.  Waiting until
+        // OnAfterRenderAsync caused child pages to issue their first API
+        // requests without the Bearer token, which surfaced as disconnected
+        // broker/market/risk state across the application.
+        var authenticated = await Auth.RestoreAsync();
+
+        if (!authenticated)
+        {
+            Navigation.NavigateTo("/login", replace: true);
+            return;
+        }
+
+        await Task.WhenAll(
+            LoadSystemStatus(),
+            LoadHeaderMarkets()
+        );
+
+        _headerMarketRefreshTask =
+            RunHeaderMarketRefreshLoopAsync(
+                _headerMarketRefreshCts.Token
+            );
+        _systemStatusRefreshTask = RunSystemStatusRefreshLoopAsync(_headerMarketRefreshCts.Token);
+    }
+
+
+    // =========================================================
+    // SYSTEM STATUS
+    // =========================================================
+
+    private async Task LoadSystemStatus()
+    {
+        var healthTask =
+            Api.Health();
+
+        var brokerTask =
+            Api.BrokerStatus();
+
+        var engineTask =
+            Api.EngineStatus();
+
+
+        await Task.WhenAll(
+            healthTask,
+            brokerTask,
+            engineTask
+        );
+
+
+        // -----------------------------------------------------
+        // BACKEND
+        // -----------------------------------------------------
+
+        var health =
+            await healthTask;
+
+        _backendOnline =
+            health is not null;
+
+
+        // -----------------------------------------------------
+        // BROKER
+        // -----------------------------------------------------
+
+        var broker =
+            await brokerTask;
+
+        _brokerConnected =
+            PhoenixApi.Text(
+                broker,
+                "connected",
+                "false"
+            )
+            .Equals(
+                "true",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+
+        // -----------------------------------------------------
+        // ENGINE / MARKET DATA
+        // -----------------------------------------------------
+
+        var engine =
+            await engineTask;
+
+        if (engine is not null)
+        {
+            _riskEngineReady = true;
+            _marketDataOnline = true;
+        }
+        else
+        {
+            _riskEngineReady = false;
+            _marketDataOnline = false;
+        }
+    }
+
+
+    // =========================================================
+    // LIVE HEADER MARKETS
+    // =========================================================
+
+    private async Task LoadHeaderMarkets()
+    {
+        var tasks = HeaderMarkets
+            .Select(async market =>
+            {
+                try
+                {
+                    var quote = await Api.Quote(market.Symbol);
+
+                    if (quote is null)
+                        return;
+
+                    var root = quote.Value;
+
+                    market.Price = ReadNumber(
+                        root,
+                        "price",
+                        "regular_market_price",
+                        "last",
+                        "close"
+                    );
+
+                    market.ChangePercent = ReadNumber(
+                        root,
+                        "change_percent",
+                        "changePercent",
+                        "percent_change"
+                    );
+
+                    market.HasData = market.Price.HasValue;
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(
+                        $"Header market quote failed for {market.Symbol}: {ex.Message}"
+                    );
+                }
+            })
+            .ToArray();
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task RunSystemStatusRefreshLoopAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                await InvokeAsync(async () =>
+                {
+                    await LoadSystemStatus();
+                    StateHasChanged();
+                });
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task RunHeaderMarketRefreshLoopAsync(
+        CancellationToken cancellationToken)
+    {
+        using var timer =
+            new PeriodicTimer(HeaderMarketRefreshInterval);
+
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await InvokeAsync(async () =>
+                {
+                    await LoadHeaderMarkets();
+                    StateHasChanged();
+                });
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private static double? ReadNumber(
+        System.Text.Json.JsonElement root,
+        params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (!root.TryGetProperty(name, out var value))
+                continue;
+
+            if (value.ValueKind ==
+                System.Text.Json.JsonValueKind.Number &&
+                value.TryGetDouble(out var number))
+            {
+                return number;
+            }
+
+            if (value.ValueKind ==
+                System.Text.Json.JsonValueKind.String &&
+                double.TryParse(
+                    value.GetString(),
+                    System.Globalization.NumberStyles.Float |
+                    System.Globalization.NumberStyles.AllowThousands,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out number))
+            {
+                return number;
+            }
+        }
+
+        return null;
+    }
+
+    private static string FormatHeaderPrice(
+        HeaderMarketRow market)
+    {
+        if (!market.Price.HasValue)
+            return "—";
+
+        return market.Name == "VIX"
+            ? market.Price.Value.ToString(
+                "N2",
+                System.Globalization.CultureInfo.InvariantCulture)
+            : market.Price.Value.ToString(
+                "N2",
+                System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatHeaderChange(
+        double? changePercent)
+    {
+        if (!changePercent.HasValue)
+            return "—";
+
+        return changePercent.Value >= 0
+            ? $"+{changePercent.Value:0.00}%"
+            : $"{changePercent.Value:0.00}%";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _headerMarketRefreshCts.Cancel();
+
+        if (_headerMarketRefreshTask is not null)
+        {
+            try
+            {
+                await _headerMarketRefreshTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+
+        if (_systemStatusRefreshTask is not null)
+        {
+            try { await _systemStatusRefreshTask; }
+            catch (OperationCanceledException) { }
+        }
+
+        _headerMarketRefreshCts.Dispose();
+    }
+
+
+    // =========================================================
+    // GLOBAL SEARCH
+    // =========================================================
+
+    private void OpenBrokerConnection()
+    {
+        Navigation.NavigateTo("/connect");
+    }
+
+    private void HandleSearchKey(
+        KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter")
+        {
+            return;
+        }
+
+
+        var value =
+            SearchText.Trim();
+
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+
+        var symbol =
+            value
+                .Trim()
+                .ToUpperInvariant();
+
+
+        Navigation.NavigateTo(
+            $"/charts?symbol={Uri.EscapeDataString(symbol)}"
+        );
+    }
+
+
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
+    private readonly NavItem[] PrimaryNav =
+    {
+        new(
+            "/home",
+            "ph ph-house",
+            "Home",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/markets",
+            "ph ph-chart-bar",
+            "Markets",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/discover",
+            "ph ph-compass",
+            "Discover",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/charts",
+            "ph ph-chart-line-up",
+            "TradeDesk",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/strategies",
+            "ph ph-stack",
+            "Strategies",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/automations",
+            "ph ph-robot",
+            "Automations",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/arena",
+            "ph ph-game-controller",
+            "Arena",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/portfolio",
+            "ph ph-wallet",
+            "Portfolio",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/risk",
+            "ph ph-shield-check",
+            "Risk",
+            NavLinkMatch.All
+        ),
+
+        new(
+            "/settings",
+            "ph ph-gear-six",
+            "Settings",
+            NavLinkMatch.All
+        )
+    };
+
+
+    private sealed class HeaderMarketRow
+    {
+        public HeaderMarketRow(
+            string name,
+            string symbol)
+        {
+            Name = name;
+            Symbol = symbol;
+        }
+
+        public string Name { get; }
+        public string Symbol { get; }
+        public double? Price { get; set; }
+        public double? ChangePercent { get; set; }
+        public bool HasData { get; set; }
+    }
+
+
+    private sealed record NavItem(
+        string Href,
+        string Icon,
+        string Name,
+        NavLinkMatch Match
+    );
+}

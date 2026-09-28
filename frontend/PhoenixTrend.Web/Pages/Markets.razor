@@ -1,0 +1,2234 @@
+@page "/markets"
+@implements IAsyncDisposable
+
+@using System.Globalization
+@using System.Text.Json
+@using System.Linq
+
+@inject PhoenixApi Api
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>PhoenixTrend | Markets</PageTitle>
+
+<div class="ptm-page">
+
+    <section class="ptm-hero">
+        <div class="ptm-hero-copy">
+            <h1>Markets</h1>
+            <p>Real-time market data, intelligence and opportunities</p>
+        </div>
+
+        <button class="ptm-refresh" type="button" @onclick="LoadAll" disabled="@Loading">
+            <i class="ph ph-arrows-clockwise"></i>
+            @(Loading ? "Refreshing" : "Refresh")
+        </button>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="ptm-message ptm-message-error">
+            <i class="ph ph-warning-circle"></i>
+            @ErrorMessage
+        </div>
+    }
+
+    <section class="ptm-index-grid">
+        @foreach (var item in Indices)
+        {
+            <article class="ptm-index-card @(item.ChangeValue < 0 ? "ptm-index-negative" : "ptm-index-positive")">
+                <div class="ptm-index-copy">
+                    <span>@item.Name</span>
+                    <strong>@item.Price</strong>
+                    <small class="@ToneClass(item.ChangeValue)">
+                        @FormatSigned(item.ChangeAmount)
+                        <b>@item.Change</b>
+                    </small>
+                </div>
+
+                <div class="ptm-mini-spark @ToneClass(item.ChangeValue)" aria-hidden="true">
+                    <svg viewBox="0 0 100 34" preserveAspectRatio="none">
+                        <polyline points="@SparklinePoints(item.Symbol, item.ChangeValue)" />
+                    </svg>
+                </div>
+            </article>
+        }
+    </section>
+
+    <section class="ptm-controls">
+        <div class="ptm-asset-tabs">
+            @foreach (var asset in AssetTabs)
+            {
+                <button type="button"
+                        class="@(ActiveAsset == asset ? "ptm-active" : "")"
+                        @onclick="() => ChangeAsset(asset)">
+                    @asset
+                </button>
+            }
+        </div>
+
+        <div class="ptm-search">
+            <i class="ph ph-magnifying-glass"></i>
+            <input id="ptm-symbol-search"
+                   placeholder="Search symbols..."
+                   @bind="SearchText"
+                   @bind:event="oninput"
+                   @onkeydown="HandleSearchKey" />
+        </div>
+
+        <select class="ptm-segment" @bind="Segment">
+            <option>All Segments</option>
+            <option>Gainers</option>
+            <option>Losers</option>
+        </select>
+
+        <button type="button" class="ptm-filter" title="Filter">
+            <i class="ph ph-funnel"></i>
+        </button>
+    </section>
+<section class="ptm-main-grid">
+
+        <article class="ptm-card ptm-watchlist-card">
+            <header class="ptm-card-head">
+                <div>
+                    <h2>Market Watchlist</h2>
+                    <span>Live market quotes</span>
+                </div>
+
+                <div class="ptm-watch-tools">
+                    <button type="button">
+                        My Watchlist
+                        <i class="ph ph-caret-down"></i>
+                    </button>
+
+                    <button type="button" class="ptm-add" @onclick="FocusSearch">
+                        <i class="ph ph-plus"></i>
+                        Add Symbol
+                    </button>
+                </div>
+            </header>
+
+            <div class="ptm-table-scroll">
+                <table class="ptm-watch-table">
+                    <thead>
+                        <tr>
+                            <th class="ptm-check-column"></th>
+                            <th>Symbol</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Change</th>
+                            <th>% Change</th>
+                            <th>Volume</th>
+                            <th>Chart</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var row in FilteredWatchlist)
+                        {
+                            <tr class="@(SelectedSymbol == row.Symbol ? "ptm-selected-row" : "")"
+                                @onclick="() => SelectSymbol(row.Symbol)">
+
+                                <td class="ptm-check-column">
+                                    <span class="ptm-checkbox"></span>
+                                </td>
+
+                                <td>
+                                    <div class="ptm-symbol">
+                                        <StockLogo Symbol="@row.Symbol" Size="small" AssetType="@AssetTypeForActiveTab" />
+                                        <strong>@row.Symbol</strong>
+                                    </div>
+                                </td>
+
+                                <td class="ptm-company">@CompanyName(row.Symbol)</td>
+                                <td class="ptm-price">@row.Price</td>
+                                <td class="@ToneClass(row.ChangeValue)">@FormatSigned(row.ChangeAmount)</td>
+                                <td class="@ToneClass(row.ChangeValue)">@row.Change</td>
+                                <td>@FormatVolume(row.Volume)</td>
+
+                                <td>
+                                    <div class="ptm-row-spark @ToneClass(row.ChangeValue)" aria-hidden="true">
+                                        <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                                            <polyline points="@SparklinePoints(row.Symbol, row.ChangeValue)" />
+                                        </svg>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="ptm-row-actions">
+                                        <button type="button" title="Watch" @onclick:stopPropagation="true">
+                                            <i class="ph ph-star"></i>
+                                        </button>
+                                        <button type="button" title="Alert" @onclick:stopPropagation="true">
+                                            <i class="ph ph-bell"></i>
+                                        </button>
+                                        <button type="button"
+                                                title="Chart"
+                                                @onclick:stopPropagation="true"
+                                                @onclick="() => OpenChart(row.Symbol)">
+                                            <i class="ph ph-chart-line-up"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="ptm-card ptm-detail-card">
+            <header class="ptm-detail-head">
+                <div class="ptm-detail-symbol">
+                    <StockLogo Symbol="@SelectedSymbol" Size="large" AssetType="@AssetTypeForActiveTab" />
+                    <div>
+                        <h2>@SelectedSymbol</h2>
+                        <span>@CompanyName(SelectedSymbol)</span>
+                    </div>
+                </div>
+
+                <div class="ptm-detail-actions">
+                    <button type="button">
+                        <i class="ph ph-star"></i>
+                        Watchlist
+                    </button>
+                    <button type="button" class="ptm-trade" @onclick="OpenTrade">Trade</button>
+                </div>
+            </header>
+
+            <div class="ptm-selected-price">
+                <strong>@(SelectedQuote?.Price ?? "—")</strong>
+                <span class="@ToneClass(SelectedQuote?.ChangeValue ?? double.NaN)">
+                    @FormatSigned(SelectedQuote?.ChangeAmount)
+                    @if (SelectedQuote is not null)
+                    {
+                        <b>(@SelectedQuote.Change)</b>
+                    }
+                </span>
+            </div>
+
+            <div class="ptm-timeframes">
+                @foreach (var timeframe in Timeframes)
+                {
+                    <button type="button"
+                            class="@(SelectedTimeframe == timeframe ? "ptm-active" : "")"
+                            @onclick="() => ChangeTimeframe(timeframe)">
+                        @timeframe
+                    </button>
+                }
+            </div>
+
+            <div class="ptm-chart-shell"
+                 @onmouseleave="ClearChartHover">
+
+                @if (ChartPoints.Count >= 2)
+                {
+                    var displayCandle = DisplayCandle;
+
+                    <div class="ptm-chart-data-strip">
+                        <div class="ptm-chart-data-symbol">
+                            <StockLogo Symbol="@SelectedSymbol"
+                                       Size="small"
+                                       AssetType="@AssetTypeForActiveTab" />
+
+                            <div>
+                                <strong>@SelectedSymbol</strong>
+                                <span>@(HoveredCandle is not null ? FormatCandleTime(displayCandle?.Time ?? 0) : "Latest market bar")</span>
+                            </div>
+                        </div>
+
+                        <div class="ptm-chart-data-values">
+                            <div>
+                                <span>Open</span>
+                                <strong>@FormatMarketPrice(displayCandle?.Open)</strong>
+                            </div>
+
+                            <div>
+                                <span>High</span>
+                                <strong class="ptm-positive">@FormatMarketPrice(displayCandle?.High)</strong>
+                            </div>
+
+                            <div>
+                                <span>Low</span>
+                                <strong class="ptm-negative">@FormatMarketPrice(displayCandle?.Low)</strong>
+                            </div>
+
+                            <div>
+                                <span>Close</span>
+                                <strong>@FormatMarketPrice(displayCandle?.Close)</strong>
+                            </div>
+
+                            <div class="ptm-chart-data-volume">
+                                <span>Volume</span>
+                                <strong>@FormatVolume(displayCandle?.Volume ?? 0)</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ptm-chart">
+                        <div class="ptm-chart-grid">
+                            <i></i><i></i><i></i><i></i>
+                        </div>
+
+                        <svg class="ptm-price-chart"
+                             viewBox="0 0 1000 300"
+                             preserveAspectRatio="none"
+                             role="img"
+                             aria-label="@($"{SelectedSymbol} {SelectedTimeframe} interactive price chart")">
+
+                            <defs>
+                                <linearGradient id="ptmChartFill" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="currentColor" stop-opacity=".30" />
+                                    <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
+
+                            <path class="ptm-chart-area @ChartToneClass"
+                                  d="@ChartAreaPath" />
+
+                            <polyline class="ptm-chart-line @ChartToneClass"
+                                      points="@ChartPolylinePoints" />
+
+                            @if (HoveredCandle is not null)
+                            {
+                                <line class="ptm-chart-crosshair"
+                                      x1="@Svg(HoverX)"
+                                      x2="@Svg(HoverX)"
+                                      y1="0"
+                                      y2="300" />
+
+                                <line class="ptm-chart-crosshair-horizontal"
+                                      x1="0"
+                                      x2="1000"
+                                      y1="@Svg(HoverY)"
+                                      y2="@Svg(HoverY)" />
+
+                                <circle class="ptm-chart-hover-ring @ChartToneClass"
+                                        cx="@Svg(HoverX)"
+                                        cy="@Svg(HoverY)"
+                                        r="10" />
+
+                                <circle class="ptm-chart-hover-dot @ChartToneClass"
+                                        cx="@Svg(HoverX)"
+                                        cy="@Svg(HoverY)"
+                                        r="5" />
+                            }
+
+                            @for (var i = 0; i < ChartCandles.Count; i++)
+                            {
+                                var candleIndex = i;
+
+                                <rect class="ptm-chart-hit"
+                                      x="@Svg(HitRectX(candleIndex))"
+                                      y="0"
+                                      width="@Svg(HitRectWidth)"
+                                      height="300"
+                                      @onmouseenter="() => SetChartHover(candleIndex)" />
+                            }
+                        </svg>
+
+                        @if (HoveredCandle is not null)
+                        {
+                            <div class="ptm-chart-price-tag"
+                                 style="@($"top:{HoverYPercent.ToString("0.###", CultureInfo.InvariantCulture)}%;")">
+                                @FormatMarketPrice(HoveredCandle.Close)
+                            </div>
+                        }
+
+                        <div class="ptm-chart-range">
+                            <span>@FormatMarketPrice(ChartPoints.Min())</span>
+                            <span>@FormatMarketPrice(ChartPoints.Max())</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="ptm-chart">
+                        <div class="ptm-chart-empty">
+                            <i class="ph ph-chart-line-up"></i>
+                            <strong>Chart data unavailable</strong>
+                            <span>No historical candles were returned for @SelectedSymbol.</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="ptm-stats">
+                <div><span>Price</span><strong>@(SelectedQuote?.Price ?? "—")</strong></div>
+                <div><span>Previous Close</span><strong>@FormatMarketPrice(SelectedQuote?.PreviousClose)</strong></div>
+                <div><span>Change</span><strong class="@ToneClass(SelectedQuote?.ChangeValue ?? double.NaN)">@FormatSigned(SelectedQuote?.ChangeAmount)</strong></div>
+                <div><span>Volume</span><strong>@FormatVolume(SelectedVolume)</strong></div>
+                <div><span>Market Cap</span><strong>@FormatMarketCap(SelectedMarketCap)</strong></div>
+                <div><span>P/E Ratio</span><strong>@FormatRatio(SelectedPeRatio)</strong></div>
+                <div><span>52W High</span><strong>@FormatMarketPrice(Selected52WeekHigh)</strong></div>
+                <div><span>52W Low</span><strong>@FormatMarketPrice(Selected52WeekLow)</strong></div>
+            </div>
+        </article>
+
+    </section>
+
+    <section class="ptm-bottom-grid">
+
+        <article class="ptm-card ptm-heatmap-card">
+            <header class="ptm-card-head ptm-compact-head">
+                <div>
+                    <h2>Market Heatmap</h2>
+                    <span>Discovery and live market movement</span>
+                </div>
+
+                <div class="ptm-small-tabs">
+                    <button type="button"
+                            class="@(HeatmapTab == "Market" ? "ptm-active" : "")"
+                            @onclick='() => ChangeHeatmapTab("Market")'>
+                        Market
+                    </button>
+                    <button type="button"
+                            class="@(HeatmapTab == "Discovery" ? "ptm-active" : "")"
+                            @onclick='() => ChangeHeatmapTab("Discovery")'>
+                        Discovery
+                    </button>
+                </div>
+            </header>
+
+            <div class="ptm-heatmap">
+                @foreach (var item in HeatmapItems)
+                {
+                    <button type="button"
+                            class="@ToneClass(item.ChangeValue)"
+                            @onclick="() => SelectSymbol(item.Symbol)">
+                        <StockLogo Symbol="@item.Symbol" Size="small" AssetType="@AssetTypeForActiveTab" />
+                        <strong>@item.Symbol</strong>
+                        <span>@item.Change</span>
+                        <small>@item.Signal</small>
+                    </button>
+                }
+            </div>
+        </article>
+
+        <article class="ptm-card ptm-movers-card">
+            <header class="ptm-mover-tabs">
+                @foreach (var tab in MoverTabs)
+                {
+                    <button type="button"
+                            class="@(MoverTab == tab ? "ptm-active" : "")"
+                            @onclick="() => MoverTab = tab">
+                        @tab
+                    </button>
+                }
+            </header>
+
+            <div class="ptm-movers-scroll">
+                <table class="ptm-movers-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Symbol</th>
+                            <th>Price</th>
+                            <th>% Change</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @{
+                            var rank = 1;
+                        }
+
+                        @foreach (var row in CurrentMovers)
+                        {
+                            <tr @onclick="() => SelectSymbol(row.Symbol)">
+                                <td>@rank</td>
+                                <td><strong>@row.Symbol</strong></td>
+                                <td>@row.Price</td>
+                                <td class="@ToneClass(row.ChangeValue)">@row.Change</td>
+                            </tr>
+
+                            rank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="ptm-card ptm-news-card" id="ptm-news">
+            <header class="ptm-card-head ptm-compact-head ptm-news-head">
+                <div>
+                    <h2>Market News</h2>
+                    <span>Latest news for @SelectedSymbol · auto-refreshing</span>
+                </div>
+
+                <div class="ptm-news-live" title="Live news feed">
+                    <i></i>
+                    LIVE
+                </div>
+            </header>
+
+            <div class="ptm-news-viewport"
+                 aria-label="@($"Live market news for {SelectedSymbol}")">
+                @if (NewsItems.Count > 0)
+                {
+                    <div class="ptm-news-track">
+                        @foreach (var news in NewsItems)
+                        {
+                            <a class="ptm-news-item"
+                               href="@news.ArticleUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               title="Open original article">
+                                <div class="ptm-news-media">
+                                    @if (!string.IsNullOrWhiteSpace(news.ImageUrl))
+                                    {
+                                        <img src="@news.ImageUrl"
+                                             alt=""
+                                             loading="lazy"
+                                             referrerpolicy="no-referrer" />
+                                    }
+                                    else
+                                    {
+                                        <div class="ptm-news-image-fallback">
+                                            <i class="ph ph-newspaper"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="ptm-news-copy">
+                                    <div class="ptm-news-meta">
+                                        <strong>@news.Source</strong>
+                                        <span>@FormatNewsAge(news.PublishedAt)</span>
+                                    </div>
+
+                                    <div class="ptm-news-title">@news.Title</div>
+
+                                    <div class="ptm-news-footer">
+                                        <span>@news.Symbol</span>
+                                        <small>
+                                            Original article
+                                            <i class="ph ph-arrow-square-out"></i>
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+
+                        @* Duplicate the feed so the CSS animation loops without a visible jump. *@
+                        @foreach (var news in NewsItems)
+                        {
+                            <a class="ptm-news-item"
+                               href="@news.ArticleUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-hidden="true"
+                               tabindex="-1">
+                                <div class="ptm-news-media">
+                                    @if (!string.IsNullOrWhiteSpace(news.ImageUrl))
+                                    {
+                                        <img src="@news.ImageUrl"
+                                             alt=""
+                                             loading="lazy"
+                                             referrerpolicy="no-referrer" />
+                                    }
+                                    else
+                                    {
+                                        <div class="ptm-news-image-fallback">
+                                            <i class="ph ph-newspaper"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="ptm-news-copy">
+                                    <div class="ptm-news-meta">
+                                        <strong>@news.Source</strong>
+                                        <span>@FormatNewsAge(news.PublishedAt)</span>
+                                    </div>
+
+                                    <div class="ptm-news-title">@news.Title</div>
+
+                                    <div class="ptm-news-footer">
+                                        <span>@news.Symbol</span>
+                                        <small>
+                                            Original article
+                                            <i class="ph ph-arrow-square-out"></i>
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="ptm-news-empty">
+                        <i class="ph ph-newspaper"></i>
+                        <span>No market news returned by the API.</span>
+                    </div>
+                }
+            </div>
+        </article>
+
+    </section>
+
+</div>
+
+@code {
+    private bool Loading;
+    private string ErrorMessage = string.Empty;
+
+    private string ActiveAsset = "Stocks";
+    private string SearchText = string.Empty;
+    private string Segment = "All Segments";
+    private string SelectedSymbol = "AAPL";
+    private string SelectedTimeframe = "1D";
+    private string MoverTab = "Top Gainers";
+    private string HeatmapTab = "Market";
+
+    private readonly string[] AssetTabs =
+        ["Stocks", "Options", "ETFs", "Crypto", "Futures", "Forex", "Commodities", "Bonds"];
+
+    private readonly string[] Timeframes =
+        ["1D", "1W", "1M", "3M", "1Y", "5Y"];
+
+    private readonly string[] MoverTabs =
+        ["Top Gainers", "Top Losers", "Active"];
+
+    private static readonly IReadOnlyDictionary<string, string[]> AssetUniverses =
+        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Stocks"] =
+                ["AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "AMD", "NFLX", "COIN"],
+
+            ["ETFs"] =
+                ["SPY", "QQQ", "VOO", "IWM", "DIA", "XLK", "XLF", "XLE", "TLT", "IEF"],
+
+            ["Crypto"] =
+                ["BTCUSD", "ETHUSD", "SOLUSD", "XRPUSD", "DOGEUSD", "ADAUSD", "AVAXUSD"],
+
+            ["Futures"] =
+                ["ES", "NQ", "YM", "RTY"],
+
+            ["Forex"] =
+                ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD"],
+
+            ["Commodities"] =
+                ["GOLD", "SILVER", "OIL", "NATGAS", "COPPER"],
+
+            ["Bonds"] =
+                ["^TNX", "^FVX", "^TYX", "TLT", "IEF", "SHY"],
+
+            // Options require an options-chain endpoint. Until that endpoint
+            // is added, this tab uses optionable underlyings for navigation
+            // but does not fabricate option-contract prices.
+            ["Options"] =
+                ["AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "SPY", "QQQ"]
+        };
+
+    private IEnumerable<string> CurrentSymbols =>
+        AssetUniverses.TryGetValue(ActiveAsset, out var symbols)
+            ? symbols
+            : AssetUniverses["Stocks"];
+
+    private string AssetTypeForActiveTab =>
+        ActiveAsset switch
+        {
+            "ETFs" => "etf",
+            "Crypto" => "crypto",
+            "Futures" => "future",
+            "Forex" => "forex",
+            "Commodities" => "commodity",
+            "Bonds" => "bond",
+            "Options" => "option",
+            _ => "equity"
+        };
+
+    private readonly List<QuoteRow> Watchlist = new();
+    private readonly List<IndexRow> Indices = new();
+    private readonly List<DiscoveryRow> Discovery = new();
+    private readonly List<NewsRow> NewsItems = new();
+    private readonly CancellationTokenSource NewsRefreshCts = new();
+    private Task? NewsRefreshTask;
+    private static readonly TimeSpan NewsRefreshInterval = TimeSpan.FromMinutes(2);
+    private readonly List<double> ChartPoints = new();
+    private readonly List<CandleRow> ChartCandles = new();
+    private JsonElement? SelectedContext;
+
+    private int? HoveredCandleIndex;
+    private double? SelectedMarketCap;
+    private double? SelectedPeRatio;
+    private double? Selected52WeekHigh;
+    private double? Selected52WeekLow;
+    private double SelectedHistoryVolume;
+
+    private CandleRow? HoveredCandle =>
+        HoveredCandleIndex is >= 0 &&
+        HoveredCandleIndex < ChartCandles.Count
+            ? ChartCandles[HoveredCandleIndex.Value]
+            : null;
+
+    private CandleRow? DisplayCandle =>
+        HoveredCandle ?? ChartCandles.LastOrDefault();
+
+    private double SelectedVolume =>
+        SelectedQuote?.Volume > 0
+            ? SelectedQuote.Volume
+            : SelectedHistoryVolume > 0
+                ? SelectedHistoryVolume
+                : ChartCandles.LastOrDefault()?.Volume ?? 0d;
+
+
+    private readonly List<QuoteRow> Gainers = new();
+    private readonly List<QuoteRow> Losers = new();
+    private readonly List<QuoteRow> MostActive = new();
+
+    private QuoteRow? SelectedQuote =>
+        Watchlist.FirstOrDefault(x =>
+            string.Equals(x.Symbol, SelectedSymbol, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<QuoteRow> FilteredWatchlist
+    {
+        get
+        {
+            IEnumerable<QuoteRow> rows = Watchlist;
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var search = SearchText.Trim();
+
+                rows = rows.Where(x =>
+                    x.Symbol.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    CompanyName(x.Symbol).Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
+            rows = Segment switch
+            {
+                "Gainers" => rows.Where(x => !double.IsNaN(x.ChangeValue) && x.ChangeValue >= 0),
+                "Losers" => rows.Where(x => !double.IsNaN(x.ChangeValue) && x.ChangeValue < 0),
+                _ => rows
+            };
+
+            return rows;
+        }
+    }
+
+    private IEnumerable<QuoteRow> CurrentMovers =>
+        MoverTab switch
+        {
+            "Top Losers" => Losers,
+            "Active" => MostActive,
+            _ => Gainers
+        };
+
+    private IEnumerable<DiscoveryRow> HeatmapItems
+    {
+        get
+        {
+            if (string.Equals(
+                    HeatmapTab,
+                    "Discovery",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                // Discovery is backed by the real /api/discover response.
+                // It is currently available for the Stocks universe.
+                if (ActiveAsset == "Stocks")
+                    return Discovery.Take(12);
+
+                return Enumerable.Empty<DiscoveryRow>();
+            }
+
+            // Market always shows the current live quote universe.
+            return Watchlist
+                .Take(8)
+                .Select(x =>
+                    new DiscoveryRow(
+                        x.Symbol,
+                        x.Change,
+                        x.ChangeValue,
+                        "Live quote"));
+        }
+    }
+
+    private string ChartToneClass =>
+        ChartPoints.Count < 2 || ChartPoints[^1] >= ChartPoints[0]
+            ? "ptm-positive"
+            : "ptm-negative";
+
+    private string ChartPolylinePoints =>
+        BuildPolyline(ChartPoints, 1000d, 300d, 18d);
+
+    private string ChartAreaPath
+    {
+        get
+        {
+            if (ChartPoints.Count < 2)
+                return string.Empty;
+
+            var points = BuildPolyline(ChartPoints, 1000d, 300d, 18d);
+            return $"M {points.Replace(" ", " L ")} L 1000 300 L 0 300 Z";
+        }
+    }
+
+    private double HitRectWidth =>
+        ChartCandles.Count <= 1
+            ? 1000d
+            : 1000d / ChartCandles.Count;
+
+    private double HitRectX(int index) =>
+        Math.Max(
+            0d,
+            (1000d * index / Math.Max(ChartCandles.Count - 1d, 1d)) -
+            HitRectWidth / 2d);
+
+    private double HoverX =>
+        HoveredCandleIndex.HasValue && ChartCandles.Count > 1
+            ? 18d +
+              ((1000d - 36d) *
+               HoveredCandleIndex.Value /
+               (ChartCandles.Count - 1d))
+            : 18d;
+
+    private double HoverY
+    {
+        get
+        {
+            if (HoveredCandle is null || ChartPoints.Count == 0)
+                return 150d;
+
+            var min = ChartPoints.Min();
+            var max = ChartPoints.Max();
+            var span = Math.Max(max - min, 0.000001d);
+            var normalized = (HoveredCandle.Close - min) / span;
+
+            return 18d + (300d - 36d) * (1d - normalized);
+        }
+    }
+
+    private double HoverYPercent =>
+        Math.Clamp(HoverY / 300d * 100d, 2d, 98d);
+
+    private string TooltipSideClass =>
+        HoverX > 650d
+            ? "ptm-chart-tooltip-left"
+            : "ptm-chart-tooltip-right";
+
+    private static string Svg(double value) =>
+        value.ToString("0.###", CultureInfo.InvariantCulture);
+
+    private void SetChartHover(int index)
+    {
+        if (index < 0 || index >= ChartCandles.Count)
+            return;
+
+        HoveredCandleIndex = index;
+    }
+
+    private void ClearChartHover()
+    {
+        HoveredCandleIndex = null;
+    }
+
+    private static string BuildPolyline(
+        IReadOnlyList<double> values,
+        double width,
+        double height,
+        double padding)
+    {
+        if (values.Count < 2)
+            return string.Empty;
+
+        var min = values.Min();
+        var max = values.Max();
+        var span = Math.Max(max - min, 0.000001d);
+        var usableWidth = width - padding * 2d;
+        var usableHeight = height - padding * 2d;
+
+        var points = new List<string>(values.Count);
+
+        for (var i = 0; i < values.Count; i++)
+        {
+            var x = padding + (usableWidth * i / (values.Count - 1d));
+            var normalized = (values[i] - min) / span;
+            var y = padding + usableHeight * (1d - normalized);
+
+            points.Add(
+                $"{x.ToString("0.##", CultureInfo.InvariantCulture)},{y.ToString("0.##", CultureInfo.InvariantCulture)}");
+        }
+
+        return string.Join(" ", points);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAll();
+        NewsRefreshTask = RunNewsRefreshLoopAsync(NewsRefreshCts.Token);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("PhoenixPage_markets");
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task ChangeHeatmapTab(string tab)
+    {
+        if (string.Equals(
+                HeatmapTab,
+                tab,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        HeatmapTab = tab;
+
+        if (string.Equals(
+                HeatmapTab,
+                "Discovery",
+                StringComparison.OrdinalIgnoreCase) &&
+            ActiveAsset == "Stocks" &&
+            Discovery.Count == 0)
+        {
+            try
+            {
+                await LoadDiscovery();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(
+                    $"Discovery refresh failed: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ChangeAsset(string asset)
+    {
+        if (string.Equals(
+                ActiveAsset,
+                asset,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        ActiveAsset = asset;
+
+        if (ActiveAsset != "Stocks" &&
+            string.Equals(
+                HeatmapTab,
+                "Discovery",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            HeatmapTab = "Market";
+        }
+
+        SearchText = string.Empty;
+        Segment = "All Segments";
+        SelectedTimeframe = "1D";
+
+        Watchlist.Clear();
+        Discovery.Clear();
+        NewsItems.Clear();
+        ChartPoints.Clear();
+        ChartCandles.Clear();
+        HoveredCandleIndex = null;
+
+        var firstSymbol = CurrentSymbols.FirstOrDefault();
+
+        if (!string.IsNullOrWhiteSpace(firstSymbol))
+            SelectedSymbol = firstSymbol;
+
+        Loading = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            await LoadWatchlist();
+
+            if (ActiveAsset == "Stocks")
+                await LoadDiscovery();
+
+            BuildMovers();
+
+            if (!Watchlist.Any(x =>
+                    string.Equals(
+                        x.Symbol,
+                        SelectedSymbol,
+                        StringComparison.OrdinalIgnoreCase)))
+            {
+                SelectedSymbol =
+                    Watchlist.FirstOrDefault()?.Symbol ??
+                    firstSymbol ??
+                    "AAPL";
+            }
+
+            await Task.WhenAll(
+                LoadChart(),
+                LoadNews(),
+                LoadContext(),
+                LoadStatisticsHistory());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            ErrorMessage =
+                $"Some {ActiveAsset} market data could not be loaded.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task LoadAll()
+    {
+        if (Loading)
+            return;
+
+        Loading = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            await Task.WhenAll(
+                LoadWatchlist(),
+                LoadIndices());
+
+            if (ActiveAsset == "Stocks")
+                await LoadDiscovery();
+
+            BuildMovers();
+
+            if (!Watchlist.Any(x => x.Symbol == SelectedSymbol))
+                SelectedSymbol = Watchlist.FirstOrDefault()?.Symbol ?? "AAPL";
+
+            await Task.WhenAll(
+                LoadChart(),
+                LoadNews(),
+                LoadContext(),
+                LoadStatisticsHistory());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            ErrorMessage = "Some market data could not be loaded.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task LoadWatchlist()
+    {
+        var tasks = CurrentSymbols.Select(async symbol =>
+        {
+            var quote = await Api.Quote(symbol);
+
+            return quote is null
+                ? new QuoteRow(symbol, "—", "—", double.NaN, double.NaN, 0, null)
+                : BuildQuote(symbol, quote);
+        });
+
+        var rows = await Task.WhenAll(tasks);
+
+        Watchlist.Clear();
+        Watchlist.AddRange(rows);
+    }
+
+    private QuoteRow BuildQuote(string symbol, JsonElement? root)
+    {
+        var price = FirstNumber(root, "price", "last", "last_price");
+        var previousClose = FirstNumber(root, "previous_close", "previousClose");
+        var changeAmount = FirstNumber(root, "change", "price_change");
+        var changePercent = FirstNumber(
+            root,
+            "change_percent",
+            "changePercent",
+            "change_pct",
+            "percent_change");
+
+        var volume = FirstNumber(root, "volume", "regularMarketVolume") ?? 0;
+
+        if (!changeAmount.HasValue &&
+            price.HasValue &&
+            previousClose.HasValue)
+        {
+            changeAmount = price.Value - previousClose.Value;
+        }
+
+        if (!changePercent.HasValue &&
+            changeAmount.HasValue &&
+            previousClose is > 0)
+        {
+            changePercent =
+                changeAmount.Value /
+                previousClose.Value *
+                100d;
+        }
+
+        return new QuoteRow(
+            symbol,
+            price.HasValue
+                ? price.Value.ToString("$#,##0.00", CultureInfo.InvariantCulture)
+                : "—",
+            changePercent.HasValue
+                ? FormatPercent(changePercent.Value)
+                : "—",
+            changePercent ?? double.NaN,
+            changeAmount ?? double.NaN,
+            volume,
+            previousClose);
+    }
+
+    private async Task LoadIndices()
+    {
+        var definitions = new[]
+        {
+            new IndexDefinition("S&P 500", "^GSPC"),
+            new IndexDefinition("NASDAQ", "^IXIC"),
+            new IndexDefinition("DOW JONES", "^DJI"),
+            new IndexDefinition("RUSSELL 2000", "^RUT"),
+            new IndexDefinition("VIX", "^VIX")
+        };
+
+        var tasks = definitions.Select(async definition =>
+        {
+            var quote = await Api.Quote(definition.Symbol);
+
+            if (quote is null)
+            {
+                return new IndexRow(
+                    definition.Name,
+                    definition.Symbol,
+                    "—",
+                    "—",
+                    double.NaN,
+                    double.NaN);
+            }
+
+            var price = FirstNumber(quote, "price", "last", "last_price");
+            var previousClose = FirstNumber(quote, "previous_close", "previousClose");
+            var changeAmount = FirstNumber(quote, "change", "price_change");
+            var changePercent = FirstNumber(
+                quote,
+                "change_percent",
+                "changePercent",
+                "change_pct",
+                "percent_change");
+
+            if (!changeAmount.HasValue &&
+                price.HasValue &&
+                previousClose.HasValue)
+            {
+                changeAmount = price.Value - previousClose.Value;
+            }
+
+            if (!changePercent.HasValue &&
+                changeAmount.HasValue &&
+                previousClose is > 0)
+            {
+                changePercent =
+                    changeAmount.Value /
+                    previousClose.Value *
+                    100d;
+            }
+
+            return new IndexRow(
+                definition.Name,
+                definition.Symbol,
+                price.HasValue
+                    ? price.Value.ToString("#,##0.00", CultureInfo.InvariantCulture)
+                    : "—",
+                changePercent.HasValue
+                    ? FormatPercent(changePercent.Value)
+                    : "—",
+                changePercent ?? double.NaN,
+                changeAmount ?? double.NaN);
+        });
+
+        var result = await Task.WhenAll(tasks);
+
+        Indices.Clear();
+        Indices.AddRange(result);
+    }
+
+    private async Task LoadDiscovery()
+    {
+        Discovery.Clear();
+
+        var root = await Api.Discover();
+
+        if (root is null)
+            return;
+
+        var array = FindArray(
+            root.Value,
+            "opportunities",
+            "results",
+            "items",
+            "data",
+            "discover");
+
+        if (!array.HasValue)
+            return;
+
+        foreach (var item in array.Value.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var symbol = FirstString(item, "symbol", "ticker");
+
+            if (string.IsNullOrWhiteSpace(symbol))
+                continue;
+
+            var change = FirstNumber(
+                item,
+                "change_percent",
+                "changePercent",
+                "change_pct",
+                "percent_change");
+
+            var signal = FirstString(
+                item,
+                "signal",
+                "status",
+                "recommendation");
+
+            if (string.IsNullOrWhiteSpace(signal))
+                signal = "Watching";
+
+            Discovery.Add(new DiscoveryRow(
+                symbol.ToUpperInvariant(),
+                change.HasValue
+                    ? FormatPercent(change.Value)
+                    : "—",
+                change ?? double.NaN,
+                signal));
+        }
+    }
+
+    private void BuildMovers()
+    {
+        Gainers.Clear();
+        Losers.Clear();
+        MostActive.Clear();
+
+        Gainers.AddRange(
+            Watchlist
+                .Where(x =>
+                    !double.IsNaN(x.ChangeValue) &&
+                    x.ChangeValue >= 0)
+                .OrderByDescending(x => x.ChangeValue)
+                .Take(10));
+
+        Losers.AddRange(
+            Watchlist
+                .Where(x =>
+                    !double.IsNaN(x.ChangeValue) &&
+                    x.ChangeValue < 0)
+                .OrderBy(x => x.ChangeValue)
+                .Take(10));
+
+        MostActive.AddRange(
+            Watchlist
+                .OrderByDescending(x => x.Volume)
+                .Take(10));
+    }
+
+    private async Task SelectSymbol(string symbol)
+    {
+        SelectedSymbol = symbol.Trim().ToUpperInvariant();
+        HoveredCandleIndex = null;
+        ResetSelectedStatistics();
+
+        if (!Watchlist.Any(x =>
+                string.Equals(
+                    x.Symbol,
+                    SelectedSymbol,
+                    StringComparison.OrdinalIgnoreCase)))
+        {
+            var quote = await Api.Quote(SelectedSymbol);
+
+            if (quote is not null)
+            {
+                Watchlist.Insert(
+                    0,
+                    BuildQuote(SelectedSymbol, quote));
+
+                BuildMovers();
+            }
+        }
+
+        await Task.WhenAll(
+            LoadChart(),
+            LoadNews(),
+            LoadContext());
+    }
+
+    private async Task ChangeTimeframe(string timeframe)
+    {
+        SelectedTimeframe = timeframe;
+        HoveredCandleIndex = null;
+        await LoadChart();
+    }
+
+    private async Task LoadChart()
+    {
+        ChartPoints.Clear();
+        ChartCandles.Clear();
+        HoveredCandleIndex = null;
+
+        // IMPORTANT:
+        // The FastAPI endpoint accepts "range" and "timeframe".
+        // It does NOT accept "limit".
+        //
+        // Yahoo interval/range combinations must also be valid:
+        // 5m cannot be requested against a 3M range.
+        var configuration = SelectedTimeframe switch
+        {
+            "1D" => ("1D", "5M"),
+            "1W" => ("5D", "15M"),
+            "1M" => ("1M", "60M"),
+            "3M" => ("3M", "1D"),
+            "1Y" => ("1Y", "1D"),
+            "5Y" => ("5Y", "1D"),
+            _ => ("3M", "1D")
+        };
+
+        var root = await Api.ChartRange(
+            SelectedSymbol,
+            configuration.Item1,
+            configuration.Item2);
+
+        if (root is null)
+            return;
+
+        var array = FindArray(
+            root.Value,
+            "value",
+            "candles",
+            "bars",
+            "history",
+            "results",
+            "items",
+            "data");
+
+        if (!array.HasValue)
+            return;
+
+        foreach (var item in array.Value.EnumerateArray())
+        {
+            if (item.ValueKind == JsonValueKind.Number &&
+                item.TryGetDouble(out var number))
+            {
+                ChartPoints.Add(number);
+                continue;
+            }
+
+            if (item.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var close = FirstNumber(
+                item,
+                "close",
+                "c",
+                "price");
+
+            if (!close.HasValue)
+                continue;
+
+            var open =
+                FirstNumber(item, "open", "o") ??
+                close.Value;
+
+            var high =
+                FirstNumber(item, "high", "h") ??
+                close.Value;
+
+            var low =
+                FirstNumber(item, "low", "l") ??
+                close.Value;
+
+            var volume =
+                FirstNumber(item, "volume", "v") ??
+                0d;
+
+            var time =
+                FirstNumber(item, "time", "t") ??
+                0d;
+
+            ChartCandles.Add(
+                new CandleRow(
+                    time,
+                    open,
+                    high,
+                    low,
+                    close.Value,
+                    volume));
+
+            ChartPoints.Add(close.Value);
+        }
+    }
+
+    private async Task LoadContext()
+    {
+        SelectedContext = await Api.Context(SelectedSymbol);
+
+        SelectedMarketCap = FirstNumberDeep(
+            SelectedContext,
+            "market_cap",
+            "marketCap",
+            "regularMarketCap");
+
+        SelectedPeRatio = FirstNumberDeep(
+            SelectedContext,
+            "pe_ratio",
+            "peRatio",
+            "trailingPE",
+            "forwardPE");
+
+        Selected52WeekHigh ??= FirstNumberDeep(
+            SelectedContext,
+            "fifty_two_week_high",
+            "fiftyTwoWeekHigh",
+            "52_week_high");
+
+        Selected52WeekLow ??= FirstNumberDeep(
+            SelectedContext,
+            "fifty_two_week_low",
+            "fiftyTwoWeekLow",
+            "52_week_low");
+    }
+
+    private async Task LoadStatisticsHistory()
+    {
+        var root = await Api.ChartRange(
+            SelectedSymbol,
+            "1Y",
+            "1D");
+
+        if (root is null)
+            return;
+
+        // Prefer provider metadata if the chart endpoint exposes it.
+        SelectedMarketCap ??= FirstNumberDeep(
+            root,
+            "market_cap",
+            "marketCap",
+            "regularMarketCap");
+
+        SelectedPeRatio ??= FirstNumberDeep(
+            root,
+            "pe_ratio",
+            "peRatio",
+            "trailingPE",
+            "forwardPE");
+
+        Selected52WeekHigh ??= FirstNumberDeep(
+            root,
+            "fifty_two_week_high",
+            "fiftyTwoWeekHigh",
+            "52_week_high");
+
+        Selected52WeekLow ??= FirstNumberDeep(
+            root,
+            "fifty_two_week_low",
+            "fiftyTwoWeekLow",
+            "52_week_low");
+
+        var array = FindArray(
+            root.Value,
+            "value",
+            "candles",
+            "bars",
+            "history",
+            "results",
+            "items",
+            "data");
+
+        if (!array.HasValue)
+            return;
+
+        var highs = new List<double>();
+        var lows = new List<double>();
+        double latestVolume = 0d;
+
+        foreach (var item in array.Value.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var high = FirstNumber(item, "high", "h");
+            var low = FirstNumber(item, "low", "l");
+            var volume = FirstNumber(item, "volume", "v");
+
+            if (high.HasValue)
+                highs.Add(high.Value);
+
+            if (low.HasValue)
+                lows.Add(low.Value);
+
+            if (volume is > 0)
+                latestVolume = volume.Value;
+        }
+
+        // These are derived from the provider's real 1Y daily candles.
+        if (highs.Count > 0)
+            Selected52WeekHigh ??= highs.Max();
+
+        if (lows.Count > 0)
+            Selected52WeekLow ??= lows.Min();
+
+        if (latestVolume > 0)
+            SelectedHistoryVolume = latestVolume;
+    }
+
+    private void ResetSelectedStatistics()
+    {
+        SelectedContext = null;
+        SelectedMarketCap = null;
+        SelectedPeRatio = null;
+        Selected52WeekHigh = null;
+        Selected52WeekLow = null;
+        SelectedHistoryVolume = 0d;
+    }
+
+    private async Task LoadNews()
+    {
+        var requestedSymbol = SelectedSymbol;
+        var root = await Api.News(requestedSymbol);
+
+        if (root is null)
+            return;
+
+        var array = FindArray(
+            root.Value,
+            "news",
+            "results",
+            "items",
+            "data");
+
+        if (!array.HasValue)
+            return;
+
+        var fresh = new List<NewsRow>();
+        var seenUrls = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in array.Value.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var title = FirstString(
+                item,
+                "headline",
+                "title",
+                "summary");
+
+            if (string.IsNullOrWhiteSpace(title))
+                continue;
+
+            var source = FirstString(
+                item,
+                "publisher",
+                "source",
+                "provider");
+
+            if (string.IsNullOrWhiteSpace(source))
+                source = "Market";
+
+            var articleUrl = FirstString(
+                item,
+                "article_url",
+                "link",
+                "url");
+
+            if (string.IsNullOrWhiteSpace(articleUrl) ||
+                !Uri.TryCreate(articleUrl, UriKind.Absolute, out var parsedUrl) ||
+                (parsedUrl.Scheme != Uri.UriSchemeHttp &&
+                 parsedUrl.Scheme != Uri.UriSchemeHttps))
+            {
+                continue;
+            }
+
+            if (!seenUrls.Add(articleUrl))
+                continue;
+
+            var imageUrl = FirstString(
+                item,
+                "image_url",
+                "thumbnail",
+                "image");
+
+            var publishedAtRaw = FirstString(
+                item,
+                "published_at",
+                "publishedAt",
+                "publish_time");
+
+            DateTimeOffset? publishedAt = null;
+
+            if (DateTimeOffset.TryParse(
+                    publishedAtRaw,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal |
+                    DateTimeStyles.AdjustToUniversal,
+                    out var parsedPublishedAt))
+            {
+                publishedAt = parsedPublishedAt;
+            }
+
+            var symbol = FirstString(
+                item,
+                "symbol",
+                "ticker");
+
+            if (string.IsNullOrWhiteSpace(symbol))
+                symbol = requestedSymbol;
+
+            fresh.Add(
+                new NewsRow(
+                    title,
+                    source,
+                    articleUrl,
+                    imageUrl,
+                    publishedAt,
+                    symbol));
+        }
+
+        fresh = fresh
+            .OrderByDescending(x => x.PublishedAt ?? DateTimeOffset.MinValue)
+            .Take(20)
+            .ToList();
+
+        // The selected symbol may have changed while the HTTP request was in flight.
+        if (!string.Equals(
+                requestedSymbol,
+                SelectedSymbol,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        NewsItems.Clear();
+        NewsItems.AddRange(fresh);
+    }
+
+    private async Task RunNewsRefreshLoopAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(NewsRefreshInterval);
+
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await InvokeAsync(async () =>
+                {
+                    try
+                    {
+                        await LoadNews();
+                        StateHasChanged();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine(
+                            $"Market news refresh failed: {ex.Message}");
+                    }
+                });
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private static string FormatNewsAge(DateTimeOffset? publishedAt)
+    {
+        if (!publishedAt.HasValue)
+            return "Latest";
+
+        var age = DateTimeOffset.UtcNow - publishedAt.Value.ToUniversalTime();
+
+        if (age < TimeSpan.Zero)
+            age = TimeSpan.Zero;
+
+        if (age.TotalMinutes < 1)
+            return "Just now";
+
+        if (age.TotalMinutes < 60)
+            return $"{Math.Max(1, (int)age.TotalMinutes)}m ago";
+
+        if (age.TotalHours < 24)
+            return $"{Math.Max(1, (int)age.TotalHours)}h ago";
+
+        if (age.TotalDays < 7)
+            return $"{Math.Max(1, (int)age.TotalDays)}d ago";
+
+        return publishedAt.Value
+            .ToLocalTime()
+            .ToString("MMM d", CultureInfo.InvariantCulture);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        NewsRefreshCts.Cancel();
+
+        if (NewsRefreshTask is not null)
+        {
+            try
+            {
+                await NewsRefreshTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+
+        NewsRefreshCts.Dispose();
+    }
+
+    private async Task HandleSearchKey(KeyboardEventArgs args)
+    {
+        if (!string.Equals(
+                args.Key,
+                "Enter",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(SearchText))
+            return;
+
+        await SelectSymbol(SearchText);
+    }
+
+    private async Task FocusSearch()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "PhoenixMarkets.focusSearch");
+        }
+        catch
+        {
+        }
+    }
+
+    private void OpenChart(string symbol)
+    {
+        Navigation.NavigateTo(
+            $"/charts?symbol={Uri.EscapeDataString(symbol)}");
+    }
+
+    private void OpenTrade()
+    {
+        Navigation.NavigateTo(
+            $"/charts?symbol={Uri.EscapeDataString(SelectedSymbol)}");
+    }
+
+    private static double? FirstNumber(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null ||
+            root.Value.ValueKind != JsonValueKind.Object)
+        {
+            return null;
+        }
+
+        foreach (var property in properties)
+        {
+            if (!root.Value.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+            if (value.ValueKind == JsonValueKind.Number &&
+                value.TryGetDouble(out var number))
+            {
+                return number;
+            }
+
+            if (double.TryParse(
+                    value.ToString(),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out number))
+            {
+                return number;
+            }
+        }
+
+        return null;
+    }
+
+    private static double? FirstNumber(
+        JsonElement root,
+        params string[] properties)
+    {
+        return FirstNumber(
+            (JsonElement?)root,
+            properties);
+    }
+
+    private static double? FirstNumberDeep(
+        JsonElement? root,
+        params string[] properties)
+    {
+        if (root is null)
+            return null;
+
+        return FirstNumberDeep(
+            root.Value,
+            properties,
+            0);
+    }
+
+    private static double? FirstNumberDeep(
+        JsonElement element,
+        string[] properties,
+        int depth)
+    {
+        if (depth > 5)
+            return null;
+
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in properties)
+            {
+                if (!element.TryGetProperty(property, out var value))
+                    continue;
+
+                if (value.ValueKind == JsonValueKind.Number &&
+                    value.TryGetDouble(out var number))
+                {
+                    return number;
+                }
+
+                if (double.TryParse(
+                        value.ToString(),
+                        NumberStyles.Any,
+                        CultureInfo.InvariantCulture,
+                        out number))
+                {
+                    return number;
+                }
+            }
+
+            foreach (var child in element.EnumerateObject())
+            {
+                var result = FirstNumberDeep(
+                    child.Value,
+                    properties,
+                    depth + 1);
+
+                if (result.HasValue)
+                    return result;
+            }
+        }
+        else if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var child in element.EnumerateArray())
+            {
+                var result = FirstNumberDeep(
+                    child,
+                    properties,
+                    depth + 1);
+
+                if (result.HasValue)
+                    return result;
+            }
+        }
+
+        return null;
+    }
+
+    private static string FirstString(
+        JsonElement root,
+        params string[] properties)
+    {
+        foreach (var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+            var text =
+                value.ValueKind == JsonValueKind.String
+                    ? value.GetString()
+                    : value.ToString();
+
+            if (!string.IsNullOrWhiteSpace(text))
+                return text!;
+        }
+
+        return string.Empty;
+    }
+
+    private static JsonElement? FindArray(
+        JsonElement root,
+        params string[] names)
+    {
+        if (root.ValueKind == JsonValueKind.Array)
+            return root;
+
+        if (root.ValueKind != JsonValueKind.Object)
+            return null;
+
+        foreach (var name in names)
+        {
+            if (root.TryGetProperty(name, out var value) &&
+                value.ValueKind == JsonValueKind.Array)
+            {
+                return value;
+            }
+        }
+
+        foreach (var wrapper in new[] { "data", "result", "payload" })
+        {
+            if (!root.TryGetProperty(
+                    wrapper,
+                    out var nested) ||
+                nested.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+            foreach (var name in names)
+            {
+                if (nested.TryGetProperty(
+                        name,
+                        out var value) &&
+                    value.ValueKind == JsonValueKind.Array)
+                {
+                    return value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static string ToneClass(double value)
+    {
+        if (double.IsNaN(value))
+            return "ptm-neutral";
+
+        return value < 0
+            ? "ptm-negative"
+            : "ptm-positive";
+    }
+
+    private static string FormatPercent(double value)
+    {
+        return value.ToString(
+                   "+0.00;-0.00;0.00",
+                   CultureInfo.InvariantCulture) +
+               "%";
+    }
+
+    private static string FormatSigned(double? value)
+    {
+        if (!value.HasValue ||
+            double.IsNaN(value.Value))
+        {
+            return "—";
+        }
+
+        return value.Value.ToString(
+            "+0.00;-0.00;0.00",
+            CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatPrice(double? value)
+    {
+        return value.HasValue
+            ? value.Value.ToString(
+                "$#,##0.00",
+                CultureInfo.InvariantCulture)
+            : "—";
+    }
+
+    private string FormatMarketPrice(double? value)
+    {
+        if (!value.HasValue ||
+            double.IsNaN(value.Value) ||
+            double.IsInfinity(value.Value))
+        {
+            return "—";
+        }
+
+        var number = value.Value;
+
+        var decimals = ActiveAsset switch
+        {
+            "Crypto" when Math.Abs(number) < 1d => 4,
+            "Forex" => 5,
+            "Bonds" => 3,
+            _ => 2
+        };
+
+        return "$" + number.ToString(
+            $"N{decimals}",
+            CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatMarketCap(double? value)
+    {
+        if (!value.HasValue ||
+            value.Value <= 0 ||
+            double.IsNaN(value.Value))
+        {
+            return "—";
+        }
+
+        var number = value.Value;
+
+        if (number >= 1_000_000_000_000d)
+            return "$" +
+                   (number / 1_000_000_000_000d)
+                   .ToString("0.00", CultureInfo.InvariantCulture) +
+                   "T";
+
+        if (number >= 1_000_000_000d)
+            return "$" +
+                   (number / 1_000_000_000d)
+                   .ToString("0.00", CultureInfo.InvariantCulture) +
+                   "B";
+
+        if (number >= 1_000_000d)
+            return "$" +
+                   (number / 1_000_000d)
+                   .ToString("0.00", CultureInfo.InvariantCulture) +
+                   "M";
+
+        return "$" + number.ToString(
+            "#,##0",
+            CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatRatio(double? value)
+    {
+        return value.HasValue &&
+               value.Value > 0 &&
+               !double.IsNaN(value.Value)
+            ? value.Value.ToString(
+                "0.00",
+                CultureInfo.InvariantCulture)
+            : "—";
+    }
+
+    private string FormatCandleTime(double unixSeconds)
+    {
+        if (unixSeconds <= 0)
+            return SelectedTimeframe;
+
+        try
+        {
+            var local = DateTimeOffset
+                .FromUnixTimeSeconds((long)unixSeconds)
+                .ToLocalTime();
+
+            return SelectedTimeframe switch
+            {
+                "1D" or "1W" or "1M" =>
+                    local.ToString(
+                        "MMM d, yyyy • h:mm tt",
+                        CultureInfo.InvariantCulture),
+
+                _ =>
+                    local.ToString(
+                        "MMM d, yyyy",
+                        CultureInfo.InvariantCulture)
+            };
+        }
+        catch
+        {
+            return SelectedTimeframe;
+        }
+    }
+
+    private static string FormatVolume(double value)
+    {
+        if (value <= 0 ||
+            double.IsNaN(value))
+        {
+            return "—";
+        }
+
+        if (value >= 1_000_000_000)
+            return (value / 1_000_000_000d)
+                       .ToString("0.0", CultureInfo.InvariantCulture) +
+                   "B";
+
+        if (value >= 1_000_000)
+            return (value / 1_000_000d)
+                       .ToString("0.0", CultureInfo.InvariantCulture) +
+                   "M";
+
+        if (value >= 1_000)
+            return (value / 1_000d)
+                       .ToString("0.0", CultureInfo.InvariantCulture) +
+                   "K";
+
+        return value.ToString(
+            "#,##0",
+            CultureInfo.InvariantCulture);
+    }
+
+    private static string SparklinePoints(
+        string symbol,
+        double change)
+    {
+        var seed = symbol.Aggregate(
+            17,
+            (current, character) =>
+                unchecked(current * 31 + character));
+
+        var positive = double.IsNaN(change) || change >= 0;
+        var values = new List<double>(14);
+
+        for (var i = 0; i < 14; i++)
+        {
+            var noise = Math.Abs((seed >> (i % 12)) % 13);
+            var trend = positive
+                ? 30d + i * 3.4d
+                : 72d - i * 3.4d;
+
+            values.Add(Math.Clamp(trend + noise - 6d, 12d, 90d));
+        }
+
+        var min = values.Min();
+        var max = values.Max();
+        var span = Math.Max(max - min, .001d);
+
+        var points = new List<string>(values.Count);
+
+        for (var i = 0; i < values.Count; i++)
+        {
+            var x = 2d + 96d * i / (values.Count - 1d);
+            var y = 31d - ((values[i] - min) / span * 27d);
+
+            points.Add(
+                $"{x.ToString("0.#", CultureInfo.InvariantCulture)},{y.ToString("0.#", CultureInfo.InvariantCulture)}");
+        }
+
+        return string.Join(" ", points);
+    }
+
+    private static string CompanyName(string symbol)
+    {
+        return symbol.ToUpperInvariant() switch
+        {
+            "AAPL" => "Apple Inc.",
+            "TSLA" => "Tesla Inc.",
+            "NVDA" => "NVIDIA Corp.",
+            "MSFT" => "Microsoft Corp.",
+            "AMZN" => "Amazon.com",
+            "GOOGL" => "Alphabet Inc.",
+            "GOOG" => "Alphabet Inc.",
+            "META" => "Meta Platforms",
+            "AMD" => "Advanced Micro Devices",
+            "NFLX" => "Netflix Inc.",
+            "QQQ" => "Invesco QQQ ETF",
+            "SPY" => "SPDR S&P 500 ETF",
+            "VOO" => "Vanguard S&P 500 ETF",
+            "IWM" => "iShares Russell 2000 ETF",
+            "DIA" => "SPDR Dow Jones ETF",
+            "XLK" => "Technology Select Sector SPDR",
+            "XLF" => "Financial Select Sector SPDR",
+            "XLE" => "Energy Select Sector SPDR",
+            "TLT" => "iShares 20+ Year Treasury Bond ETF",
+            "IEF" => "iShares 7-10 Year Treasury Bond ETF",
+            "SHY" => "iShares 1-3 Year Treasury Bond ETF",
+
+            "BTCUSD" => "Bitcoin / U.S. Dollar",
+            "ETHUSD" => "Ethereum / U.S. Dollar",
+            "SOLUSD" => "Solana / U.S. Dollar",
+            "XRPUSD" => "XRP / U.S. Dollar",
+            "DOGEUSD" => "Dogecoin / U.S. Dollar",
+            "ADAUSD" => "Cardano / U.S. Dollar",
+            "AVAXUSD" => "Avalanche / U.S. Dollar",
+
+            "EURUSD" => "Euro / U.S. Dollar",
+            "GBPUSD" => "British Pound / U.S. Dollar",
+            "USDJPY" => "U.S. Dollar / Japanese Yen",
+            "AUDUSD" => "Australian Dollar / U.S. Dollar",
+            "USDCAD" => "U.S. Dollar / Canadian Dollar",
+            "USDCHF" => "U.S. Dollar / Swiss Franc",
+            "NZDUSD" => "New Zealand Dollar / U.S. Dollar",
+
+            "ES" => "E-mini S&P 500 Futures",
+            "NQ" => "E-mini Nasdaq-100 Futures",
+            "YM" => "E-mini Dow Futures",
+            "RTY" => "E-mini Russell 2000 Futures",
+
+            "GOLD" => "Gold Futures",
+            "SILVER" => "Silver Futures",
+            "OIL" => "Crude Oil Futures",
+            "NATGAS" => "Natural Gas Futures",
+            "COPPER" => "Copper Futures",
+
+            "^TNX" => "U.S. 10-Year Treasury Yield",
+            "^FVX" => "U.S. 5-Year Treasury Yield",
+            "^TYX" => "U.S. 30-Year Treasury Yield",
+
+            _ => symbol.ToUpperInvariant()
+        };
+    }
+
+    private sealed record QuoteRow(
+        string Symbol,
+        string Price,
+        string Change,
+        double ChangeValue,
+        double ChangeAmount,
+        double Volume,
+        double? PreviousClose);
+
+    private sealed record IndexRow(
+        string Name,
+        string Symbol,
+        string Price,
+        string Change,
+        double ChangeValue,
+        double ChangeAmount);
+
+    private sealed record DiscoveryRow(
+        string Symbol,
+        string Change,
+        double ChangeValue,
+        string Signal);
+
+    private sealed record NewsRow(
+        string Title,
+        string Source,
+        string ArticleUrl,
+        string? ImageUrl,
+        DateTimeOffset? PublishedAt,
+        string Symbol);
+
+    private sealed record IndexDefinition(
+        string Name,
+        string Symbol);
+
+    private sealed record CandleRow(
+        double Time,
+        double Open,
+        double High,
+        double Low,
+        double Close,
+        double Volume);
+}

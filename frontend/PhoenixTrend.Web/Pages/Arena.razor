@@ -1,0 +1,1025 @@
+@page "/arena"
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<PageTitle>Phoenix Flight | PhoenixTrend</PageTitle>
+
+<section class="arena-page" id="phoenixArenaRoot">
+
+    <!-- =========================================================
+         HERO
+         ========================================================= -->
+    <div class="arena-hero glass-panel">
+
+        <div class="arena-hero-copy">
+
+            <span class="arena-kicker">
+                <i class="ph-duotone ph-game-controller"></i>
+                PHOENIXTREND ARENA
+            </span>
+
+            <h1>
+                RUNWAY
+                <span>FLIGHT</span>
+            </h1>
+
+            <p>
+                Take a break while PhoenixTrend automation keeps running.
+                Take off, cash out, and build your virtual Phoenix Coin balance.
+            </p>
+
+            <div class="arena-safety-row">
+
+                <span>
+                    <i class="ph ph-shield-check"></i>
+                    Virtual coins only
+                </span>
+
+                <span>
+                    <i class="ph ph-lock-key"></i>
+                    Server-authoritative rounds
+                </span>
+
+                <span>
+                    <i class="ph ph-arrows-clockwise"></i>
+                    Random flight duration
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="arena-wallet glass-panel-soft">
+
+            <div class="coin-orb">
+                <i class="ph-duotone ph-coin"></i>
+            </div>
+
+            <div>
+                <small>PHOENIX COINS</small>
+                <strong id="arenaBalance">10,000</strong>
+                <em>SIMULATION CURRENCY</em>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         GAME TABS
+         ========================================================= -->
+    <div class="arena-tabs glass-panel-soft" role="tablist">
+
+        <button type="button"
+                class="arena-tab active"
+                role="tab"
+                aria-selected="true">
+
+            <i class="ph-duotone ph-airplane-tilt"></i>
+
+            <span>Phoenix Flight</span>
+
+            <small>LIVE</small>
+
+        </button>
+
+        <button type="button"
+                class="arena-tab locked"
+                role="tab"
+                aria-selected="false"
+                disabled>
+
+            <i class="ph-duotone ph-sword"></i>
+
+            <span>Battle Mode</span>
+
+            <small>SOON</small>
+
+        </button>
+
+        <button type="button"
+                class="arena-tab locked"
+                role="tab"
+                aria-selected="false"
+                disabled>
+
+            <i class="ph-duotone ph-brain"></i>
+
+            <span>AI Challenge</span>
+
+            <small>SOON</small>
+
+        </button>
+
+        <button type="button"
+                class="arena-tab locked"
+                role="tab"
+                aria-selected="false"
+                disabled>
+
+            <i class="ph-duotone ph-trophy"></i>
+
+            <span>Leaderboard</span>
+
+            <small>SOON</small>
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         RECENT FLIGHTS
+         ========================================================= -->
+    <div class="arena-history glass-panel-soft">
+
+        <span class="history-title">
+            RECENT FLIGHTS
+        </span>
+
+        <div id="arenaHistory"
+             class="history-track">
+
+            <span class="history-placeholder">
+                Completed flights will appear here
+            </span>
+
+        </div>
+
+        <button type="button"
+                class="history-info"
+                title="Round fairness"
+                aria-label="Round fairness information">
+
+            <i class="ph ph-info"></i>
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         MAIN GAME AREA
+         ========================================================= -->
+    <div class="arena-main-grid">
+
+
+        <!-- =====================================================
+             FLIGHT PANEL
+             ===================================================== -->
+        <article class="flight-shell glass-panel">
+
+            <header class="flight-toolbar">
+
+                <div class="round-players">
+
+                    <span class="pulse-dot"></span>
+
+                    <strong id="arenaPlayers">
+                        1
+                    </strong>
+
+                    <span>
+                        players this round
+                    </span>
+
+                </div>
+
+
+                <div class="round-id">
+
+                    <span>
+                        ROUND
+                    </span>
+
+                    <strong id="arenaRoundId">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="server-state online">
+
+                    <span></span>
+
+                    <b id="arenaServerState">
+                        CONNECTING…
+                    </b>
+
+                </div>
+
+            </header>
+
+
+            <!-- =================================================
+                 FLIGHT STAGE
+                 ================================================= -->
+            <div class="flight-stage phase-countdown"
+                 id="arenaStage">
+
+
+                <!-- ---------------------------------------------
+                     BACKGROUND LAYERS
+                     --------------------------------------------- -->
+                <div class="stage-aurora"></div>
+
+                <div class="stage-stars"></div>
+
+                <div class="stage-vignette"></div>
+
+
+                <!-- ---------------------------------------------
+                     FLIGHT SVG
+                     IMPORTANT:
+                     Phoenix and SVG use the same 1000 x 540
+                     coordinate system from arena.js.
+                     --------------------------------------------- -->
+                <svg id="arenaFlightSvg"
+                     class="flight-svg"
+                     viewBox="0 0 1000 540"
+                     preserveAspectRatio="none"
+                     aria-hidden="true">
+
+                    <defs>
+
+                        <linearGradient id="flightGradient"
+                                        x1="0"
+                                        y1="1"
+                                        x2="1"
+                                        y2="0">
+
+                            <stop offset="0"
+                                  stop-color="#22d3ee" />
+
+                            <stop offset=".48"
+                                  stop-color="#6366f1" />
+
+                            <stop offset="1"
+                                  stop-color="#d946ef" />
+
+                        </linearGradient>
+
+
+                        <linearGradient id="areaGradient"
+                                        x1="0"
+                                        y1="1"
+                                        x2="0"
+                                        y2="0">
+
+                            <stop offset="0"
+                                  stop-color="#2563eb"
+                                  stop-opacity=".04" />
+
+                            <stop offset="1"
+                                  stop-color="#a855f7"
+                                  stop-opacity=".22" />
+
+                        </linearGradient>
+
+
+                        <filter id="flightGlow"
+                                x="-50%"
+                                y="-50%"
+                                width="200%"
+                                height="200%">
+
+                            <feGaussianBlur stdDeviation="7"
+                                            result="blur" />
+
+                            <feMerge>
+
+                                <feMergeNode in="blur" />
+
+                                <feMergeNode in="SourceGraphic" />
+
+                            </feMerge>
+
+                        </filter>
+
+                    </defs>
+
+
+                    <!-- AREA UNDER FLIGHT -->
+
+                    <path id="arenaAreaPath"
+                          class="flight-area"
+                          d="M 34 505 L 34 520 Z">
+                    </path>
+
+
+                    <!-- GLOWING TRAIL -->
+
+                    <path id="arenaTrailGlow"
+                          class="flight-trail glow"
+                          d="M 34 505">
+                    </path>
+
+
+                    <!-- MAIN TRAIL -->
+
+                    <path id="arenaTrail"
+                          class="flight-trail"
+                          d="M 34 505">
+                    </path>
+
+                </svg>
+
+
+                <!-- ---------------------------------------------
+                     MULTIPLIER
+                     --------------------------------------------- -->
+                <div class="multiplier-stack">
+
+                    <span id="arenaPhaseLabel">
+                        NEXT FLIGHT
+                    </span>
+
+                    <strong id="arenaMultiplier">
+                        1.00x
+                    </strong>
+
+                    <small id="arenaSubLabel">
+                        Waiting for server…
+                    </small>
+
+                </div>
+
+
+                <!-- ---------------------------------------------
+                     COUNTDOWN
+                     --------------------------------------------- -->
+                <div id="arenaCountdown"
+                     class="launch-countdown">
+
+                    <span>
+                        LAUNCHING IN
+                    </span>
+
+                    <strong>
+                        5
+                    </strong>
+
+                </div>
+
+
+                <!-- =================================================
+                     PHOENIX
+                     ================================================= -->
+                <div id="arenaPhoenix"
+                     class="phoenix-sprite"
+                     role="img"
+                     aria-label="Flying red biplane"
+                     style="left:3.4%; top:93.5%;">
+
+                    <div class="phoenix-aura"></div>
+
+
+                    <div class="phoenix-image-wrap">
+
+                        <img id="arenaPhoenixImage"
+                             class="phoenix-image"
+                             src="/assets/arena/red-biplane.png"
+                             alt="Red biplane"
+                             draggable="false"
+                             decoding="async" />
+
+                    </div>
+
+
+                    <div class="phoenix-engine-glow"></div>
+
+                    <div class="phoenix-flame"></div>
+
+                </div>
+
+
+                <!-- =================================================
+                     CRASH / FLY-AWAY EFFECT
+                     ================================================= -->
+                <div id="arenaCrashBurst"
+                     class="crash-burst"
+                     aria-hidden="true">
+
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+
+                </div>
+
+
+                <!-- =================================================
+                     AXIS LABELS
+                     ================================================= -->
+                <div class="axis-labels">
+
+                    <span>
+                        1x
+                    </span>
+
+                    <span>
+                        2x
+                    </span>
+
+                    <span>
+                        5x
+                    </span>
+
+                    <span>
+                        10x+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </article>
+
+
+        <!-- =====================================================
+             BET FEED
+             ===================================================== -->
+        <aside class="arena-side glass-panel">
+
+            <div class="side-tabs">
+
+                <button type="button"
+                        class="active"
+                        data-arena-feed="all">
+
+                    ALL BETS
+
+                </button>
+
+                <button type="button"
+                        data-arena-feed="mine">
+
+                    MY BET
+
+                </button>
+
+            </div>
+
+
+            <div class="bet-head">
+
+                <span>
+                    PLAYER
+                </span>
+
+                <span>
+                    BET
+                </span>
+
+                <span>
+                    CASH OUT
+                </span>
+
+            </div>
+
+
+            <div id="arenaBetFeed"
+                 class="bet-feed">
+
+                <div class="feed-empty">
+
+                    <i class="ph-duotone ph-users-three"></i>
+
+                    <span>
+                        Waiting for bets…
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="side-footer">
+
+                <span>
+                    <i class="ph ph-users"></i>
+                    Live round
+                </span>
+
+                <b>
+                    PHOENIX COINS
+                </b>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+
+    <!-- =========================================================
+         CONTROLS
+         ========================================================= -->
+    <div class="arena-control-grid">
+
+
+        <!-- =====================================================
+             BET AMOUNT
+             ===================================================== -->
+        <section class="bet-control glass-panel">
+
+            <div class="control-title">
+
+                <div>
+
+                    <span>
+                        BET AMOUNT
+                    </span>
+
+                    <small>
+                        Virtual Phoenix Coins
+                    </small>
+
+                </div>
+
+                <i class="ph-duotone ph-coins"></i>
+
+            </div>
+
+
+            <div class="bet-value">
+
+                <span class="mini-coin">
+                    P
+                </span>
+
+                <strong id="arenaBetValue">
+                    500
+                </strong>
+
+            </div>
+
+
+            <div class="bet-chips">
+
+                <button type="button"
+                        data-arena-bet="100">
+
+                    100
+
+                </button>
+
+
+                <button type="button"
+                        data-arena-bet="250">
+
+                    250
+
+                </button>
+
+
+                <button type="button"
+                        class="active"
+                        data-arena-bet="500">
+
+                    500
+
+                </button>
+
+
+                <button type="button"
+                        data-arena-bet="1000">
+
+                    1,000
+
+                </button>
+
+
+                <button type="button"
+                        data-arena-bet="2500">
+
+                    2,500
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             AUTO CASH OUT
+             ===================================================== -->
+        <section class="bet-control glass-panel">
+
+            <div class="control-title">
+
+                <div>
+
+                    <span>
+                        AUTO CASH OUT
+                    </span>
+
+                    <small>
+                        Optional safety target
+                    </small>
+
+                </div>
+
+                <i class="ph-duotone ph-crosshair"></i>
+
+            </div>
+
+
+            <div class="auto-row">
+
+                <div class="auto-input">
+
+                    <input id="arenaAutoCash"
+                           type="number"
+                           value="5.00"
+                           min="1.01"
+                           max="100"
+                           step="0.10"
+                           inputmode="decimal"
+                           aria-label="Auto cash out multiplier" />
+
+                    <span>
+                        x
+                    </span>
+
+                </div>
+
+
+                <label class="premium-switch">
+
+                    <input id="arenaAutoEnabled"
+                           type="checkbox"
+                           aria-label="Enable automatic cash out" />
+
+                    <span></span>
+
+                    <b>
+                        AUTO
+                    </b>
+
+                </label>
+
+            </div>
+
+
+            <div class="bet-chips auto-chips">
+
+                <button type="button"
+                        data-arena-auto="2">
+
+                    2x
+
+                </button>
+
+
+                <button type="button"
+                        data-arena-auto="3">
+
+                    3x
+
+                </button>
+
+
+                <button type="button"
+                        data-arena-auto="5">
+
+                    5x
+
+                </button>
+
+
+                <button type="button"
+                        data-arena-auto="10">
+
+                    10x
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =========================================================
+         PRIMARY ACTIONS
+         ========================================================= -->
+    <div class="arena-action-row">
+
+        <button type="button"
+                id="arenaPrimaryAction"
+                class="arena-primary">
+
+            <i class="ph-duotone ph-rocket-launch"></i>
+
+            <span>
+
+                <b>
+                    PLACE BET
+                </b>
+
+                <small>
+                    500 PHOENIX COINS
+                </small>
+
+            </span>
+
+        </button>
+
+
+        <button type="button"
+                id="arenaCancelAction"
+                class="arena-secondary"
+                disabled>
+
+            <i class="ph ph-x"></i>
+
+            <span>
+                CANCEL BET
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         STATUS / ERROR MESSAGE
+         ========================================================= -->
+    <div id="arenaMessage"
+         class="arena-message"
+         role="status"
+         aria-live="polite">
+    </div>
+
+
+    <!-- =========================================================
+         INFO
+         ========================================================= -->
+    <div class="arena-info-grid">
+
+
+        <!-- HOW IT WORKS -->
+
+        <section class="info-card glass-panel">
+
+            <div class="info-icon blue">
+
+                <i class="ph-duotone ph-game-controller"></i>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    How Phoenix Flight Works
+                </h3>
+
+                <ol>
+
+                    <li>
+                        Place a virtual coin bet during the countdown.
+                    </li>
+
+                    <li>
+                        The Phoenix launches and the multiplier rises.
+                    </li>
+
+                    <li>
+                        Cash out before the randomly committed flight ends.
+                    </li>
+
+                    <li>
+                        If the Phoenix flies away first, that virtual stake is lost.
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </section>
+
+
+        <!-- STATISTICS -->
+
+        <section class="info-card glass-panel stats-card">
+
+            <div class="info-icon violet">
+
+                <i class="ph-duotone ph-chart-line-up"></i>
+
+            </div>
+
+            <div class="stats-content">
+
+                <h3>
+                    Arena Statistics
+                </h3>
+
+
+                <div class="stats-grid">
+
+                    <div>
+
+                        <small>
+                            TOTAL ROUNDS
+                        </small>
+
+                        <strong id="arenaTotalRounds">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            HIGHEST FLIGHT
+                        </small>
+
+                        <strong id="arenaHighest">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            LONGEST FLIGHT
+                        </small>
+
+                        <strong id="arenaLongest">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            LAST FLIGHT
+                        </small>
+
+                        <strong id="arenaLastFlight">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FAIRNESS -->
+
+        <section class="info-card glass-panel fairness-card">
+
+            <div class="info-icon green">
+
+                <i class="ph-duotone ph-shield-check"></i>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    Round Fairness
+                </h3>
+
+                <p>
+                    Each flight is committed on the server before betting closes.
+                    The hidden result is never changed by bets or cash-outs.
+                </p>
+
+                <code id="arenaCommitment">
+                    Waiting for round…
+                </code>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =========================================================
+         DISCLAIMER
+         ========================================================= -->
+    <div class="arena-disclaimer glass-panel-soft">
+
+        <i class="ph-duotone ph-info"></i>
+
+        <p>
+
+            <strong>
+                Simulation Arena.
+            </strong>
+
+            Phoenix Coins have no monetary value and cannot be purchased,
+            withdrawn, redeemed, or transferred to a brokerage account.
+            Arena activity is isolated from PhoenixTrend trading execution.
+
+        </p>
+
+    </div>
+
+</section>
+
+
+@code {
+
+    private IJSObjectReference? _module;
+
+    private bool _disposed;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _disposed)
+        {
+            return;
+        }
+
+        try
+        {
+            /*
+             * IMPORTANT:
+             * Version bumped so the browser does not continue using
+             * an older cached Arena JavaScript file.
+             */
+            _module = await JS.InvokeAsync<IJSObjectReference>(
+                "import",
+                "./js/pages/arena.js?v=42"
+            );
+
+            await _module.InvokeVoidAsync(
+                "mountPhoenixArena"
+            );
+        }
+        catch (JSDisconnectedException)
+        {
+            // Browser disconnected while the page was mounting.
+        }
+        catch (TaskCanceledException)
+        {
+            // Navigation occurred before JS initialization completed.
+        }
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+        if (_module is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _module.InvokeVoidAsync(
+                "unmountPhoenixArena"
+            );
+        }
+        catch (JSDisconnectedException)
+        {
+            // Browser already disconnected.
+        }
+        catch (TaskCanceledException)
+        {
+            // Navigation/disposal cancelled the JS call.
+        }
+
+        try
+        {
+            await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // Browser already disconnected.
+        }
+
+        _module = null;
+    }
+}

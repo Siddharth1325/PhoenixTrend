@@ -1,0 +1,15 @@
+@page "/"
+@layout EmptyLayout
+@inject NavigationManager Navigation
+
+<PageTitle>PhoenixTrend</PageTitle>
+
+<div></div>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo("/login", replace: true);
+    }
+}

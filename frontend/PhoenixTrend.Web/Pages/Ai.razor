@@ -1,0 +1,2221 @@
+@page "/ai"
+
+@inject PhoenixApi Api
+@inject NavigationManager Navigation
+@inject AuthService Auth
+
+<PageTitle>PhoenixTrend | Trady AI</PageTitle>
+
+<div class="pt-ai pt-ai-v1">
+    <section class="trady-v1-shell">
+        <div class="trady-v1-glow" aria-hidden="true"></div>
+
+        <main class="trady-v1-chat">
+            <header class="trady-v1-head">
+                <div>
+                    <span class="trady-v1-kicker"><i class="ph-duotone ph-sparkle"></i> PHOENIXTREND INTELLIGENCE</span>
+                    <h1>TRADY <em>AI</em></h1>
+                    <p>Ask. Analyze. Trade smarter.</p>
+                </div>
+                <button class="trady-new-chat" type="button" @onclick="NewChat"><i class="ph ph-plus"></i> New Chat</button>
+            </header>
+
+            @if (Loading)
+            {
+                <div class="trady-v1-notice"><i class="ph-duotone ph-circle-notch"></i> Trady AI is analyzing...</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="trady-v1-notice error"><i class="ph-duotone ph-warning-circle"></i> @ErrorMessage</div>
+            }
+
+            <section class="trady-v1-thread" aria-live="polite">
+                @if (Messages.Count == 0)
+                {
+                    <div class="trady-v1-welcome">
+                        <div class="trady-v1-orb"><i class="ph-duotone ph-sparkle"></i></div>
+                        <h2>How can Trady AI help?</h2>
+                        <p>Analyze markets, review portfolio risk, discover opportunities, build strategies, or prepare a trade from one conversation.</p>
+                        <div class="trady-v1-starters">
+                            <button @onclick='() => UseExample("Analyze AAPL")'><i class="ph-duotone ph-chart-line-up"></i><span><b>Analyze AAPL</b><small>Technical + market intelligence</small></span></button>
+                            <button @onclick='() => UseExample("Show portfolio insights")'><i class="ph-duotone ph-chart-pie-slice"></i><span><b>Portfolio Insights</b><small>Account, positions and performance</small></span></button>
+                            <button @onclick='() => UseExample("Analyze my portfolio risk")'><i class="ph-duotone ph-shield-check"></i><span><b>Risk Analysis</b><small>Exposure and portfolio risk</small></span></button>
+                            <button @onclick='() => UseExample("Find trading opportunities")'><i class="ph-duotone ph-target"></i><span><b>Find Opportunities</b><small>PhoenixTrend discovery engine</small></span></button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var message in Messages)
+                    {
+                        @if (message.Role == "user")
+                        {
+                            <article class="trady-msg user">
+                                <div class="trady-msg-avatar user">@CurrentUserInitial</div>
+                                <div class="trady-msg-body"><span>You</span><p>@message.Text</p></div>
+                            </article>
+                        }
+                        else
+                        {
+                            <article class="trady-msg assistant">
+                                <div class="trady-msg-avatar ai"><i class="ph-duotone ph-sparkle"></i></div>
+                                <div class="trady-msg-body">
+                                    <span>Trady AI</span>
+                                    <p>@message.Text</p>
+
+                                    @if (message.Analysis is not null)
+                                    {
+                                        <div class="analysis-symbol">
+                                            <div><strong>@message.Analysis.Symbol</strong><small>@message.Analysis.Name</small></div>
+                                            <b>@message.Analysis.Price <em class="@GetChangeClass(message.Analysis.Change)">@message.Analysis.Change</em></b>
+                                            <span class="@GetSignalClass(message.Analysis.Signal)">@message.Analysis.Signal</span>
+                                        </div>
+                                        <div class="trading-chart ai-chart">
+                                            <div class="chart-grid"></div>
+                                            @if (message.Analysis.ChartPoints.Count > 1)
+                                            {
+                                                <svg class="pt-live-chart" viewBox="0 0 1000 420" preserveAspectRatio="none"><polyline class="pt-price-line" points="@BuildPolyline(message.Analysis.ChartPoints)" /></svg>
+                                            }
+                                            else
+                                            {
+                                                <div class="candles">@for (var i = 0; i < 55; i++){<i class="@(i % 5 == 0 ? "down" : "up")" style="@GetFallbackCandleStyle(i)"></i>}</div>
+                                            }
+                                        </div>
+                                        <div class="ai-detail-grid">
+                                            <div><h4>Market Context</h4><p>RSI <b>@message.Analysis.Rsi</b></p><p>EMA 20 <b>@message.Analysis.Ema20</b></p><p>EMA 50 <b>@message.Analysis.Ema50</b></p><p>VWAP <b>@message.Analysis.Vwap</b></p></div>
+                                            <div><h4>Key Levels</h4><p>Day High <b class="red">@message.Analysis.DayHigh</b></p><p>Day Low <b class="green">@message.Analysis.DayLow</b></p><p>Regime <b>@message.Analysis.MarketRegime</b></p><p>Volume Ratio <b>@message.Analysis.VolumeRatio</b></p></div>
+                                            <div><h4>Intelligence</h4><p>Signal <b class="@GetSignalTextClass(message.Analysis.Signal)">@message.Analysis.Signal</b></p><p>Confidence <b>@message.Analysis.Confidence</b></p><p>Score <b>@message.Analysis.Score</b></p><p>Pattern <b>@message.Analysis.Pattern</b></p></div>
+                                        </div>
+                                        <div class="trady-result-actions"><button class="pt-btn" @onclick="() => OpenChart(message.Analysis.Symbol)"><i class="ph ph-chart-line"></i> Open Chart</button><button class="pt-btn pt-btn-gold" @onclick="() => OpenTrade(message.Analysis.Symbol)"><i class="ph ph-lightning"></i> Trade Workspace</button></div>
+                                    }
+
+                                    @if (message.Portfolio is not null)
+                                    {
+                                        <div class="metric-grid four"><MetricCard Icon="ph ph-wallet" Label="Portfolio" Value="@message.Portfolio.PortfolioValue" Detail="Broker account" /><MetricCard Icon="ph ph-currency-dollar" Label="Buying Power" Value="@message.Portfolio.BuyingPower" Detail="@($"Cash {message.Portfolio.Cash}")" /><MetricCard Icon="ph ph-trend-up" Label="Total P&L" Value="@message.Portfolio.TotalPnl" Detail="@message.Portfolio.TotalReturn" /><MetricCard Icon="ph ph-trend-down" Label="Max Drawdown" Value="@message.Portfolio.MaxDrawdown" Detail="Analytics" Tone="negative" /></div>
+                                    }
+
+                                    @if (message.Opportunities.Count > 0)
+                                    {
+                                        <div class="trady-opportunity-grid">
+                                            @foreach (var opportunity in message.Opportunities)
+                                            {
+                                                <button @onclick="() => AnalyzeFromOpportunity(opportunity.Symbol)"><StockLogo Symbol="@opportunity.Symbol" Size="small" /><span><b>@opportunity.Symbol</b><small>@opportunity.Price · @opportunity.Signal</small></span><em>@opportunity.Score</em></button>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </article>
+                        }
+                    }
+                }
+            </section>
+
+            <footer class="trady-v1-composer">
+                <div class="trady-active-mode"><i class="ph-duotone @GetModeIcon(ActiveMode)"></i><span>@ActiveMode</span></div>
+                <div class="trady-compose-row">
+                    <i class="ph-duotone ph-sparkle"></i>
+                    <input @bind="Prompt" @bind:event="oninput" @onkeydown="PromptKeyDown" placeholder="@PromptPlaceholder" />
+                    <button @onclick="Ask" disabled="@Loading" aria-label="Send"><i class="ph ph-paper-plane-tilt"></i></button>
+                </div>
+                <small>Trady AI uses available PhoenixTrend market, broker and portfolio data.</small>
+            </footer>
+        </main>
+
+        <aside class="trady-v1-side">
+            <section class="trady-side-card modes">
+                <header><i class="ph-duotone ph-squares-four"></i><strong>AI Workspace</strong></header>
+                <div class="trady-mode-list">
+                    @foreach (var mode in Modes)
+                    {
+                        <button class="@(ActiveMode == mode ? "active" : "")" @onclick="() => ChangeMode(mode)"><i class="ph-duotone @GetModeIcon(mode)"></i><span>@mode</span><i class="ph ph-caret-right"></i></button>
+                    }
+                </div>
+            </section>
+
+            <section class="trady-side-card summary">
+                <header><i class="ph-duotone ph-brain"></i><strong>AI Summary</strong></header>
+                <div class="summary-score"><div><small>Symbol</small><b>@CurrentSymbol</b></div><div><small>Signal</small><b>@CurrentSignal</b></div><div><small>Confidence</small><b>@CurrentConfidence</b></div></div>
+                <p>@CurrentSummary</p>
+            </section>
+
+            <section class="trady-side-card">
+                <header><i class="ph-duotone ph-lightbulb"></i><strong>Key Insights</strong></header>
+                <div class="trady-side-list">
+                    @if (KeyInsights.Count == 0){<span>Run an analysis to populate live insights.</span>}else{@foreach (var insight in KeyInsights){<span>@insight</span>}}
+                </div>
+            </section>
+
+            <section class="trady-side-card market">
+                <header><i class="ph-duotone ph-chart-line-up"></i><strong>Market Snapshot</strong><button @onclick="RefreshCurrentAnalysis"><i class="ph ph-arrow-clockwise"></i></button></header>
+                <div class="trady-market-mini">@foreach (var market in MarketSnapshot){<div><span>@market.Name</span><b>@market.Price</b><em class="@GetChangeClass(market.Change)">@market.Change</em></div>}</div>
+            </section>
+
+            <section class="trady-side-card opportunities">
+                <header><i class="ph-duotone ph-target"></i><strong>Related Opportunities</strong></header>
+                <div class="trady-ticker-mini">
+                    @if (RelatedQuotes.Count == 0){<span>No opportunities loaded.</span>}else{@foreach (var quote in RelatedQuotes){<button @onclick="() => AnalyzeFromOpportunity(quote.Symbol)"><StockLogo Symbol="@quote.Symbol" Size="small" /><b>@quote.Symbol</b><span>@quote.Price</span><em class="@GetChangeClass(quote.Change)">@quote.Change</em></button>}}
+                </div>
+            </section>
+        </aside>
+    </section>
+</div>
+@code
+{
+    private string CurrentUserInitial
+    {
+        get
+        {
+            if (Auth.CurrentUser is { } user && user.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                foreach (var key in new[] { "display_name", "username", "email" })
+                {
+                    if (user.TryGetProperty(key, out var value) && value.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        var text = value.GetString();
+                        if (!string.IsNullOrWhiteSpace(text)) return text.Trim()[..1].ToUpperInvariant();
+                    }
+                }
+            }
+            return "U";
+        }
+    }
+
+    private bool Loading;
+
+    private string ErrorMessage = string.Empty;
+
+    private string Prompt = string.Empty;
+
+    private string ActiveMode = "Market Analysis";
+
+
+    private string CurrentSymbol = "—";
+
+    private string CurrentSignal = "—";
+
+    private string CurrentConfidence = "—";
+
+    private string CurrentSummary =
+        "Trady AI is ready. Ask for a symbol analysis or portfolio insight.";
+
+
+    private readonly List<ChatMessage> Messages = new();
+
+    private readonly List<ChatHistory> Chats = new();
+
+    private readonly List<string> KeyInsights = new();
+
+    private readonly List<RelatedQuote> RelatedQuotes = new();
+    private readonly List<MarketSnapshotView> MarketSnapshot = new();
+
+
+    private readonly string[] Modes =
+    {
+        "Market Analysis",
+        "Strategy Ideas",
+        "Risk Analysis",
+        "Portfolio Insights",
+        "Trade Execution",
+        "Learning & Education"
+    };
+
+
+    private string PromptPlaceholder =>
+        ActiveMode switch
+        {
+            "Market Analysis" =>
+                "Ask: Analyze AAPL, NVDA, TSLA...",
+
+            "Strategy Ideas" =>
+                "Ask for analysis of a symbol or current opportunities...",
+
+            "Risk Analysis" =>
+                "Ask: Analyze my portfolio risk...",
+
+            "Portfolio Insights" =>
+                "Ask: Show portfolio insights...",
+
+            "Trade Execution" =>
+                "Enter a symbol to analyze before opening Trade...",
+
+            _ =>
+                "Ask Trady AI about a symbol or PhoenixTrend data..."
+        };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.WhenAll(
+            LoadRelatedQuotes(),
+            LoadMarketSnapshot()
+        );
+    }
+
+
+    // =========================================================
+    // CHAT
+    // =========================================================
+
+    private async Task Ask()
+    {
+        var input =
+            Prompt.Trim();
+
+
+        if (string.IsNullOrWhiteSpace(input) ||
+            Loading)
+        {
+            return;
+        }
+
+
+        Prompt =
+            string.Empty;
+
+
+        Messages.Add(
+            new ChatMessage(
+                "user",
+                input
+            )
+        );
+
+
+        AddChatHistory(input);
+
+
+        try
+        {
+            Loading = true;
+
+            ErrorMessage =
+                string.Empty;
+
+
+            if (ActiveMode == "Portfolio Insights")
+            {
+                await AskPortfolio();
+
+                return;
+            }
+
+
+            if (ActiveMode == "Risk Analysis")
+            {
+                await AskRisk();
+
+                return;
+            }
+
+
+            if (input.Contains(
+                    "portfolio",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                await AskPortfolio();
+
+                return;
+            }
+
+
+            if (input.Contains(
+                    "opportun",
+                    StringComparison.OrdinalIgnoreCase) ||
+                input.Contains(
+                    "discover",
+                    StringComparison.OrdinalIgnoreCase) ||
+                input.Contains(
+                    "scanner",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                await AskOpportunities();
+
+                return;
+            }
+
+
+            var symbol =
+                ExtractSymbol(input);
+
+
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                Messages.Add(
+                    new ChatMessage(
+                        "assistant",
+                        "I need a stock symbol for market analysis. Try \"Analyze AAPL\" or choose Portfolio Insights or Risk Analysis."
+                    )
+                );
+
+                return;
+            }
+
+
+            await AnalyzeSymbol(
+                symbol,
+                input
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage =
+                "Trady AI could not complete the request.";
+
+            Messages.Add(
+                new ChatMessage(
+                    "assistant",
+                    "I couldn't complete that analysis with the available backend data."
+                )
+            );
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+    private async Task PromptKeyDown(
+        KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Ask();
+        }
+    }
+
+
+    private void NewChat()
+    {
+        Messages.Clear();
+
+        Prompt = string.Empty;
+
+        CurrentSymbol = "—";
+
+        CurrentSignal = "—";
+
+        CurrentConfidence = "—";
+
+        CurrentSummary =
+            "Trady AI is ready. Ask for a new analysis.";
+
+        KeyInsights.Clear();
+    }
+
+
+    private void LoadChat(
+        ChatHistory chat)
+    {
+        Prompt =
+            chat.Prompt;
+    }
+
+
+    private void AddChatHistory(
+        string prompt)
+    {
+        var title =
+            prompt.Length > 36
+                ? prompt[..36] + "..."
+                : prompt;
+
+
+        Chats.Insert(
+            0,
+            new ChatHistory(
+                title,
+                prompt,
+                DateTime.Now.ToString("h:mm tt")
+            )
+        );
+
+
+        if (Chats.Count > 10)
+        {
+            Chats.RemoveAt(
+                Chats.Count - 1
+            );
+        }
+    }
+
+
+    private async Task UseExample(
+        string prompt)
+    {
+        Prompt = prompt;
+
+        await Ask();
+    }
+
+
+    private async Task ChangeMode(
+        string mode)
+    {
+        ActiveMode = mode;
+
+
+        if (mode == "Portfolio Insights")
+        {
+            Prompt =
+                "Show portfolio insights";
+        }
+        else if (mode == "Risk Analysis")
+        {
+            Prompt =
+                "Analyze my portfolio risk";
+        }
+
+
+        await Task.CompletedTask;
+    }
+
+
+    // =========================================================
+    // SYMBOL ANALYSIS
+    // =========================================================
+
+    private async Task AnalyzeSymbol(
+        string symbol,
+        string originalPrompt)
+    {
+        symbol =
+            symbol
+                .Trim()
+                .ToUpperInvariant();
+
+
+        var quoteTask =
+            Api.Quote(symbol);
+
+        var contextTask =
+            Api.Context(symbol);
+
+        var analyzeTask =
+            Api.Analyze(symbol);
+
+        var intelligenceTask =
+            Api.Intelligence(symbol);
+
+        var patternsTask =
+            Api.Patterns(symbol);
+
+        var chartTask =
+            Api.Chart(
+                symbol,
+                "15m",
+                120
+            );
+
+        var newsTask =
+            Api.News(symbol);
+
+
+        await Task.WhenAll(
+            quoteTask,
+            contextTask,
+            analyzeTask,
+            intelligenceTask,
+            patternsTask,
+            chartTask,
+            newsTask
+        );
+
+
+        var quote =
+            await quoteTask;
+
+        var context =
+            await contextTask;
+
+        var analysis =
+            await analyzeTask;
+
+        var intelligence =
+            await intelligenceTask;
+
+        var patterns =
+            await patternsTask;
+
+        var chart =
+            await chartTask;
+
+        var news =
+            await newsTask;
+
+
+        var view =
+            BuildAnalysisView(
+                symbol,
+                quote,
+                context,
+                analysis,
+                intelligence,
+                patterns,
+                chart
+            );
+
+
+        CurrentSymbol =
+            view.Symbol;
+
+        CurrentSignal =
+            view.Signal;
+
+        CurrentConfidence =
+            view.Confidence;
+
+
+        CurrentSummary =
+            BuildSummary(view);
+
+
+        BuildInsights(
+            view,
+            news
+        );
+
+
+        Messages.Add(
+            new ChatMessage(
+                "assistant",
+                CurrentSummary,
+                view
+            )
+        );
+    }
+
+
+    private AnalysisView BuildAnalysisView(
+        string symbol,
+        JsonElement? quote,
+        JsonElement? context,
+        JsonElement? analysis,
+        JsonElement? intelligence,
+        JsonElement? patterns,
+        JsonElement? chart)
+    {
+        var price =
+            PhoenixApi.Number(
+                quote,
+                "price",
+                double.NaN
+            );
+
+
+        var change =
+            PhoenixApi.Number(
+                quote,
+                "change_percent",
+                double.NaN
+            );
+
+
+        if (double.IsNaN(change))
+        {
+            change =
+                PhoenixApi.Number(
+                    quote,
+                    "change_pct",
+                    double.NaN
+                );
+        }
+
+
+        var name =
+            PhoenixApi.Text(
+                quote,
+                "name",
+                symbol
+            );
+
+
+        var signal =
+            PhoenixApi.Text(
+                analysis,
+                "signal",
+                ""
+            );
+
+
+        if (string.IsNullOrWhiteSpace(signal))
+        {
+            signal =
+                PhoenixApi.Text(
+                    intelligence,
+                    "signal",
+                    "WATCH"
+                );
+        }
+
+
+        signal =
+            signal.ToUpperInvariant();
+
+
+        var confidence =
+            ReadNumber(
+                analysis,
+                "confidence"
+            );
+
+
+        if (double.IsNaN(confidence))
+        {
+            confidence =
+                ReadNumber(
+                    intelligence,
+                    "confidence"
+                );
+        }
+
+
+        var score =
+            ReadNumber(
+                intelligence,
+                "score"
+            );
+
+
+        if (double.IsNaN(score))
+        {
+            score =
+                ReadNumber(
+                    intelligence,
+                    "ai_score"
+                );
+        }
+
+
+        var chartPoints =
+            ExtractChartPoints(
+                chart
+            );
+
+
+        return new AnalysisView(
+            symbol,
+            name,
+            FormatPrice(price),
+            FormatPercent(change),
+            signal,
+            FormatConfidence(confidence),
+            FormatScore(score),
+            ReadContextPrice(context, "ema20"),
+            ReadContextPrice(context, "ema50"),
+            ReadContextPrice(context, "vwap"),
+            ReadContextNumber(context, "rsi"),
+            ReadContextNumber(context, "volume_ratio"),
+            ReadContextPrice(context, "day_high"),
+            ReadContextPrice(context, "day_low"),
+            PhoenixApi.Text(
+                context,
+                "market_regime",
+                "—"
+            ),
+            ExtractPattern(
+                patterns
+            ),
+            chartPoints
+        );
+    }
+
+
+    private string BuildSummary(
+        AnalysisView view)
+    {
+        var pieces =
+            new List<string>();
+
+
+        pieces.Add(
+            $"{view.Symbol} is trading at {view.Price}."
+        );
+
+
+        if (view.Signal != "—")
+        {
+            pieces.Add(
+                $"PhoenixTrend currently reports a {view.Signal} signal."
+            );
+        }
+
+
+        if (view.Confidence != "—")
+        {
+            pieces.Add(
+                $"Signal confidence is {view.Confidence}."
+            );
+        }
+
+
+        if (view.MarketRegime != "—")
+        {
+            pieces.Add(
+                $"The current market regime is {view.MarketRegime}."
+            );
+        }
+
+
+        if (view.Pattern != "—")
+        {
+            pieces.Add(
+                $"Pattern intelligence detected {view.Pattern}."
+            );
+        }
+
+
+        return string.Join(
+            " ",
+            pieces
+        );
+    }
+
+
+    private void BuildInsights(
+        AnalysisView view,
+        JsonElement? news)
+    {
+        KeyInsights.Clear();
+
+
+        if (view.Rsi != "—")
+        {
+            KeyInsights.Add(
+                $"RSI: {view.Rsi}"
+            );
+        }
+
+
+        if (view.Ema20 != "—")
+        {
+            KeyInsights.Add(
+                $"EMA 20: {view.Ema20}"
+            );
+        }
+
+
+        if (view.Ema50 != "—")
+        {
+            KeyInsights.Add(
+                $"EMA 50: {view.Ema50}"
+            );
+        }
+
+
+        if (view.Vwap != "—")
+        {
+            KeyInsights.Add(
+                $"VWAP: {view.Vwap}"
+            );
+        }
+
+
+        if (view.VolumeRatio != "—")
+        {
+            KeyInsights.Add(
+                $"Volume ratio: {view.VolumeRatio}"
+            );
+        }
+
+
+        if (view.Pattern != "—")
+        {
+            KeyInsights.Add(
+                $"Pattern: {view.Pattern}"
+            );
+        }
+
+
+        var headline =
+            ExtractFirstHeadline(
+                news
+            );
+
+
+        if (!string.IsNullOrWhiteSpace(
+            headline))
+        {
+            KeyInsights.Add(
+                headline
+            );
+        }
+    }
+
+
+    // =========================================================
+    // PORTFOLIO
+    // =========================================================
+
+    private async Task AskPortfolio()
+    {
+        var accountTask =
+            Api.BrokerAccount();
+
+        var analyticsTask =
+            Api.Analytics();
+
+        var positionsTask =
+            Api.BrokerPositions();
+
+
+        await Task.WhenAll(
+            accountTask,
+            analyticsTask,
+            positionsTask
+        );
+
+
+        var account =
+            await accountTask;
+
+        var analytics =
+            await analyticsTask;
+
+        var positions =
+            await positionsTask;
+
+
+        var portfolio =
+            new PortfolioView(
+                FormatMoney(
+                    ReadNumber(
+                        account,
+                        "portfolio_value"
+                    )
+                ),
+
+                FormatMoney(
+                    ReadNumber(
+                        account,
+                        "buying_power"
+                    )
+                ),
+
+                FormatMoney(
+                    ReadNumber(
+                        account,
+                        "cash"
+                    )
+                ),
+
+                FormatSignedMoney(
+                    ReadNumber(
+                        analytics,
+                        "total_pnl"
+                    )
+                ),
+
+                FormatPercentAuto(
+                    ReadNumber(
+                        analytics,
+                        "total_return"
+                    )
+                ),
+
+                FormatPercentAuto(
+                    ReadNumber(
+                        analytics,
+                        "max_drawdown"
+                    )
+                )
+            );
+
+
+        var count =
+            CountArrayItems(
+                positions
+            );
+
+
+        CurrentSymbol =
+            "PORTFOLIO";
+
+        CurrentSignal =
+            "MONITOR";
+
+        CurrentConfidence =
+            "—";
+
+
+        CurrentSummary =
+            $"Portfolio value is {portfolio.PortfolioValue} with {count} open position(s).";
+
+
+        Messages.Add(
+            new ChatMessage(
+                "assistant",
+                CurrentSummary,
+                Portfolio: portfolio
+            )
+        );
+    }
+
+
+    // =========================================================
+    // RISK
+    // =========================================================
+
+    private async Task AskRisk()
+    {
+        var accountTask =
+            Api.BrokerAccount();
+
+        var analyticsTask =
+            Api.Analytics();
+
+        var positionsTask =
+            Api.BrokerPositions();
+
+        var engineTask =
+            Api.EngineStatus();
+
+
+        await Task.WhenAll(
+            accountTask,
+            analyticsTask,
+            positionsTask,
+            engineTask
+        );
+
+
+        var account =
+            await accountTask;
+
+        var analytics =
+            await analyticsTask;
+
+        var positions =
+            await positionsTask;
+
+        var engine =
+            await engineTask;
+
+
+        var portfolioValue =
+            ReadNumber(
+                account,
+                "portfolio_value"
+            );
+
+
+        var maxDrawdown =
+            FormatPercentAuto(
+                ReadNumber(
+                    analytics,
+                    "max_drawdown"
+                )
+            );
+
+
+        var exposure =
+            CalculateExposure(
+                positions
+            );
+
+
+        var engineState =
+            PhoenixApi.Text(
+                engine,
+                "status",
+                "Available"
+            );
+
+
+        var exposurePercent =
+            portfolioValue > 0
+                ? exposure /
+                  portfolioValue *
+                  100
+                : double.NaN;
+
+
+        var response =
+            $"Current portfolio exposure is {FormatMoney(exposure)}";
+
+
+        if (!double.IsNaN(
+            exposurePercent))
+        {
+            response +=
+                $" ({exposurePercent:0.0}% of portfolio value)";
+        }
+
+
+        response +=
+            $". Maximum drawdown reported by analytics is {maxDrawdown}. Risk engine status: {engineState}.";
+
+
+        CurrentSymbol =
+            "PORTFOLIO";
+
+        CurrentSignal =
+            "RISK";
+
+        CurrentConfidence =
+            "—";
+
+        CurrentSummary =
+            response;
+
+
+        Messages.Add(
+            new ChatMessage(
+                "assistant",
+                response
+            )
+        );
+    }
+
+
+    // =========================================================
+    // DISCOVERY
+    // =========================================================
+
+    private async Task AskOpportunities()
+    {
+        var result =
+            await Api.Discover();
+
+
+        var rows =
+            ParseOpportunities(
+                result
+            );
+
+
+        CurrentSymbol =
+            "MARKET";
+
+        CurrentSignal =
+            "SCAN";
+
+        CurrentConfidence =
+            "—";
+
+        CurrentSummary =
+            rows.Count == 0
+                ? "PhoenixTrend discovery did not return any opportunities."
+                : $"PhoenixTrend discovery returned {rows.Count} opportunity candidate(s).";
+
+
+        Messages.Add(
+            new ChatMessage(
+                "assistant",
+                CurrentSummary,
+                Opportunities: rows
+            )
+        );
+    }
+
+
+    private List<OpportunityView> ParseOpportunities(
+        JsonElement? result)
+    {
+        var output =
+            new List<OpportunityView>();
+
+
+        if (result is null ||
+            !TryGetArray(
+                result.Value,
+                out var items))
+        {
+            return output;
+        }
+
+
+        foreach (var item in
+                 items.EnumerateArray())
+        {
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var symbol =
+                ReadString(
+                    item,
+                    "symbol",
+                    ""
+                );
+
+
+            if (string.IsNullOrWhiteSpace(
+                symbol))
+            {
+                continue;
+            }
+
+
+            var price =
+                ReadNumber(
+                    item,
+                    "price"
+                );
+
+
+            var score =
+                ReadNumber(
+                    item,
+                    "ai_score"
+                );
+
+
+            if (double.IsNaN(score))
+            {
+                score =
+                    ReadNumber(
+                        item,
+                        "score"
+                    );
+            }
+
+
+            var signal =
+                ReadString(
+                    item,
+                    "signal",
+                    "WATCH"
+                );
+
+
+            output.Add(
+                new OpportunityView(
+                    symbol.ToUpperInvariant(),
+                    FormatPrice(price),
+                    signal.ToUpperInvariant(),
+                    FormatScore(score)
+                )
+            );
+
+
+            if (output.Count >= 8)
+            {
+                break;
+            }
+        }
+
+
+        return output;
+    }
+
+
+    // =========================================================
+    // RELATED QUOTES
+    // =========================================================
+
+    private async Task LoadMarketSnapshot()
+    {
+        MarketSnapshot.Clear();
+        var markets = new[]
+        {
+            (Name: "S&P 500", Symbol: "^GSPC"),
+            (Name: "NASDAQ", Symbol: "^IXIC"),
+            (Name: "DOW", Symbol: "^DJI"),
+            (Name: "VIX", Symbol: "^VIX")
+        };
+
+        foreach (var market in markets)
+        {
+            try
+            {
+                var quote = await Api.Quote(market.Symbol);
+                if (quote is null) continue;
+                var price = PhoenixApi.Number(quote, "price", double.NaN);
+                var change = PhoenixApi.Number(quote, "change_percent", double.NaN);
+                if (double.IsNaN(change)) change = PhoenixApi.Number(quote, "change_pct", double.NaN);
+                MarketSnapshot.Add(new MarketSnapshotView(
+                    market.Name,
+                    double.IsNaN(price) ? "—" : price.ToString("N2", System.Globalization.CultureInfo.InvariantCulture),
+                    double.IsNaN(change) ? "—" : FormatPercent(change)));
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Trady AI market snapshot failed for {market.Symbol}: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task LoadRelatedQuotes()
+    {
+        RelatedQuotes.Clear();
+
+
+        var symbols =
+            new[]
+            {
+                "MSFT",
+                "NVDA",
+                "GOOGL",
+                "TSLA"
+            };
+
+
+        foreach (var symbol in symbols)
+        {
+            var quote =
+                await Api.Quote(symbol);
+
+
+            if (quote is null)
+            {
+                continue;
+            }
+
+
+            var price =
+                PhoenixApi.Number(
+                    quote,
+                    "price",
+                    double.NaN
+                );
+
+
+            var change =
+                PhoenixApi.Number(
+                    quote,
+                    "change_percent",
+                    double.NaN
+                );
+
+
+            if (double.IsNaN(change))
+            {
+                change =
+                    PhoenixApi.Number(
+                        quote,
+                        "change_pct",
+                        double.NaN
+                    );
+            }
+
+
+            RelatedQuotes.Add(
+                new RelatedQuote(
+                    symbol,
+                    FormatPrice(price),
+                    FormatPercent(change)
+                )
+            );
+        }
+    }
+
+
+    private async Task AnalyzeFromOpportunity(
+        string symbol)
+    {
+        Prompt =
+            $"Analyze {symbol}";
+
+        await Ask();
+    }
+
+
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
+    private void OpenChart(
+        string symbol)
+    {
+        Navigation.NavigateTo(
+            $"/charts?symbol={Uri.EscapeDataString(symbol)}"
+        );
+    }
+
+
+    private void OpenTrade(
+        string symbol)
+    {
+        Navigation.NavigateTo(
+            $"/charts?symbol={Uri.EscapeDataString(symbol)}"
+        );
+    }
+
+
+    private async Task RefreshCurrentAnalysis()
+    {
+        if (CurrentSymbol == "—" ||
+            CurrentSymbol == "PORTFOLIO" ||
+            CurrentSymbol == "MARKET")
+        {
+            await Task.WhenAll(LoadRelatedQuotes(), LoadMarketSnapshot());
+
+            return;
+        }
+
+
+        Prompt =
+            $"Analyze {CurrentSymbol}";
+
+        await Ask();
+    }
+
+
+    // =========================================================
+    // SYMBOL EXTRACTION
+    // =========================================================
+
+    private static string ExtractSymbol(
+        string input)
+    {
+        var tokens =
+            System.Text.RegularExpressions.Regex
+                .Matches(
+                    input.ToUpperInvariant(),
+                    @"\b[A-Z]{1,5}\b"
+                )
+                .Select(
+                    x => x.Value
+                )
+                .ToList();
+
+
+        var ignored =
+            new HashSet<string>
+            {
+                "I",
+                "AI",
+                "THE",
+                "FOR",
+                "AND",
+                "WITH",
+                "SHOW",
+                "FIND",
+                "BEST",
+                "TRADE",
+                "STOCK",
+                "STOCKS",
+                "ANALYZE",
+                "ANALYSIS",
+                "MARKET",
+                "SWING",
+                "ENTRY",
+                "TARGET",
+                "STOP",
+                "LOSS",
+                "RISK",
+                "MY"
+            };
+
+
+        return tokens
+            .FirstOrDefault(
+                x => !ignored.Contains(x)
+            )
+            ?? string.Empty;
+    }
+
+
+    // =========================================================
+    // CHART
+    // =========================================================
+
+    private static List<double> ExtractChartPoints(
+        JsonElement? root)
+    {
+        var output =
+            new List<double>();
+
+
+        if (root is null)
+        {
+            return output;
+        }
+
+
+        JsonElement collection;
+
+
+        if (root.Value.ValueKind ==
+            JsonValueKind.Array)
+        {
+            collection =
+                root.Value;
+        }
+        else if (
+            root.Value.ValueKind ==
+                JsonValueKind.Object &&
+            root.Value.TryGetProperty(
+                "data",
+                out var data) &&
+            data.ValueKind ==
+                JsonValueKind.Array)
+        {
+            collection = data;
+        }
+        else if (
+            root.Value.ValueKind ==
+                JsonValueKind.Object &&
+            root.Value.TryGetProperty(
+                "candles",
+                out var candles) &&
+            candles.ValueKind ==
+                JsonValueKind.Array)
+        {
+            collection = candles;
+        }
+        else if (
+            root.Value.ValueKind ==
+                JsonValueKind.Object &&
+            root.Value.TryGetProperty(
+                "bars",
+                out var bars) &&
+            bars.ValueKind ==
+                JsonValueKind.Array)
+        {
+            collection = bars;
+        }
+        else
+        {
+            return output;
+        }
+
+
+        foreach (var item in
+                 collection.EnumerateArray())
+        {
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var close =
+                ReadNumber(
+                    item,
+                    "close"
+                );
+
+
+            if (double.IsNaN(close))
+            {
+                close =
+                    ReadNumber(
+                        item,
+                        "price"
+                    );
+            }
+
+
+            if (!double.IsNaN(close))
+            {
+                output.Add(close);
+            }
+        }
+
+
+        return output;
+    }
+
+
+    private static string BuildPolyline(
+        List<double> points)
+    {
+        if (points.Count < 2)
+        {
+            return string.Empty;
+        }
+
+
+        var min =
+            points.Min();
+
+        var max =
+            points.Max();
+
+        var range =
+            max - min;
+
+
+        if (range <= 0)
+        {
+            range = 1;
+        }
+
+
+        var values =
+            new List<string>();
+
+
+        for (var i = 0;
+             i < points.Count;
+             i++)
+        {
+            var x =
+                i /
+                (double)(points.Count - 1)
+                * 1000;
+
+
+            var normalized =
+                (points[i] - min)
+                / range;
+
+
+            var y =
+                390 -
+                normalized * 350;
+
+
+            values.Add(
+                $"{x:0.##},{y:0.##}"
+            );
+        }
+
+
+        return string.Join(
+            " ",
+            values
+        );
+    }
+
+
+    private static string GetFallbackCandleStyle(
+        int index)
+    {
+        var x =
+            index * 1.78;
+
+        var y =
+            68 -
+            index * .7 +
+            index % 8 * 2;
+
+        var height =
+            16 +
+            index % 5 * 5;
+
+
+        return
+            $"--x:{x}%;--y:{y}%;--h:{height}px";
+    }
+
+
+    // =========================================================
+    // JSON HELPERS
+    // =========================================================
+
+    private static bool TryGetArray(
+        JsonElement root,
+        out JsonElement array)
+    {
+        if (root.ValueKind ==
+            JsonValueKind.Array)
+        {
+            array = root;
+
+            return true;
+        }
+
+
+        if (root.ValueKind ==
+            JsonValueKind.Object)
+        {
+            var names =
+                new[]
+                {
+                    "data",
+                    "results",
+                    "items",
+                    "opportunities",
+                    "discover",
+                    "positions",
+                    "news"
+                };
+
+
+            foreach (var name in names)
+            {
+                if (root.TryGetProperty(
+                        name,
+                        out var candidate) &&
+                    candidate.ValueKind ==
+                        JsonValueKind.Array)
+                {
+                    array = candidate;
+
+                    return true;
+                }
+            }
+        }
+
+
+        array = default;
+
+        return false;
+    }
+
+
+    private static double ReadNumber(
+        JsonElement? root,
+        string property)
+    {
+        if (root is null)
+        {
+            return double.NaN;
+        }
+
+
+        return ReadNumber(
+            root.Value,
+            property
+        );
+    }
+
+
+    private static double ReadNumber(
+        JsonElement root,
+        string property)
+    {
+        if (root.ValueKind !=
+                JsonValueKind.Object ||
+            !root.TryGetProperty(
+                property,
+                out var value))
+        {
+            return double.NaN;
+        }
+
+
+        if (value.ValueKind ==
+                JsonValueKind.Number &&
+            value.TryGetDouble(
+                out var number))
+        {
+            return number;
+        }
+
+
+        return double.TryParse(
+            value.ToString(),
+            out number)
+                ? number
+                : double.NaN;
+    }
+
+
+    private static string ReadString(
+        JsonElement root,
+        string property,
+        string fallback)
+    {
+        if (root.ValueKind !=
+                JsonValueKind.Object ||
+            !root.TryGetProperty(
+                property,
+                out var value))
+        {
+            return fallback;
+        }
+
+
+        return value.ValueKind ==
+               JsonValueKind.String
+            ? value.GetString()
+              ?? fallback
+            : value.ToString();
+    }
+
+
+    private static string ReadContextPrice(
+        JsonElement? root,
+        string property)
+    {
+        return FormatPrice(
+            ReadNumber(
+                root,
+                property
+            )
+        );
+    }
+
+
+    private static string ReadContextNumber(
+        JsonElement? root,
+        string property)
+    {
+        var value =
+            ReadNumber(
+                root,
+                property
+            );
+
+
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString("0.00");
+    }
+
+
+    private static string ExtractPattern(
+        JsonElement? result)
+    {
+        if (result is null)
+        {
+            return "—";
+        }
+
+
+        JsonElement items;
+
+
+        if (result.Value.ValueKind ==
+            JsonValueKind.Array)
+        {
+            items =
+                result.Value;
+        }
+        else if (
+            result.Value.ValueKind ==
+                JsonValueKind.Object &&
+            result.Value.TryGetProperty(
+                "patterns",
+                out var patterns) &&
+            patterns.ValueKind ==
+                JsonValueKind.Array)
+        {
+            items = patterns;
+        }
+        else
+        {
+            return "—";
+        }
+
+
+        foreach (var item in
+                 items.EnumerateArray())
+        {
+            var name =
+                ReadString(
+                    item,
+                    "name",
+                    ""
+                );
+
+
+            if (string.IsNullOrWhiteSpace(
+                name))
+            {
+                name =
+                    ReadString(
+                        item,
+                        "pattern",
+                        ""
+                    );
+            }
+
+
+            if (!string.IsNullOrWhiteSpace(
+                name))
+            {
+                return name;
+            }
+        }
+
+
+        return "—";
+    }
+
+
+    private static string ExtractFirstHeadline(
+        JsonElement? result)
+    {
+        if (result is null ||
+            !TryGetArray(
+                result.Value,
+                out var items))
+        {
+            return string.Empty;
+        }
+
+
+        foreach (var item in
+                 items.EnumerateArray())
+        {
+            var title =
+                ReadString(
+                    item,
+                    "title",
+                    ""
+                );
+
+
+            if (string.IsNullOrWhiteSpace(
+                title))
+            {
+                title =
+                    ReadString(
+                        item,
+                        "headline",
+                        ""
+                    );
+            }
+
+
+            if (!string.IsNullOrWhiteSpace(
+                title))
+            {
+                return $"Latest news: {title}";
+            }
+        }
+
+
+        return string.Empty;
+    }
+
+
+    private static int CountArrayItems(
+        JsonElement? result)
+    {
+        if (result is null ||
+            !TryGetArray(
+                result.Value,
+                out var items))
+        {
+            return 0;
+        }
+
+
+        return items
+            .EnumerateArray()
+            .Count();
+    }
+
+
+    private static double CalculateExposure(
+        JsonElement? result)
+    {
+        if (result is null ||
+            !TryGetArray(
+                result.Value,
+                out var items))
+        {
+            return 0;
+        }
+
+
+        double total = 0;
+
+
+        foreach (var item in
+                 items.EnumerateArray())
+        {
+            var value =
+                ReadNumber(
+                    item,
+                    "market_value"
+                );
+
+
+            if (!double.IsNaN(value))
+            {
+                total +=
+                    Math.Abs(value);
+            }
+        }
+
+
+        return total;
+    }
+
+
+    // =========================================================
+    // FORMATTING
+    // =========================================================
+
+    private static string FormatMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00"
+            );
+    }
+
+
+    private static string FormatSignedMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "+$#,##0.00;-$#,##0.00;$0.00"
+            );
+    }
+
+
+    private static string FormatPrice(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00"
+            );
+    }
+
+
+    private static string FormatPercent(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : $"{value:+0.00;-0.00;0.00}%";
+    }
+
+
+    private static string FormatPercentAuto(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) <= 1)
+        {
+            value *= 100;
+        }
+
+
+        return $"{value:+0.00;-0.00;0.00}%";
+    }
+
+
+    private static string FormatConfidence(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) <= 1)
+        {
+            value *= 100;
+        }
+
+
+        return $"{value:0}%";
+    }
+
+
+    private static string FormatScore(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) <= 1)
+        {
+            value *= 100;
+        }
+
+
+        return value.ToString("0");
+    }
+
+
+    private static string GetChangeClass(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(
+                value) ||
+            value == "—")
+        {
+            return "";
+        }
+
+
+        return value
+            .TrimStart()
+            .StartsWith("-")
+                ? "red"
+                : "green";
+    }
+
+
+    private static string GetSignalClass(
+        string signal)
+    {
+        if (signal.Equals(
+            "BUY",
+            StringComparison.OrdinalIgnoreCase) ||
+            signal.Equals(
+                "BULLISH",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return "pill green";
+        }
+
+
+        if (signal.Equals(
+            "SELL",
+            StringComparison.OrdinalIgnoreCase) ||
+            signal.Equals(
+                "BEARISH",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return "pill red";
+        }
+
+
+        return "pill blue";
+    }
+
+
+    private static string GetSignalTextClass(
+        string signal)
+    {
+        if (signal.Equals(
+                "BUY",
+                StringComparison.OrdinalIgnoreCase) ||
+            signal.Equals(
+                "BULLISH",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return "green";
+        }
+
+
+        if (signal.Equals(
+                "SELL",
+                StringComparison.OrdinalIgnoreCase) ||
+            signal.Equals(
+                "BEARISH",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return "red";
+        }
+
+
+        return "";
+    }
+
+
+    // =========================================================
+    // MODELS
+    // =========================================================
+
+    private sealed class ChatMessage
+    {
+        public ChatMessage(
+            string role,
+            string text,
+            AnalysisView? Analysis = null,
+            PortfolioView? Portfolio = null,
+            List<OpportunityView>? Opportunities = null)
+        {
+            Role = role;
+
+            Text = text;
+
+            this.Analysis = Analysis;
+
+            this.Portfolio = Portfolio;
+
+            this.Opportunities =
+                Opportunities
+                ?? new List<OpportunityView>();
+        }
+
+
+        public string Role { get; }
+
+
+        public string Text { get; }
+
+
+        public AnalysisView? Analysis { get; }
+
+
+        public PortfolioView? Portfolio { get; }
+
+
+        public List<OpportunityView> Opportunities { get; }
+    }
+
+
+    private sealed record ChatHistory(
+        string Title,
+        string Prompt,
+        string Time
+    );
+
+
+    private sealed record AnalysisView(
+        string Symbol,
+        string Name,
+        string Price,
+        string Change,
+        string Signal,
+        string Confidence,
+        string Score,
+        string Ema20,
+        string Ema50,
+        string Vwap,
+        string Rsi,
+        string VolumeRatio,
+        string DayHigh,
+        string DayLow,
+        string MarketRegime,
+        string Pattern,
+        List<double> ChartPoints
+    );
+
+
+    private sealed record PortfolioView(
+        string PortfolioValue,
+        string BuyingPower,
+        string Cash,
+        string TotalPnl,
+        string TotalReturn,
+        string MaxDrawdown
+    );
+
+
+    private sealed record OpportunityView(
+        string Symbol,
+        string Price,
+        string Signal,
+        string Score
+    );
+
+
+    private sealed record RelatedQuote(
+        string Symbol,
+        string Price,
+        string Change
+    );
+
+    private sealed record MarketSnapshotView(
+        string Name,
+        string Price,
+        string Change
+    );
+
+    private static string GetModeIcon(string mode) => mode switch
+    {
+        "Market Analysis" => "ph-chart-line-up",
+        "Strategy Ideas" => "ph-lightbulb",
+        "Risk Analysis" => "ph-shield-check",
+        "Portfolio Insights" => "ph-chart-pie-slice",
+        "Trade Execution" => "ph-lightning",
+        "Learning & Education" => "ph-book-open-text",
+        _ => "ph-sparkle"
+    };
+
+}

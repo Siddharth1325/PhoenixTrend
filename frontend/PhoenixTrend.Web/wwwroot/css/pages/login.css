@@ -1,0 +1,1052 @@
+/* ============================================================
+   PHOENIXTREND LOGIN — REFERENCE MATCH
+   Uses /assets/loginscreen.png as the full-screen artwork.
+   ============================================================ */
+
+.pt-login-page,
+.pt-login-page * {
+    box-sizing: border-box;
+}
+
+.pt-login-page {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    isolation: isolate;
+    color: #fff;
+    background:
+        radial-gradient(circle at 18% 42%, #b64317 0%, #3b1720 28%, transparent 54%),
+        linear-gradient(90deg, #11152a 0%, #0b1428 52%, #071426 100%);
+    font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.pt-login-bg {
+    position: fixed;
+    z-index: -3;
+    inset: 0;
+    background: url("/assets/loginscreen.png") center 8% / cover no-repeat;
+    background-color: #05070d;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+}
+
+.pt-login-shade {
+    position: fixed;
+    z-index: -2;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg,
+            rgba(2,4,9,.04) 0%,
+            rgba(2,4,9,.03) 45%,
+            rgba(2,4,9,.16) 67%,
+            rgba(2,4,9,.30) 100%),
+        linear-gradient(180deg,
+            rgba(0,0,0,.05),
+            rgba(0,0,0,.08));
+}
+
+.pt-login-shell {
+    min-height: 100vh;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 58.5%) minmax(500px, 41.5%);
+}
+
+.pt-login-art {
+    position: relative;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+/*
+   The supplied loginscreen artwork may already contain PhoenixTrend branding.
+   This overlay brand is hidden by default so the artwork remains identical
+   to the approved reference. Set display:flex if using an unbranded background.
+*/
+.pt-login-brand {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+    width: min(520px, 70%);
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.pt-login-logo {
+    width: 220px;
+    height: 220px;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 34px rgba(255,111,16,.38));
+}
+
+.pt-login-name {
+    margin-top: -10px;
+    font-size: clamp(44px, 4vw, 67px);
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -.045em;
+    text-shadow: 0 8px 24px rgba(0,0,0,.48);
+}
+
+.pt-login-name strong {
+    color: #f4a23b;
+    font-weight: 700;
+}
+
+.pt-login-tagline {
+    margin-top: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: .31em;
+    color: rgba(255,255,255,.88);
+}
+
+.pt-login-tagline i {
+    padding: 0 10px;
+    font-style: normal;
+}
+
+.pt-login-panel {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(32px, 5vh, 78px) clamp(32px, 4vw, 72px) clamp(32px, 5vh, 78px) 20px;
+}
+
+.pt-login-card {
+    --mouse-x: 50%;
+    --mouse-y: 20%;
+    position: relative;
+    width: min(100%, 590px);
+    padding: clamp(38px, 4.1vw, 62px);
+    border: 1px solid rgba(238, 142, 48, .72);
+    border-radius: 19px;
+    background:
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y),
+            rgba(255,157,62,.10),
+            transparent 34%),
+        linear-gradient(145deg,
+            rgba(10, 14, 23, .42),
+            rgba(3, 7, 14, .54));
+    box-shadow:
+        0 34px 90px rgba(0,0,0,.46),
+        inset 0 1px 0 rgba(255,255,255,.07),
+        inset 0 0 70px rgba(255,123,28,.025);
+    backdrop-filter: blur(24px) saturate(132%);
+    -webkit-backdrop-filter: blur(24px) saturate(132%);
+    transition: transform .18s ease, box-shadow .18s ease;
+    will-change: transform;
+}
+
+.pt-login-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(125deg, rgba(255,255,255,.025), transparent 28%, transparent 72%, rgba(255,143,39,.035));
+}
+
+.pt-login-card-header {
+    position: relative;
+    margin-bottom: 50px;
+}
+
+.pt-login-card-header h1 {
+    margin: 0;
+    font-size: clamp(38px, 3vw, 50px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -.035em;
+    color: #fff;
+}
+
+.pt-login-card-header p {
+    margin: 13px 0 0;
+    font-size: clamp(17px, 1.3vw, 21px);
+    line-height: 1.4;
+    font-weight: 400;
+    color: rgba(230,231,237,.73);
+}
+
+.pt-login-form {
+    position: relative;
+}
+
+.pt-login-field {
+    margin-bottom: 26px;
+}
+
+.pt-login-field > label {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 500;
+    color: rgba(255,255,255,.95);
+}
+
+.pt-login-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 62px;
+    overflow: hidden;
+    border: 1px solid rgba(160,166,180,.48);
+    border-radius: 11px;
+    background: rgba(5,8,17,.45);
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.pt-login-input-wrap:hover {
+    border-color: rgba(207,174,137,.66);
+}
+
+.pt-login-input-wrap:focus-within,
+.pt-login-input-wrap.is-focused {
+    border-color: #e99a49;
+    background: rgba(5,8,17,.68);
+    box-shadow: 0 0 0 3px rgba(233,154,73,.10), 0 0 28px rgba(232,133,35,.08);
+}
+
+.pt-login-input-icon {
+    width: 66px;
+    height: 100%;
+    flex: 0 0 66px;
+    display: grid;
+    place-items: center;
+    color: rgba(255,255,255,.90);
+}
+
+.pt-login-input-icon svg,
+.pt-login-password-toggle svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pt-login-input {
+    width: 100%;
+    height: 60px;
+    min-width: 0;
+    padding: 0 16px 0 2px;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    font: inherit;
+    font-size: 17px;
+}
+
+.pt-login-input::placeholder {
+    color: rgba(199,202,212,.60);
+}
+
+.pt-login-password-toggle {
+    width: 62px;
+    height: 60px;
+    flex: 0 0 62px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    outline: 0;
+    cursor: pointer;
+    color: rgba(255,255,255,.94);
+    background: transparent;
+    transition: color .18s ease, background .18s ease;
+}
+
+.pt-login-password-toggle:hover {
+    color: #f5aa4a;
+    background: rgba(255,153,44,.05);
+}
+
+.pt-login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 2px 0 35px;
+}
+
+.pt-login-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 16px;
+    color: rgba(236,237,242,.76);
+}
+
+.pt-login-checkbox input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.pt-login-checkbox-box {
+    position: relative;
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
+    border: 1px solid rgba(214,216,224,.76);
+    border-radius: 4px;
+    background: rgba(3,7,15,.42);
+    transition: all .18s ease;
+}
+
+.pt-login-checkbox input:checked + .pt-login-checkbox-box {
+    border-color: #ffad42;
+    background: linear-gradient(135deg, #ffbd58, #ef8c20);
+}
+
+.pt-login-checkbox input:checked + .pt-login-checkbox-box::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 11px;
+    border-right: 2px solid #1b1005;
+    border-bottom: 2px solid #1b1005;
+    transform: rotate(45deg);
+}
+
+.pt-login-forgot {
+    color: #f3a442;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color .18s ease;
+}
+
+.pt-login-forgot:hover {
+    color: #ffc86c;
+}
+
+.pt-login-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: -14px 0 20px;
+    padding: 11px 13px;
+    border: 1px solid rgba(255,88,88,.34);
+    border-radius: 8px;
+    background: rgba(136,22,28,.22);
+    color: #ffaaaa;
+}
+
+.pt-login-error > span {
+    width: 21px;
+    height: 21px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 21px;
+    border-radius: 50%;
+    background: rgba(255,76,76,.16);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.pt-login-error p {
+    margin: 1px 0 0;
+    font-size: 13px;
+}
+
+.pt-login-submit {
+    position: relative;
+    width: 100%;
+    height: 69px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #171006;
+    font-size: 19px;
+    font-weight: 700;
+    background: linear-gradient(100deg, #ff7a18 0%, #f7a43c 52%, #ffd56b 100%);
+    box-shadow: 0 14px 34px rgba(239,132,27,.20), inset 0 1px 0 rgba(255,255,255,.36);
+    transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+
+.pt-login-submit::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -55%;
+    width: 34%;
+    pointer-events: none;
+    transform: skewX(-22deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.30), transparent);
+    animation: ptLoginShine 3.2s ease-in-out infinite;
+}
+
+.pt-login-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.04);
+    box-shadow: 0 18px 42px rgba(239,132,27,.28), inset 0 1px 0 rgba(255,255,255,.42);
+}
+
+.pt-login-submit:disabled {
+    cursor: default;
+    opacity: .76;
+}
+
+.pt-login-submit-arrow {
+    font-size: 30px;
+    line-height: 1;
+    font-weight: 400;
+    transition: transform .18s ease;
+}
+
+.pt-login-submit:hover .pt-login-submit-arrow {
+    transform: translateX(4px);
+}
+
+.pt-login-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(22,15,6,.22);
+    border-top-color: #211506;
+    border-radius: 50%;
+    animation: ptLoginSpin .7s linear infinite;
+}
+
+.pt-login-divider {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    margin: 31px 0 27px;
+}
+
+.pt-login-divider span {
+    height: 1px;
+    background: rgba(225,227,234,.32);
+}
+
+.pt-login-divider small {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(224,226,233,.76);
+    white-space: nowrap;
+}
+
+.pt-login-social {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.pt-login-social-button {
+    height: 58px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    border: 1px solid rgba(182,186,198,.35);
+    border-radius: 9px;
+    cursor: pointer;
+    background: rgba(4,8,16,.40);
+    color: rgba(255,255,255,.94);
+    font-size: 15px;
+    font-weight: 500;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.pt-login-social-button:hover {
+    transform: translateY(-2px);
+    border-color: rgba(241,162,72,.62);
+    background: rgba(255,151,41,.055);
+}
+
+.pt-login-social-button img {
+    width: 25px;
+    height: 25px;
+    object-fit: contain;
+    flex: 0 0 25px;
+}
+
+.pt-login-create {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 47px;
+    font-size: 16px;
+    color: rgba(226,228,234,.74);
+}
+
+.pt-login-create a {
+    color: #f3a442;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.pt-login-create a:hover {
+    color: #ffc86c;
+}
+
+.pt-keyboard-navigation .pt-login-submit:focus-visible,
+.pt-keyboard-navigation .pt-login-social-button:focus-visible,
+.pt-keyboard-navigation .pt-login-password-toggle:focus-visible,
+.pt-keyboard-navigation .pt-login-forgot:focus-visible,
+.pt-keyboard-navigation .pt-login-create a:focus-visible {
+    outline: 2px solid #ffb34e;
+    outline-offset: 3px;
+}
+
+@keyframes ptLoginShine {
+    0%, 60% { left: -55%; }
+    82%, 100% { left: 125%; }
+}
+
+@keyframes ptLoginSpin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1180px) {
+    .pt-login-shell {
+        grid-template-columns: minmax(0, 52%) minmax(470px, 48%);
+    }
+
+    .pt-login-panel {
+        padding-right: 30px;
+    }
+
+    .pt-login-card {
+        padding: 42px;
+    }
+}
+
+@media (max-width: 900px) {
+    .pt-login-page {
+        overflow: auto;
+    }
+
+    .pt-login-bg {
+        background-position: 38% center;
+    }
+
+    .pt-login-shell {
+        display: block;
+        min-height: 100vh;
+    }
+
+    .pt-login-art {
+        display: none;
+    }
+
+    .pt-login-panel {
+        min-height: 100vh;
+        padding: 30px 20px;
+        background: rgba(1,4,10,.26);
+    }
+
+    .pt-login-card {
+        width: min(100%, 590px);
+        padding: 40px;
+    }
+}
+
+@media (max-width: 600px) {
+    .pt-login-card {
+        padding: 30px 24px;
+        border-radius: 16px;
+    }
+
+    .pt-login-card-header {
+        margin-bottom: 34px;
+    }
+
+    .pt-login-card-header h1 {
+        font-size: 36px;
+    }
+
+    .pt-login-card-header p {
+        font-size: 16px;
+    }
+
+    .pt-login-field > label,
+    .pt-login-checkbox,
+    .pt-login-forgot {
+        font-size: 14px;
+    }
+
+    .pt-login-options {
+        gap: 14px;
+    }
+
+    .pt-login-social {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-login-social-button {
+        height: 54px;
+    }
+
+    .pt-login-create {
+        margin-top: 34px;
+        font-size: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pt-login-page *,
+    .pt-login-page *::before,
+    .pt-login-page *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+
+    .pt-login-bg,
+    .pt-login-card {
+        transform: none !important;
+    }
+}
+
+
+/* ============================================================
+   PHOENIXTREND — VISIBLE CINEMATIC EFFECTS
+   The PhoenixTrend logo is already part of loginscreen.png.
+   Do NOT show the separate HTML logo/wordmark.
+   ============================================================ */
+
+.pt-login-brand {
+    display: none !important;
+}
+
+/* Atmospheric animated layers */
+.pt-login-fx,
+.pt-login-embers,
+.pt-login-rays {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.pt-login-fx {
+    z-index: -1;
+}
+
+.pt-login-rays {
+    z-index: 0;
+    width: 61%;
+    right: auto;
+    mix-blend-mode: screen;
+    opacity: .72;
+    background:
+        linear-gradient(116deg,
+            transparent 8%,
+            rgba(255, 105, 16, 0) 30%,
+            rgba(255, 150, 40, .13) 43%,
+            rgba(255, 204, 113, .20) 48%,
+            rgba(255, 137, 29, .09) 54%,
+            transparent 69%);
+    transform: translateX(-90%);
+    animation: ptVisibleRaySweep 7.5s ease-in-out infinite;
+}
+
+.pt-login-fx::before {
+    content: "";
+    position: absolute;
+    width: 58vw;
+    height: 58vw;
+    left: -14vw;
+    bottom: -32vw;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle,
+            rgba(255, 170, 56, .30) 0%,
+            rgba(255, 112, 22, .17) 26%,
+            rgba(255, 75, 5, .07) 47%,
+            transparent 70%);
+    filter: blur(20px);
+    animation: ptVisibleSunPulse 5.5s ease-in-out infinite alternate;
+}
+
+.pt-login-fx::after {
+    content: "";
+    position: absolute;
+    width: 32vw;
+    height: 32vw;
+    left: 22vw;
+    top: 3vh;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle,
+            rgba(255, 192, 93, .18),
+            rgba(255, 110, 21, .06) 42%,
+            transparent 70%);
+    filter: blur(26px);
+    animation: ptVisiblePhoenixAura 6.5s ease-in-out infinite alternate;
+}
+
+.pt-login-embers {
+    z-index: 1;
+    width: 61%;
+    right: auto;
+}
+
+.pt-login-ember {
+    --ember-x: 20vw;
+    --ember-size: 4px;
+    --ember-duration: 8s;
+    --ember-delay: 0s;
+    --ember-drift: 30px;
+
+    position: absolute;
+    left: var(--ember-x);
+    bottom: -24px;
+    width: var(--ember-size);
+    height: var(--ember-size);
+    border-radius: 50%;
+    opacity: 0;
+    background: #ffd06b;
+    box-shadow:
+        0 0 5px #ffcb61,
+        0 0 11px rgba(255, 130, 24, .95),
+        0 0 22px rgba(255, 76, 4, .58);
+    animation: ptVisibleEmberRise var(--ember-duration) linear var(--ember-delay) infinite;
+}
+
+/* Stronger mouse-following glow on the glass card */
+.pt-login-card::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: .9;
+    background:
+        radial-gradient(
+            420px circle at var(--mouse-x) var(--mouse-y),
+            rgba(255, 169, 72, .16),
+            rgba(255, 115, 24, .055) 27%,
+            transparent 57%);
+    transition: opacity .25s ease;
+}
+
+.pt-login-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.pt-login-card:hover {
+    box-shadow:
+        0 38px 100px rgba(0,0,0,.52),
+        0 0 38px rgba(255, 127, 25, .08),
+        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 0 70px rgba(255,123,28,.035);
+}
+
+/* Visible premium sheen on social buttons */
+.pt-login-social-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.pt-login-social-button::after {
+    content: "";
+    position: absolute;
+    top: -80%;
+    bottom: -80%;
+    left: -55%;
+    width: 30%;
+    pointer-events: none;
+    transform: rotate(18deg);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.16),
+        transparent);
+    transition: left .62s ease;
+}
+
+.pt-login-social-button:hover::after {
+    left: 130%;
+}
+
+@keyframes ptVisibleRaySweep {
+    0%, 52% {
+        transform: translateX(-90%);
+        opacity: 0;
+    }
+    63% {
+        opacity: .75;
+    }
+    84% {
+        opacity: .45;
+    }
+    100% {
+        transform: translateX(112%);
+        opacity: 0;
+    }
+}
+
+@keyframes ptVisibleSunPulse {
+    0% {
+        opacity: .52;
+        transform: translate3d(-1vw, 1vh, 0) scale(.90);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(2.5vw, -1.5vh, 0) scale(1.10);
+    }
+}
+
+@keyframes ptVisiblePhoenixAura {
+    0% {
+        opacity: .40;
+        transform: translate3d(-2vw, 0, 0) scale(.92);
+    }
+    100% {
+        opacity: .95;
+        transform: translate3d(2vw, 1vh, 0) scale(1.12);
+    }
+}
+
+@keyframes ptVisibleEmberRise {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(.6);
+    }
+    8% {
+        opacity: 1;
+    }
+    55% {
+        opacity: .86;
+    }
+    82% {
+        opacity: .42;
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--ember-drift), -78vh, 0) scale(.15);
+    }
+}
+
+@media (max-width: 900px) {
+    .pt-login-fx,
+    .pt-login-rays,
+    .pt-login-embers {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pt-login-fx::before,
+    .pt-login-fx::after,
+    .pt-login-rays,
+    .pt-login-ember {
+        animation: none !important;
+    }
+}
+
+
+/* ============================================================
+   FINAL FRAMING + GLASS PANEL TUNING
+   ============================================================ */
+
+.pt-login-card {
+    border-color: rgba(244, 151, 56, .62);
+    box-shadow:
+        0 34px 90px rgba(0,0,0,.34),
+        0 0 1px rgba(255,184,92,.55),
+        inset 0 1px 0 rgba(255,255,255,.14),
+        inset 0 0 80px rgba(255,123,28,.025);
+}
+
+.pt-login-card::before {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.075) 0%,
+            rgba(255,255,255,.018) 20%,
+            transparent 43%,
+            rgba(255,145,45,.025) 100%);
+}
+
+.pt-login-input-wrap {
+    background: rgba(3, 7, 15, .34);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.pt-login-social-button {
+    background: rgba(3, 7, 15, .30);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+/* ============================================================
+   EDGE BLEND + HIGH-GLOSS GLASS CARD
+   ============================================================ */
+
+/* Ensure the artwork always fills the viewport edge-to-edge. */
+.pt-login-bg {
+    inset: 0;
+    background-size: cover;
+    background-position: center 8%;
+}
+
+/* Soft edge color extension so no black gutters appear during parallax movement. */
+.pt-login-page {
+    background:
+        radial-gradient(circle at 15% 38%,
+            rgba(164, 54, 24, .88) 0%,
+            rgba(44, 22, 31, .76) 28%,
+            transparent 55%),
+        linear-gradient(90deg, #111427 0%, #0b1427 55%, #071426 100%);
+}
+
+.pt-login-card {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.105) 0%,
+            rgba(255,255,255,.028) 18%,
+            rgba(7,12,22,.30) 48%,
+            rgba(2,7,15,.44) 100%);
+    border: 1px solid rgba(255, 170, 72, .72);
+    backdrop-filter: blur(30px) saturate(150%) brightness(1.05);
+    -webkit-backdrop-filter: blur(30px) saturate(150%) brightness(1.05);
+    box-shadow:
+        0 34px 100px rgba(0,0,0,.28),
+        0 0 30px rgba(255,132,30,.07),
+        inset 0 1px 0 rgba(255,255,255,.25),
+        inset 1px 0 0 rgba(255,255,255,.07),
+        inset -1px 0 0 rgba(255,153,54,.07),
+        inset 0 -1px 0 rgba(255,255,255,.045);
+}
+
+/* Static glass reflection */
+.pt-login-card::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+        linear-gradient(
+            118deg,
+            rgba(255,255,255,.15) 0%,
+            rgba(255,255,255,.055) 12%,
+            transparent 28%,
+            transparent 72%,
+            rgba(255,151,51,.035) 100%);
+}
+
+/* Animated glossy shine crossing the entire panel. */
+.pt-login-card::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: -45%;
+    bottom: -45%;
+    left: -52%;
+    width: 25%;
+    pointer-events: none;
+    border-radius: 40%;
+    transform: rotate(15deg);
+    background:
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255,255,255,.025) 20%,
+            rgba(255,255,255,.17) 50%,
+            rgba(255,191,111,.08) 66%,
+            transparent 100%);
+    filter: blur(2px);
+    animation: ptGlassPanelShine 6.2s ease-in-out infinite;
+}
+
+/* Mouse-following gloss lives on an extra JS-created layer. */
+.pt-login-card-glow {
+    position: absolute !important;
+    z-index: 0 !important;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: .95;
+    background:
+        radial-gradient(
+            430px circle at var(--mouse-x) var(--mouse-y),
+            rgba(255,255,255,.11),
+            rgba(255,163,64,.075) 24%,
+            transparent 58%);
+}
+
+.pt-login-card > :not(.pt-login-card-glow) {
+    position: relative;
+    z-index: 2;
+}
+
+.pt-login-input-wrap,
+.pt-login-social-button {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.045),
+            rgba(3,7,15,.22));
+    border-color: rgba(205,211,222,.43);
+    backdrop-filter: blur(12px) saturate(125%);
+    -webkit-backdrop-filter: blur(12px) saturate(125%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.06),
+        0 8px 22px rgba(0,0,0,.06);
+}
+
+@keyframes ptGlassPanelShine {
+    0%, 55% {
+        left: -52%;
+        opacity: 0;
+    }
+    64% {
+        opacity: .78;
+    }
+    82% {
+        opacity: .55;
+    }
+    100% {
+        left: 132%;
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pt-login-card::after {
+        animation: none !important;
+        display: none;
+    }
+}

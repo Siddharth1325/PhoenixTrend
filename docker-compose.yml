@@ -1,0 +1,133 @@
+services:
+
+  # ============================================================
+  # POSTGRESQL
+  # ============================================================
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: phoenixtrend-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: phoenixtrend
+      POSTGRES_USER: phoenix
+      POSTGRES_PASSWORD: phoenix_dev
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U phoenix -d phoenixtrend"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - phoenixtrend-network
+
+
+  # ============================================================
+  # REDIS
+  # ============================================================
+
+  redis:
+    image: redis:7-alpine
+    container_name: phoenixtrend-redis
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "ping"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    networks:
+      - phoenixtrend-network
+
+
+  # ============================================================
+  # BACKEND
+  # ============================================================
+
+  backend:
+    container_name: phoenixtrend-backend
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+
+    restart: unless-stopped
+
+    environment:
+      DATABASE_URL: postgresql+psycopg://phoenix:phoenix_dev@postgres:5432/phoenixtrend
+      REDIS_URL: redis://redis:6379/0
+      EXECUTION_MODE: paper
+
+    ports:
+      - "8000:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    networks:
+      - phoenixtrend-network
+
+
+  # ============================================================
+  # FRONTEND
+  # ============================================================
+
+  frontend:
+    container_name: phoenixtrend-ui
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+
+    restart: unless-stopped
+
+    ports:
+      - "89:80"
+
+    depends_on:
+      - backend
+
+    networks:
+      - phoenixtrend-network
+
+
+# ==============================================================
+# VOLUMES
+# ==============================================================
+
+volumes:
+
+  pgdata:
+    name: phoenixtrend-pgdata
+
+
+# ==============================================================
+# NETWORK
+# ==============================================================
+
+networks:
+
+  phoenixtrend-network:
+    name: phoenixtrend-network
+    driver: bridge

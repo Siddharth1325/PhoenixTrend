@@ -1,0 +1,641 @@
+@page "/connect"
+@layout EmptyLayout
+
+@inject PhoenixApi Api
+@inject AuthService Auth
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>PhoenixTrend | Connect Trading Account</PageTitle>
+
+<div class="pt-connect-page">
+
+    <div class="pt-connect-bg"
+         aria-hidden="true">
+    </div>
+
+    <div class="pt-connect-overlay"
+         aria-hidden="true">
+    </div>
+
+    <div class="pt-connect-ambient"
+         aria-hidden="true">
+    </div>
+
+
+    <main class="pt-connect-shell">
+
+        <!-- =====================================================
+             LEFT VISUAL
+             Background artwork is supplied by connect.png
+             ===================================================== -->
+
+        <section class="pt-connect-visual"
+                 aria-hidden="true">
+        </section>
+
+
+        <!-- =====================================================
+             CONNECT CARD
+             ===================================================== -->
+
+        <section class="pt-connect-card"
+                 style="--mouse-x:50%; --mouse-y:20%;">
+
+            <div class="pt-connect-card-reflection"
+                 aria-hidden="true">
+            </div>
+
+            <div class="pt-connect-card-glow"
+                 aria-hidden="true">
+            </div>
+
+
+            <div class="pt-connect-card-content">
+
+
+                <!-- =================================================
+                     BACK
+                     ================================================= -->
+
+                <button type="button"
+                        class="pt-connect-back"
+                        @onclick="BackToLogin">
+
+                    <i class="ph ph-caret-left"
+                       aria-hidden="true">
+                    </i>
+
+                    <span>
+                        Back to login
+                    </span>
+
+                </button>
+
+
+                <!-- =================================================
+                     HEADER
+                     ================================================= -->
+
+                <header class="pt-connect-heading">
+
+                    <div class="pt-connect-eyebrow">
+
+                        <i class="ph-duotone ph-shield-check"
+                           aria-hidden="true">
+                        </i>
+
+                        <span>
+                            SECURE BROKER CONNECTION
+                        </span>
+
+                    </div>
+
+
+                    <h1>
+                        Connect your
+                        <span>
+                            Trading Account
+                        </span>
+                    </h1>
+
+
+                    <p>
+                        Securely connect your brokerage account to PhoenixTrend.
+                    </p>
+
+                </header>
+
+
+                <!-- =================================================
+                     ALPACA BROKER
+                     ================================================= -->
+
+                <div class="pt-connect-broker">
+
+
+                    <!--
+                        IMPORTANT:
+                        Keep pt-connect-broker-icon because your existing
+                        CSS already sizes this box correctly.
+
+                        The inline sizing on the IMG prevents any global
+                        img rule from expanding alpaca.png.
+                    -->
+
+                    <div class="pt-connect-broker-icon pt-connect-alpaca-logo">
+
+                        <img src="/assets/alpaca.png"
+                             alt="Alpaca Markets"
+                             style="
+                                display:block !important;
+                                position:static !important;
+
+                                width:34px !important;
+                                height:34px !important;
+
+                                min-width:34px !important;
+                                min-height:34px !important;
+
+                                max-width:34px !important;
+                                max-height:34px !important;
+
+                                margin:0 !important;
+                                padding:0 !important;
+
+                                object-fit:contain !important;
+                                object-position:center !important;
+
+                                border:0 !important;
+
+                                transform:none !important;
+
+                                flex:none !important;" />
+
+                    </div>
+
+
+                    <div class="pt-connect-broker-copy">
+
+                        <small>
+                            BROKER
+                        </small>
+
+                        <h2>
+                            Alpaca Markets
+                        </h2>
+
+
+                        <div class="pt-connect-broker-meta">
+
+                            <span>
+
+                                <i class="ph ph-link"
+                                   aria-hidden="true">
+                                </i>
+
+                                API connection
+
+                            </span>
+
+
+                            <b aria-hidden="true">
+                            </b>
+
+
+                            <span>
+
+                                <i class="ph ph-check-circle"
+                                   aria-hidden="true">
+                                </i>
+
+                                Paper trading supported
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pt-connect-broker-badge">
+
+                        <i class="ph ph-check"
+                           aria-hidden="true">
+                        </i>
+
+                        SUPPORTED
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     API KEY
+                     ================================================= -->
+
+                <div class="pt-connect-field">
+
+                    <label for="alpaca-api-key">
+                        API Key
+                    </label>
+
+
+                    <div class="pt-connect-input-shell">
+
+                        <span class="pt-connect-field-icon">
+
+                            <i class="ph ph-key"
+                               aria-hidden="true">
+                            </i>
+
+                        </span>
+
+
+                        <input id="alpaca-api-key"
+                               class="pt-connect-input"
+                               @bind="ApiKey"
+                               autocomplete="off"
+                               spellcheck="false"
+                               placeholder="Enter your Alpaca API key" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     SECRET KEY
+                     ================================================= -->
+
+                <div class="pt-connect-field">
+
+                    <label for="alpaca-secret-key">
+                        Secret Key
+                    </label>
+
+
+                    <div class="pt-connect-input-shell">
+
+                        <span class="pt-connect-field-icon">
+
+                            <i class="ph ph-lock-key"
+                               aria-hidden="true">
+                            </i>
+
+                        </span>
+
+
+                        <input id="alpaca-secret-key"
+                               class="pt-connect-input"
+                               @bind="Secret"
+                               type="@(_showSecret ? "text" : "password")"
+                               autocomplete="off"
+                               spellcheck="false"
+                               placeholder="Enter your Alpaca secret key" />
+
+
+                        <button type="button"
+                                class="pt-connect-eye"
+                                aria-label="@(_showSecret ? "Hide secret key" : "Show secret key")"
+                                @onclick="ToggleSecret">
+
+                            @if (_showSecret)
+                            {
+                                <i class="ph ph-eye-slash"
+                                   aria-hidden="true">
+                                </i>
+                            }
+                            else
+                            {
+                                <i class="ph ph-eye"
+                                   aria-hidden="true">
+                                </i>
+                            }
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     PAPER TRADING
+                     ================================================= -->
+
+                <label class="pt-connect-paper">
+
+                    <span class="pt-connect-paper-left">
+
+                        <span class="pt-connect-paper-icon">
+
+                            <i class="ph-duotone ph-shield-check"
+                               aria-hidden="true">
+                            </i>
+
+                        </span>
+
+
+                        <span class="pt-connect-paper-copy">
+
+                            <strong>
+                                Paper Trading
+                            </strong>
+
+                            <small>
+                                Recommended for setup and testing
+                            </small>
+
+                        </span>
+
+                    </span>
+
+
+                    <input type="checkbox"
+                           @bind="Paper" />
+
+
+                    <span class="pt-connect-switch"
+                          aria-hidden="true">
+
+                        <span>
+                        </span>
+
+                    </span>
+
+                </label>
+
+
+                <!-- =================================================
+                     MESSAGE
+                     ================================================= -->
+
+                @if (!string.IsNullOrWhiteSpace(Message))
+                {
+                    var success =
+                        Message.Contains(
+                            "successfully",
+                            StringComparison.OrdinalIgnoreCase);
+
+                    <div class="pt-connect-message @(success ? "success" : "error")">
+
+                        @if (success)
+                        {
+                            <i class="ph-duotone ph-check-circle"
+                               aria-hidden="true">
+                            </i>
+                        }
+                        else
+                        {
+                            <i class="ph-duotone ph-warning-circle"
+                               aria-hidden="true">
+                            </i>
+                        }
+
+                        <span>
+                            @Message
+                        </span>
+
+                    </div>
+                }
+
+
+                <!-- =================================================
+                     CONNECT
+                     ================================================= -->
+
+                <button type="button"
+                        class="pt-connect-submit"
+                        @onclick="ConnectBroker"
+                        disabled="@Busy">
+
+                    <span class="pt-connect-submit-shine"
+                          aria-hidden="true">
+                    </span>
+
+
+                    @if (Busy)
+                    {
+                        <span class="pt-connect-spinner"
+                              aria-hidden="true">
+                        </span>
+
+                        <span>
+                            Connecting securely...
+                        </span>
+                    }
+                    else
+                    {
+                        <i class="ph-duotone ph-plugs-connected"
+                           aria-hidden="true">
+                        </i>
+
+                        <span>
+                            Connect Trading Account
+                        </span>
+
+                        <i class="ph ph-arrow-right"
+                           aria-hidden="true">
+                        </i>
+                    }
+
+                </button>
+
+
+                <!-- =================================================
+                     DIVIDER
+                     ================================================= -->
+
+                <div class="pt-connect-divider">
+
+                    <span>
+                    </span>
+
+                    <em>
+                        OR
+                    </em>
+
+                    <span>
+                    </span>
+
+                </div>
+
+
+                <!-- =================================================
+                     CONTINUE WITHOUT BROKER
+                     ================================================= -->
+
+                <button type="button"
+                        class="pt-connect-skip"
+                        @onclick="ContinueWithoutBroker"
+                        disabled="@Busy">
+
+                    <span>
+                        Continue without broker
+                    </span>
+
+                    <i class="ph ph-arrow-right"
+                       aria-hidden="true">
+                    </i>
+
+                </button>
+
+
+                <!-- =================================================
+                     SECURITY
+                     ================================================= -->
+
+                <div class="pt-connect-security">
+
+                    <div class="pt-connect-security-icon">
+
+                        <i class="ph-duotone ph-lock-key"
+                           aria-hidden="true">
+                        </i>
+
+                    </div>
+
+
+                    <div class="pt-connect-security-copy">
+
+                        <strong>
+                            Secure connection
+                        </strong>
+
+                        <small>
+                            Your credentials are sent securely to the
+                            PhoenixTrend backend.
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+@code {
+
+    private string ApiKey = string.Empty;
+
+    private string Secret = string.Empty;
+
+    private string Message = string.Empty;
+
+    private bool Paper = true;
+
+    private bool Busy;
+
+    private bool _showSecret;
+
+    private bool _motionBooted;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticated = await Auth.RestoreAsync();
+
+        if (!authenticated)
+        {
+            Navigation.NavigateTo("/login", replace: true);
+        }
+    }
+
+
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
+    {
+        if (_motionBooted)
+        {
+            return;
+        }
+
+        _motionBooted = true;
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "PhoenixConnect.boot");
+        }
+        catch (JSException)
+        {
+        }
+    }
+
+
+    private void ToggleSecret()
+    {
+        _showSecret = !_showSecret;
+    }
+
+
+    private void BackToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+
+    private async Task ConnectBroker()
+    {
+        if (Busy)
+        {
+            return;
+        }
+
+
+        if (string.IsNullOrWhiteSpace(ApiKey))
+        {
+            Message =
+                "Enter your Alpaca API key.";
+
+            return;
+        }
+
+
+        if (string.IsNullOrWhiteSpace(Secret))
+        {
+            Message =
+                "Enter your Alpaca secret key.";
+
+            return;
+        }
+
+
+        try
+        {
+            Busy = true;
+
+            Message =
+                string.Empty;
+
+
+            var result =
+                await Api.ConnectAlpaca(
+                    ApiKey.Trim(),
+                    Secret.Trim(),
+                    Paper);
+
+
+            if (result is null)
+            {
+                Message =
+                    "Connection failed. Verify your credentials and try again.";
+
+                return;
+            }
+
+
+            Message =
+                "Broker connected successfully.";
+
+
+            Navigation.NavigateTo("/home");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+
+            Message =
+                "Unable to connect to Alpaca. Please try again.";
+        }
+        finally
+        {
+            Busy = false;
+        }
+    }
+
+
+    private void ContinueWithoutBroker()
+    {
+        Navigation.NavigateTo("/home");
+    }
+
+}

@@ -1,0 +1,1490 @@
+@page "/portfolio"
+
+@inject PhoenixApi Api
+
+<PageTitle>PhoenixTrend | Portfolio</PageTitle>
+
+<div class="pt-portfolio">
+
+
+<section class="pt-market-hero">
+    <div class="pt-market-hero-copy">
+        <h1>Portfolio</h1>
+        <p>Track your holdings, P&L, performance and account health.</p>
+    </div>
+    <button class="pt-market-refresh" type="button" @onclick="Load" disabled="@Loading">
+        <i class="ph ph-arrows-clockwise"></i>
+        @(Loading ? "Refreshing" : "Refresh")
+    </button>
+</section>
+
+
+<div class="tabbar">
+
+    @foreach (var tab in Tabs)
+    {
+        <button
+            class="@(ActiveTab == tab ? "active" : "")"
+            @onclick="() => SelectTab(tab)">
+
+            <i class="ph-duotone @GetTabIcon(tab)"></i>
+            <span>@tab</span>
+
+        </button>
+    }
+
+</div>
+
+
+@if (Loading)
+{
+    <div class="connect-message">
+        Loading portfolio...
+    </div>
+}
+
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="connect-message">
+        @ErrorMessage
+    </div>
+}
+
+
+<!-- =========================================================
+     TOP METRICS
+     ========================================================= -->
+
+<div class="metric-grid four">
+
+    <MetricCard
+        Icon="ph ph-wallet"
+        Label="Total Portfolio Value"
+        Value="@PortfolioValue"
+        Detail="@PortfolioDetail" />
+
+    <MetricCard
+        Icon="ph ph-chart-line-up"
+        Label="Day P&L"
+        Value="@DayPnl"
+        Detail="@DayPnlPercent" />
+
+    <MetricCard
+        Icon="ph ph-trend-up"
+        Label="Total P&L"
+        Value="@TotalPnl"
+        Detail="@TotalPnlPercent" />
+
+    <MetricCard
+        Icon="ph ph-coins"
+        Label="Buying Power"
+        Value="@BuyingPower"
+        Detail="@($"Cash {CashBalance}")"
+        Tone="orange" />
+
+</div>
+
+
+<!-- =========================================================
+     OVERVIEW
+     ========================================================= -->
+
+@if (ActiveTab == "Overview")
+{
+    <div class="portfolio-layout">
+
+        <Panel
+            Title="Portfolio Performance"
+            Class="span-2">
+
+            <div class="hero-chart">
+
+                <div class="chart-grid"></div>
+
+                @if (EquityPoints.Count > 1)
+                {
+                    <svg viewBox="0 0 900 260" preserveAspectRatio="none">
+                        <polyline class="line" fill="none" points="@BuildPolyline(EquityPoints, 900, 260)" />
+                    </svg>
+                }
+                else
+                {
+                    <div class="portfolio-chart-empty">
+                        Historical equity-series data is not currently available.
+                    </div>
+                }
+
+            </div>
+
+
+            <div class="performance-kpis">
+
+                <span>
+                    <b>
+                        @TotalPnlPercent
+                    </b>
+
+                    Total Return
+                </span>
+
+
+                <span>
+                    <b>
+                        @TotalPnl
+                    </b>
+
+                    Total P&amp;L
+                </span>
+
+
+                <span>
+                    <b>
+                        @WinRate
+                    </b>
+
+                    Win Rate
+                </span>
+
+
+                <span>
+                    <b>
+                        @ProfitFactor
+                    </b>
+
+                    Profit Factor
+                </span>
+
+
+                <span>
+
+                    <b class="red">
+                        @MaxDrawdown
+                    </b>
+
+                    Max Drawdown
+
+                </span>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel Title="Asset Allocation">
+
+            @if (AllocationRows.Count > 0)
+            {
+                <div class="donut">
+                    <div>
+                        <b>@PortfolioValueShort</b>
+                        <small>Total Value</small>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="allocation-empty">
+                    <i class="ph ph-chart-donut"></i>
+                    <strong>No open-position allocation</strong>
+                    <small>Allocation will appear when the connected broker has positions.</small>
+                </div>
+            }
+
+
+            <div class="legend">
+
+                @if (AllocationRows.Count == 0)
+                {
+                    <span>
+                        <i class="c1"></i>
+                        No allocation data
+                        <b>—</b>
+                    </span>
+                }
+                else
+                {
+                    @for (var i = 0; i < AllocationRows.Count; i++)
+                    {
+                        var row = AllocationRows[i];
+
+                        <span>
+
+                            <i class="@GetLegendClass(i)">
+                            </i>
+
+                            @row.Name
+
+                            <b>
+                                @row.Percent
+                            </b>
+
+                        </span>
+                    }
+                }
+
+            </div>
+
+        </Panel>
+
+
+        <Panel
+            Title="Top Holdings"
+            Class="span-2">
+
+            <table class="data-table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Qty</th>
+            <th>Avg Price</th>
+            <th>Current</th>
+            <th>Market Value</th>
+            <th>P&amp;L</th>
+            <th>P&amp;L %</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Positions.Count == 0)
+        {
+            <tr>
+                <td colspan="8">No positions available.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var position in Positions)
+            {
+                <tr>
+                    <td><strong>@position.Symbol</strong></td>
+                    <td>@position.Name</td>
+                    <td>@position.Quantity</td>
+                    <td>@position.AvgPrice</td>
+                    <td>@position.CurrentPrice</td>
+                    <td>@position.MarketValue</td>
+                    <td class="@GetValueClass(position.Pnl)">@position.Pnl</td>
+                    <td class="@GetValueClass(position.PnlPercent)">@position.PnlPercent</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+        </Panel>
+
+
+        <Panel Title="Sector Allocation">
+
+            <div class="bar-list">
+
+                @if (SectorRows.Count == 0)
+                {
+                    <div>
+                        <span>No sector data</span>
+                        <i style="--w:0%"></i>
+                        <b>—</b>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var sector in SectorRows)
+                    {
+                        <div>
+
+                            <span>
+                                @sector.Name
+                            </span>
+
+                            <i style="@($"--w:{sector.Width}%")">
+                            </i>
+
+                            <b>
+                                @sector.Percent
+                            </b>
+
+                        </div>
+                    }
+                }
+
+            </div>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     POSITIONS
+     ========================================================= -->
+
+@if (ActiveTab == "Positions")
+{
+    <Panel
+        Title="Open Positions"
+        Subtitle="@($"{Positions.Count} current positions")">
+
+        <table class="data-table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Qty</th>
+            <th>Avg Price</th>
+            <th>Current</th>
+            <th>Market Value</th>
+            <th>P&amp;L</th>
+            <th>P&amp;L %</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Positions.Count == 0)
+        {
+            <tr>
+                <td colspan="8">No positions available.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var position in Positions)
+            {
+                <tr>
+                    <td><strong>@position.Symbol</strong></td>
+                    <td>@position.Name</td>
+                    <td>@position.Quantity</td>
+                    <td>@position.AvgPrice</td>
+                    <td>@position.CurrentPrice</td>
+                    <td>@position.MarketValue</td>
+                    <td class="@GetValueClass(position.Pnl)">@position.Pnl</td>
+                    <td class="@GetValueClass(position.PnlPercent)">@position.PnlPercent</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     ORDERS
+     ========================================================= -->
+
+@if (ActiveTab == "Orders")
+{
+    <Panel Title="Open Broker Orders" Subtitle="Live orders from the connected broker">
+        <table class="data-table">
+            <thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>Type</th><th>Status</th><th>Submitted</th></tr></thead>
+            <tbody>
+            @if (Orders.Count == 0) { <tr><td colspan="6">No open broker orders.</td></tr> }
+            else { @foreach (var order in Orders) { <tr><td><strong>@order.Symbol</strong></td><td>@order.Side</td><td>@order.Qty</td><td>@order.Type</td><td>@order.Status</td><td>@order.Submitted</td></tr> } }
+            </tbody>
+        </table>
+    </Panel>
+}
+
+
+<!-- =========================================================
+     HOLDINGS
+     ========================================================= -->
+
+@if (ActiveTab == "Holdings")
+{
+    <Panel
+        Title="Holdings"
+        Subtitle="Current broker holdings">
+
+        <table class="data-table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Qty</th>
+            <th>Avg Price</th>
+            <th>Current</th>
+            <th>Market Value</th>
+            <th>P&amp;L</th>
+            <th>P&amp;L %</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Positions.Count == 0)
+        {
+            <tr>
+                <td colspan="8">No positions available.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var position in Positions)
+            {
+                <tr>
+                    <td><strong>@position.Symbol</strong></td>
+                    <td>@position.Name</td>
+                    <td>@position.Quantity</td>
+                    <td>@position.AvgPrice</td>
+                    <td>@position.CurrentPrice</td>
+                    <td>@position.MarketValue</td>
+                    <td class="@GetValueClass(position.Pnl)">@position.Pnl</td>
+                    <td class="@GetValueClass(position.PnlPercent)">@position.PnlPercent</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     PERFORMANCE
+     ========================================================= -->
+
+@if (ActiveTab == "Performance")
+{
+    <Panel Title="Performance">
+
+        <div class="performance-kpis">
+
+            <span>
+                <b>@TotalPnlPercent</b>
+                Total Return
+            </span>
+
+            <span>
+                <b>@TotalPnl</b>
+                Total P&amp;L
+            </span>
+
+            <span>
+                <b>@WinRate</b>
+                Win Rate
+            </span>
+
+            <span>
+                <b>@ProfitFactor</b>
+                Profit Factor
+            </span>
+
+            <span>
+                <b class="red">@MaxDrawdown</b>
+                Max Drawdown
+            </span>
+
+        </div>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     ALLOCATION
+     ========================================================= -->
+
+@if (ActiveTab == "Allocation")
+{
+    <div class="dashboard-grid">
+
+        <Panel Title="Asset Allocation">
+
+            <div class="legend">
+
+                @foreach (var row in AllocationRows)
+                {
+                    <span>
+
+                        <i class="c1"></i>
+
+                        @row.Name
+
+                        <b>
+                            @row.Percent
+                        </b>
+
+                    </span>
+                }
+
+            </div>
+
+        </Panel>
+
+
+        <Panel Title="Sector Allocation">
+
+            <div class="bar-list">
+
+                @foreach (var sector in SectorRows)
+                {
+                    <div>
+
+                        <span>
+                            @sector.Name
+                        </span>
+
+                        <i style="@($"--w:{sector.Width}%")">
+                        </i>
+
+                        <b>
+                            @sector.Percent
+                        </b>
+
+                    </div>
+                }
+
+            </div>
+
+        </Panel>
+
+    </div>
+}
+
+
+<!-- =========================================================
+     REALIZED P&L
+     ========================================================= -->
+
+@if (ActiveTab == "Realized P&L")
+{
+    <Panel Title="Realized P&L">
+
+        <div class="status-list">
+
+            <div>
+                <span>Total P&amp;L</span>
+                <b>@TotalPnl</b>
+            </div>
+
+            <div>
+                <span>Total Return</span>
+                <b>@TotalPnlPercent</b>
+            </div>
+
+            <div>
+                <span>Win Rate</span>
+                <b>@WinRate</b>
+            </div>
+
+            <div>
+                <span>Profit Factor</span>
+                <b>@ProfitFactor</b>
+            </div>
+
+        </div>
+
+    </Panel>
+}
+
+
+<!-- =========================================================
+     TAX LOTS
+     ========================================================= -->
+
+@if (ActiveTab == "Tax Lots")
+{
+    <Panel Title="Tax Lots">
+
+        <div class="connect-message">
+            Your current PhoenixApi does not expose tax-lot data yet.
+        </div>
+
+    </Panel>
+}
+
+
+</div>
+
+@code
+{
+    private bool Loading;
+    private readonly List<double> EquityPoints = new();
+
+    private string ErrorMessage = string.Empty;
+
+    private string ActiveTab = "Overview";
+
+
+    private string PortfolioValue = "—";
+
+    private string PortfolioValueShort = "—";
+
+    private string PortfolioDetail = "—";
+
+    private string DayPnl = "—";
+
+    private string DayPnlPercent = "—";
+
+    private string TotalPnl = "—";
+
+    private string TotalPnlPercent = "—";
+
+    private string BuyingPower = "—";
+
+    private string CashBalance = "—";
+
+    private string WinRate = "—";
+
+    private string ProfitFactor = "—";
+
+    private string MaxDrawdown = "—";
+
+
+    private readonly List<PositionRow> Positions = new();
+
+    private readonly List<AllocationRow> AllocationRows = new();
+
+    private readonly List<SectorRow> SectorRows = new();
+    private readonly List<OrderRow> Orders = new();
+
+
+    private readonly string[] Tabs =
+    {
+        "Overview",
+        "Positions",
+        "Orders",
+        "Holdings",
+        "Performance",
+        "Allocation",
+        "Realized P&L",
+        "Tax Lots"
+    };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+
+    private void SelectTab(
+        string tab)
+    {
+        ActiveTab = tab;
+    }
+
+
+    private async Task Load()
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+
+        try
+        {
+            Loading = true;
+
+            ErrorMessage = string.Empty;
+
+
+            await Task.WhenAll(
+                LoadAccount(),
+                LoadPositions(),
+                LoadAnalytics(),
+                LoadOrders()
+            );
+
+
+            BuildAllocation();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage =
+                "Unable to load portfolio data.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+    private async Task LoadAccount()
+    {
+        var account =
+            await Api.BrokerAccount();
+
+
+        if (account is null)
+        {
+            ResetAccount();
+
+            return;
+        }
+
+
+        var portfolio =
+            ReadNumber(
+                account,
+                "portfolio_value"
+            );
+
+
+        if (double.IsNaN(portfolio))
+        {
+            portfolio =
+                ReadNumber(
+                    account,
+                    "equity"
+                );
+        }
+
+
+        PortfolioValue =
+            FormatMoney(portfolio);
+
+
+        PortfolioValueShort =
+            FormatShortMoney(portfolio);
+
+
+        BuyingPower =
+            FormatMoney(
+                ReadNumber(
+                    account,
+                    "buying_power"
+                )
+            );
+
+
+        CashBalance =
+            FormatMoney(
+                ReadNumber(
+                    account,
+                    "cash"
+                )
+            );
+
+
+        var dayPnl =
+            ReadNumber(
+                account,
+                "day_pnl"
+            );
+
+
+        if (double.IsNaN(dayPnl))
+        {
+            dayPnl =
+                ReadNumber(
+                    account,
+                    "daily_pnl"
+                );
+        }
+
+
+        DayPnl =
+            FormatSignedMoney(
+                dayPnl
+            );
+
+
+        var dayPercent =
+            ReadNumber(
+                account,
+                "day_pnl_percent"
+            );
+
+
+        if (double.IsNaN(dayPercent))
+        {
+            dayPercent =
+                ReadNumber(
+                    account,
+                    "daily_pnl_percent"
+                );
+        }
+
+
+        DayPnlPercent =
+            FormatPercentAuto(
+                dayPercent
+            );
+
+
+        PortfolioDetail =
+            DayPnl != "—"
+                ? $"{DayPnl} {DayPnlPercent}"
+                : "Live broker account";
+    }
+
+
+    private async Task LoadOrders()
+    {
+        Orders.Clear();
+        var result = await Api.BrokerOrders();
+        if (result is null || result.Value.ValueKind != JsonValueKind.Array) return;
+        foreach (var item in result.Value.EnumerateArray())
+        {
+            static string Text(JsonElement e, string name) => e.TryGetProperty(name, out var v) ? (v.ToString() ?? "—") : "—";
+            Orders.Add(new OrderRow(Text(item,"symbol"), Text(item,"side"), Text(item,"qty"), Text(item,"type"), Text(item,"status"), Text(item,"submitted_at")));
+        }
+    }
+
+
+    private async Task LoadPositions()
+    {
+        Positions.Clear();
+
+
+        var result =
+            await Api.BrokerPositions();
+
+
+        if (result is null)
+        {
+            result =
+                await Api.Positions();
+        }
+
+
+        if (result is null)
+        {
+            return;
+        }
+
+
+        if (!TryGetArray(
+            result.Value,
+            out var items))
+        {
+            return;
+        }
+
+
+        foreach (var item in items.EnumerateArray())
+        {
+            if (item.ValueKind !=
+                JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var symbol =
+                ReadString(
+                    item,
+                    "symbol",
+                    ""
+                );
+
+
+            if (string.IsNullOrWhiteSpace(
+                symbol))
+            {
+                continue;
+            }
+
+
+            var name =
+                ReadString(
+                    item,
+                    "name",
+                    symbol
+                );
+
+
+            var qty =
+                ReadNumber(
+                    item,
+                    "qty"
+                );
+
+
+            if (double.IsNaN(qty))
+            {
+                qty =
+                    ReadNumber(
+                        item,
+                        "quantity"
+                    );
+            }
+
+
+            var avgPrice =
+                ReadNumber(
+                    item,
+                    "avg_entry_price"
+                );
+
+
+            if (double.IsNaN(avgPrice))
+            {
+                avgPrice =
+                    ReadNumber(
+                        item,
+                        "average_price"
+                    );
+            }
+
+
+            var currentPrice =
+                ReadNumber(
+                    item,
+                    "current_price"
+                );
+
+
+            var marketValue =
+                ReadNumber(
+                    item,
+                    "market_value"
+                );
+
+
+            var pnl =
+                ReadNumber(
+                    item,
+                    "unrealized_pl"
+                );
+
+
+            if (double.IsNaN(pnl))
+            {
+                pnl =
+                    ReadNumber(
+                        item,
+                        "pnl"
+                    );
+            }
+
+
+            var pnlPercent =
+                ReadNumber(
+                    item,
+                    "unrealized_plpc"
+                );
+
+
+            if (double.IsNaN(pnlPercent))
+            {
+                pnlPercent =
+                    ReadNumber(
+                        item,
+                        "pnl_percent"
+                    );
+            }
+
+
+            Positions.Add(
+                new PositionRow(
+                    symbol,
+                    name,
+                    FormatQuantity(qty),
+                    FormatPrice(avgPrice),
+                    FormatPrice(currentPrice),
+                    FormatMoney(marketValue),
+                    FormatSignedMoney(pnl),
+                    FormatPercentAuto(pnlPercent),
+                    marketValue,
+                    pnl
+                )
+            );
+        }
+    }
+
+
+    private async Task LoadAnalytics()
+    {
+        var analytics =
+            await Api.Analytics();
+
+
+        EquityPoints.Clear();
+
+        if (analytics is null)
+        {
+            return;
+        }
+
+        ExtractEquityCurve(analytics.Value);
+
+
+        var totalPnl =
+            ReadNumber(
+                analytics,
+                "total_pnl"
+            );
+
+
+        TotalPnl =
+            FormatSignedMoney(
+                totalPnl
+            );
+
+
+        var totalReturn =
+            ReadNumber(
+                analytics,
+                "total_return"
+            );
+
+
+        if (double.IsNaN(totalReturn))
+        {
+            totalReturn =
+                ReadNumber(
+                    analytics,
+                    "return_percent"
+                );
+        }
+
+
+        TotalPnlPercent =
+            FormatPercentAuto(
+                totalReturn
+            );
+
+
+        var winRate =
+            ReadNumber(
+                analytics,
+                "win_rate"
+            );
+
+
+        WinRate =
+            FormatPercentAuto(
+                winRate
+            );
+
+
+        var profitFactor =
+            ReadNumber(
+                analytics,
+                "profit_factor"
+            );
+
+
+        ProfitFactor =
+            double.IsNaN(profitFactor)
+                ? "—"
+                : profitFactor.ToString("0.00");
+
+
+        var maxDrawdown =
+            ReadNumber(
+                analytics,
+                "max_drawdown"
+            );
+
+
+        MaxDrawdown =
+            FormatPercentAuto(
+                maxDrawdown
+            );
+    }
+
+
+    private void BuildAllocation()
+    {
+        AllocationRows.Clear();
+
+        SectorRows.Clear();
+
+
+        var totalMarketValue =
+            Positions
+                .Where(x =>
+                    !double.IsNaN(
+                        x.MarketValueRaw
+                    ))
+                .Sum(x =>
+                    x.MarketValueRaw
+                );
+
+
+        if (totalMarketValue <= 0)
+        {
+            return;
+        }
+
+
+        foreach (var position in
+                 Positions
+                     .OrderByDescending(
+                         x => x.MarketValueRaw
+                     )
+                     .Take(6))
+        {
+            if (double.IsNaN(
+                position.MarketValueRaw))
+            {
+                continue;
+            }
+
+
+            var percent =
+                position.MarketValueRaw /
+                totalMarketValue *
+                100;
+
+
+            AllocationRows.Add(
+                new AllocationRow(
+                    position.Symbol,
+                    $"{percent:0.0}%"
+                )
+            );
+        }
+
+
+        // Sector data is not currently exposed directly by PhoenixApi,
+        // so this list stays empty rather than inventing live sector values.
+    }
+
+
+    private void ExtractEquityCurve(JsonElement root)
+    {
+        if (root.ValueKind != JsonValueKind.Object) return;
+
+        foreach (var name in new[] { "equity_curve", "equity", "performance_history", "history" })
+        {
+            if (!root.TryGetProperty(name, out var series) || series.ValueKind != JsonValueKind.Array) continue;
+
+            foreach (var item in series.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.Number && item.TryGetDouble(out var direct))
+                {
+                    if (double.IsFinite(direct)) EquityPoints.Add(direct);
+                    continue;
+                }
+
+                if (item.ValueKind != JsonValueKind.Object) continue;
+
+                foreach (var key in new[] { "equity", "value", "portfolio_value", "balance" })
+                {
+                    if (item.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.Number &&
+                        value.TryGetDouble(out var parsed) && double.IsFinite(parsed))
+                    {
+                        EquityPoints.Add(parsed);
+                        break;
+                    }
+                }
+            }
+
+            if (EquityPoints.Count > 0) return;
+        }
+    }
+
+
+    private static string BuildPolyline(List<double> values, double width, double height)
+    {
+        if (values.Count < 2) return string.Empty;
+        var min = values.Min();
+        var max = values.Max();
+        var range = max - min;
+        if (range <= 0) range = 1;
+        var output = new List<string>(values.Count);
+
+        for (var i = 0; i < values.Count; i++)
+        {
+            var x = i / (double)(values.Count - 1) * width;
+            var normalized = (values[i] - min) / range;
+            var y = height - 20 - normalized * (height - 40);
+            output.Add($"{x:0.##},{y:0.##}");
+        }
+
+        return string.Join(" ", output);
+    }
+
+
+    private static bool TryGetArray(
+        JsonElement root,
+        out JsonElement array)
+    {
+        if (root.ValueKind ==
+            JsonValueKind.Array)
+        {
+            array = root;
+
+            return true;
+        }
+
+
+        if (root.ValueKind ==
+            JsonValueKind.Object)
+        {
+            var names =
+                new[]
+                {
+                    "positions",
+                    "data",
+                    "items",
+                    "results"
+                };
+
+
+            foreach (var name in names)
+            {
+                if (root.TryGetProperty(
+                        name,
+                        out var candidate) &&
+                    candidate.ValueKind ==
+                        JsonValueKind.Array)
+                {
+                    array = candidate;
+
+                    return true;
+                }
+            }
+        }
+
+
+        array = default;
+
+        return false;
+    }
+
+
+    private static double ReadNumber(
+        JsonElement? element,
+        string property)
+    {
+        if (element is null)
+        {
+            return double.NaN;
+        }
+
+
+        return ReadNumber(
+            element.Value,
+            property
+        );
+    }
+
+
+    private static double ReadNumber(
+        JsonElement element,
+        string property)
+    {
+        if (!element.TryGetProperty(
+                property,
+                out var value))
+        {
+            return double.NaN;
+        }
+
+
+        if (value.ValueKind ==
+                JsonValueKind.Number &&
+            value.TryGetDouble(
+                out var number))
+        {
+            return number;
+        }
+
+
+        return double.TryParse(
+            value.ToString(),
+            out number)
+                ? number
+                : double.NaN;
+    }
+
+
+    private static string ReadString(
+        JsonElement element,
+        string property,
+        string fallback)
+    {
+        if (!element.TryGetProperty(
+                property,
+                out var value))
+        {
+            return fallback;
+        }
+
+
+        return value.ValueKind ==
+               JsonValueKind.String
+            ? value.GetString()
+              ?? fallback
+            : value.ToString();
+    }
+
+
+    private static string FormatMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00"
+            );
+    }
+
+
+    private static string FormatShortMoney(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) >= 1_000_000)
+        {
+            return $"${value / 1_000_000:0.00}M";
+        }
+
+
+        if (Math.Abs(value) >= 1_000)
+        {
+            return $"${value / 1_000:0.00}K";
+        }
+
+
+        return $"${value:0.00}";
+    }
+
+
+    private static string FormatSignedMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "+$#,##0.00;-$#,##0.00;$0.00"
+            );
+    }
+
+
+    private static string FormatPrice(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00"
+            );
+    }
+
+
+    private static string FormatQuantity(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "0.####"
+            );
+    }
+
+
+    private static string FormatPercentAuto(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) <= 1)
+        {
+            value *= 100;
+        }
+
+
+        return $"{value:+0.00;-0.00;0.00}%";
+    }
+
+
+    private static string GetValueClass(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) ||
+            value == "—")
+        {
+            return "";
+        }
+
+
+        return value.TrimStart()
+            .StartsWith("-")
+                ? "red"
+                : "green";
+    }
+
+
+    private static string GetLegendClass(
+        int index)
+    {
+        return (index % 4) switch
+        {
+            0 => "c1",
+            1 => "c2",
+            2 => "c3",
+            _ => "c4"
+        };
+    }
+
+
+    private void ResetAccount()
+    {
+        PortfolioValue = "—";
+
+        PortfolioValueShort = "—";
+
+        PortfolioDetail = "—";
+
+        DayPnl = "—";
+
+        DayPnlPercent = "—";
+
+        BuyingPower = "—";
+
+        CashBalance = "—";
+    }
+
+
+    private sealed record PositionRow(
+        string Symbol,
+        string Name,
+        string Quantity,
+        string AvgPrice,
+        string CurrentPrice,
+        string MarketValue,
+        string Pnl,
+        string PnlPercent,
+        double MarketValueRaw,
+        double PnlRaw
+    );
+
+
+    private sealed record AllocationRow(
+        string Name,
+        string Percent
+    );
+
+
+    private sealed record SectorRow(
+        string Name,
+        int Width,
+        string Percent
+    );
+
+    private sealed record OrderRow(string Symbol, string Side, string Qty, string Type, string Status, string Submitted);
+
+    private static string GetTabIcon(string tab) =>
+        tab switch
+        {
+            "Overview" => "ph-squares-four",
+            "Positions" => "ph-chart-line-up",
+            "Orders" => "ph-receipt",
+            "Holdings" => "ph-wallet",
+            "Performance" => "ph-trend-up",
+            "Allocation" => "ph-chart-donut",
+            "Realized P&L" => "ph-currency-dollar",
+            "Tax Lots" => "ph-files",
+            _ => "ph-circle"
+        };
+
+}

@@ -1,0 +1,1669 @@
+@page "/activity"
+@page "/portfolio/activity"
+
+@inject PhoenixApi Api
+
+<PageTitle>PhoenixTrend | Activity</PageTitle>
+
+<div class="pt-activity">
+
+<PortfolioTabs />
+
+
+<PageHero
+    BackgroundImage="/assets/phoenix-mountain-horizontal.png"
+    CssClass="premium-mountain-hero"
+    Title="Activity"
+    Subtitle="Track trading activity, executions, automation events, signals, alerts and system events."
+    Action="Refresh"
+    OnAction="Load" />
+
+
+<!-- =========================================================
+     TABS
+     ========================================================= -->
+
+<div class="tabbar">
+
+    @foreach (var tab in Tabs)
+    {
+        <button
+            class="@(ActiveTab == tab ? "active" : "")"
+            @onclick="() => SelectTab(tab)">
+
+            @tab
+
+        </button>
+    }
+
+</div>
+
+
+<!-- =========================================================
+     STATUS
+     ========================================================= -->
+
+@if (Loading)
+{
+    <div class="connect-message">
+        Loading activity...
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="connect-message">
+        @ErrorMessage
+    </div>
+}
+
+
+<!-- =========================================================
+     METRICS
+     ========================================================= -->
+
+<div class="metric-grid five">
+
+    <MetricCard
+        Icon="ph ph-activity"
+        Label="Total Activity"
+        Value="@TotalActivity"
+        Detail="Loaded activity records"
+        Tone="orange" />
+
+    <MetricCard
+        Icon="ph ph-check-circle"
+        Label="Executed Trades"
+        Value="@ExecutedTrades"
+        Detail="@FillRate"
+        Tone="purple" />
+
+    <MetricCard
+        Icon="ph ph-list-checks"
+        Label="Total Volume"
+        Value="@TotalVolume"
+        Detail="Activity quantity"
+        Tone="blue" />
+
+    <MetricCard
+        Icon="ph ph-currency-dollar"
+        Label="Realized P&L"
+        Value="@RealizedPnl"
+        Detail="PhoenixTrend analytics" />
+
+    <MetricCard
+        Icon="ph ph-waveform"
+        Label="Win Rate"
+        Value="@WinRate"
+        Detail="Trading performance"
+        Tone="orange" />
+
+</div>
+
+
+<!-- =========================================================
+     FILTERS
+     ========================================================= -->
+
+<div class="filterbar">
+
+    <button type="button">
+        @DateRangeText
+    </button>
+
+
+    <select
+        @bind="SelectedType">
+
+        <option value="All">
+            All Types
+        </option>
+
+        @foreach (var type in ActivityTypes)
+        {
+            <option value="@type">
+                @type
+            </option>
+        }
+
+    </select>
+
+
+    <select
+        @bind="SelectedSymbol">
+
+        <option value="All">
+            All Symbols
+        </option>
+
+        @foreach (var symbol in Symbols)
+        {
+            <option value="@symbol">
+                @symbol
+            </option>
+        }
+
+    </select>
+
+
+    <select
+        @bind="SelectedStatus">
+
+        <option value="All">
+            All Status
+        </option>
+
+        @foreach (var status in Statuses)
+        {
+            <option value="@status">
+                @status
+            </option>
+        }
+
+    </select>
+
+
+    <input
+        @bind="SearchText"
+        @bind:event="oninput"
+        placeholder="Search activity..." />
+
+
+    <button
+        class="pt-btn"
+        type="button"
+        @onclick="ClearFilters">
+
+        Clear
+
+    </button>
+
+</div>
+
+
+<!-- =========================================================
+     ACTIVITY
+     ========================================================= -->
+
+<div class="activity-layout">
+
+    <Panel
+        Title="@GetPanelTitle()"
+        Class="span-2">
+
+        <table class="data-table activity-table">
+
+            <thead>
+
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Symbol</th>
+                    <th>Action</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Strategy</th>
+                    <th>P&amp;L</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @if (FilteredActivities.Count == 0)
+                {
+                    <tr>
+
+                        <td colspan="9">
+                            No activity found.
+                        </td>
+
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var activity in FilteredActivities)
+                    {
+                        <tr>
+
+                            <td>
+                                @activity.Time
+                            </td>
+
+
+                            <td>
+                                @activity.Type
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    @activity.Symbol
+                                </strong>
+
+                            </td>
+
+
+                            <td class="@GetActionClass(activity.Action)">
+                                @activity.Action
+                            </td>
+
+
+                            <td>
+                                @activity.Quantity
+                            </td>
+
+
+                            <td>
+                                @activity.Price
+                            </td>
+
+
+                            <td>
+
+                                <span class="@GetStatusClass(activity.Status)">
+                                    @activity.Status
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                @activity.Strategy
+                            </td>
+
+
+                            <td class="@GetValueClass(activity.Pnl)">
+                                @activity.Pnl
+                            </td>
+
+                        </tr>
+                    }
+                }
+
+            </tbody>
+
+        </table>
+
+    </Panel>
+
+
+    <!-- =====================================================
+         RIGHT SIDE
+         ===================================================== -->
+
+    <div>
+
+        <Panel Title="Activity Breakdown">
+
+            <div class="donut activity-donut @(Activities.Count == 0 ? "empty" : "")">
+
+                <div>
+
+                    <b>
+                        @TotalActivity
+                    </b>
+
+                    <small>
+                        Total Activities
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="legend">
+
+                @for (var i = 0; i < Breakdown.Count; i++)
+                {
+                    var row = Breakdown[i];
+
+                    <span>
+
+                        <i class="@GetLegendClass(i)">
+                        </i>
+
+                        @row.Type
+
+                        <b>
+                            @row.Count
+                        </b>
+
+                    </span>
+                }
+
+            </div>
+
+        </Panel>
+
+
+        <Panel Title="P&L Summary">
+
+            <div class="status-list">
+
+                <div>
+
+                    <span>
+                        Realized P&amp;L
+                    </span>
+
+                    <b class="@GetValueClass(RealizedPnl)">
+                        @RealizedPnl
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Win Rate
+                    </span>
+
+                    <b>
+                        @WinRate
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Profit Factor
+                    </span>
+
+                    <b>
+                        @ProfitFactor
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Max Drawdown
+                    </span>
+
+                    <b class="red">
+                        @MaxDrawdown
+                    </b>
+
+                </div>
+
+            </div>
+
+        </Panel>
+
+
+        <Panel Title="Latest Alerts & Events">
+
+            <div class="alert-list">
+
+                @if (LatestEvents.Count == 0)
+                {
+                    <article>
+
+                        <b>
+                            No recent alerts
+                        </b>
+
+                        <span>
+                            No alert or system events were returned.
+                        </span>
+
+                    </article>
+                }
+                else
+                {
+                    @foreach (var item in LatestEvents)
+                    {
+                        <article class="@GetAlertClass(item.Type)">
+
+                            <b>
+                                @item.Title
+                            </b>
+
+                            <span>
+                                @item.Time
+                            </span>
+
+                        </article>
+                    }
+                }
+
+            </div>
+
+        </Panel>
+
+    </div>
+
+</div>
+
+
+</div>
+
+@code
+{
+    // =========================================================
+    // STATE
+    // =========================================================
+
+    private bool Loading;
+
+    private string ErrorMessage = string.Empty;
+
+    private string ActiveTab = "All Activity";
+
+    private string SelectedType = "All";
+
+    private string SelectedSymbol = "All";
+
+    private string SelectedStatus = "All";
+
+    private string SearchText = string.Empty;
+
+
+    private string TotalActivity = "0";
+
+    private string ExecutedTrades = "0";
+
+    private string TotalVolume = "0";
+
+    private string FillRate = "—";
+
+    private string RealizedPnl = "—";
+
+    private string WinRate = "—";
+
+    private string ProfitFactor = "—";
+
+    private string MaxDrawdown = "—";
+
+
+    private readonly List<ActivityRow> Activities = new();
+
+    private readonly List<BreakdownRow> Breakdown = new();
+
+    private readonly List<EventRow> LatestEvents = new();
+
+
+    private readonly string[] Tabs =
+    {
+        "All Activity",
+        "Orders",
+        "Trades",
+        "Automations",
+        "Strategy Signals",
+        "Alerts",
+        "System Events"
+    };
+
+
+    private string DateRangeText =>
+        $"{DateTime.Today.AddDays(-7):MMM d, yyyy} → {DateTime.Today:MMM d, yyyy}";
+
+
+    // =========================================================
+    // FILTER OPTIONS
+    // =========================================================
+
+    private IEnumerable<string> ActivityTypes =>
+        Activities
+            .Select(x => x.Type)
+            .Where(x => !string.IsNullOrWhiteSpace(x) && x != "—")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x);
+
+
+    private IEnumerable<string> Symbols =>
+        Activities
+            .Select(x => x.Symbol)
+            .Where(x => !string.IsNullOrWhiteSpace(x) && x != "—")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x);
+
+
+    private IEnumerable<string> Statuses =>
+        Activities
+            .Select(x => x.Status)
+            .Where(x => !string.IsNullOrWhiteSpace(x) && x != "—")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x);
+
+
+    // =========================================================
+    // FILTERED DATA
+    // =========================================================
+
+    private List<ActivityRow> FilteredActivities =>
+        Activities
+            .Where(MatchesTab)
+            .Where(MatchesFilters)
+            .ToList();
+
+
+    // =========================================================
+    // INITIAL LOAD
+    // =========================================================
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+
+    private async Task Load()
+    {
+        if (Loading)
+        {
+            return;
+        }
+
+
+        try
+        {
+            Loading = true;
+
+            ErrorMessage = string.Empty;
+
+
+            var activityTask =
+                Api.Activity();
+
+            var analyticsTask =
+                Api.Analytics();
+
+
+            await Task.WhenAll(
+                activityTask,
+                analyticsTask
+            );
+
+
+            ParseActivity(
+                await activityTask
+            );
+
+
+            ParseAnalytics(
+                await analyticsTask
+            );
+
+
+            BuildMetrics();
+
+            BuildBreakdown();
+
+            BuildLatestEvents();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+
+            ErrorMessage =
+                "Unable to load PhoenixTrend activity.";
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+    // =========================================================
+    // ACTIVITY PARSING
+    // =========================================================
+
+    private void ParseActivity(
+        JsonElement? result)
+    {
+        Activities.Clear();
+
+
+        if (result is null)
+        {
+            return;
+        }
+
+
+        if (!TryGetArray(
+                result.Value,
+                out var items))
+        {
+            return;
+        }
+
+
+        foreach (var item in items.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+
+            var type =
+                FirstText(
+                    item,
+                    "type",
+                    "event_type",
+                    "activity_type",
+                    "category"
+                );
+
+
+            var symbol =
+                FirstText(
+                    item,
+                    "symbol",
+                    "ticker",
+                    "asset"
+                );
+
+
+            var action =
+                FirstText(
+                    item,
+                    "action",
+                    "side",
+                    "signal"
+                );
+
+
+            var quantity =
+                FirstNumber(
+                    item,
+                    "quantity",
+                    "qty",
+                    "filled_qty"
+                );
+
+
+            var price =
+                FirstNumber(
+                    item,
+                    "price",
+                    "filled_avg_price",
+                    "fill_price",
+                    "average_price"
+                );
+
+
+            var status =
+                FirstText(
+                    item,
+                    "status",
+                    "state"
+                );
+
+
+            var strategy =
+                FirstText(
+                    item,
+                    "strategy",
+                    "strategy_name",
+                    "source"
+                );
+
+
+            var pnl =
+                FirstNumber(
+                    item,
+                    "pnl",
+                    "realized_pnl",
+                    "profit_loss"
+                );
+
+
+            var time =
+                FirstText(
+                    item,
+                    "time",
+                    "timestamp",
+                    "created_at",
+                    "updated_at"
+                );
+
+
+            var message =
+                FirstText(
+                    item,
+                    "message",
+                    "description",
+                    "detail",
+                    "title"
+                );
+
+
+            Activities.Add(
+                new ActivityRow(
+                    FormatTimestamp(time),
+                    NormalizeType(type),
+                    EmptyValue(symbol),
+                    NormalizeAction(action),
+                    FormatQuantity(quantity),
+                    FormatPrice(price),
+                    EmptyValue(status),
+                    EmptyValue(strategy),
+                    FormatSignedMoney(pnl),
+                    message
+                )
+            );
+        }
+    }
+
+
+    // =========================================================
+    // ANALYTICS
+    // =========================================================
+
+    private void ParseAnalytics(
+        JsonElement? analytics)
+    {
+        if (analytics is null)
+        {
+            RealizedPnl = "—";
+
+            WinRate = "—";
+
+            ProfitFactor = "—";
+
+            MaxDrawdown = "—";
+
+            return;
+        }
+
+
+        var realizedPnl =
+            FirstNumber(
+                analytics.Value,
+                "realized_pnl",
+                "total_pnl"
+            );
+
+
+        RealizedPnl =
+            FormatSignedMoney(
+                realizedPnl
+            );
+
+
+        var winRate =
+            FirstNumber(
+                analytics.Value,
+                "win_rate"
+            );
+
+
+        WinRate =
+            FormatPercentAuto(
+                winRate
+            );
+
+
+        var profitFactor =
+            FirstNumber(
+                analytics.Value,
+                "profit_factor"
+            );
+
+
+        ProfitFactor =
+            double.IsNaN(profitFactor)
+                ? "—"
+                : profitFactor.ToString("0.00");
+
+
+        var maxDrawdown =
+            FirstNumber(
+                analytics.Value,
+                "max_drawdown"
+            );
+
+
+        MaxDrawdown =
+            FormatPercentAuto(
+                maxDrawdown
+            );
+    }
+
+
+    // =========================================================
+    // METRICS
+    // =========================================================
+
+    private void BuildMetrics()
+    {
+        TotalActivity =
+            Activities.Count.ToString("N0");
+
+
+        var executed =
+            Activities.Count(
+                x =>
+                    IsTrade(x) &&
+                    IsExecuted(x)
+            );
+
+
+        ExecutedTrades =
+            executed.ToString("N0");
+
+
+        var orderCount =
+            Activities.Count(IsOrder);
+
+
+        if (orderCount > 0)
+        {
+            var filled =
+                Activities.Count(
+                    x =>
+                        IsOrder(x) &&
+                        IsExecuted(x)
+                );
+
+
+            var rate =
+                filled /
+                (double)orderCount *
+                100;
+
+
+            FillRate =
+                $"{rate:0.0}% fill rate";
+        }
+        else
+        {
+            FillRate = "No order data";
+        }
+
+
+        var volume =
+            Activities
+                .Where(x => !double.IsNaN(x.QuantityRaw))
+                .Sum(x => Math.Abs(x.QuantityRaw));
+
+
+        TotalVolume =
+            volume.ToString("#,##0.####");
+    }
+
+
+    // =========================================================
+    // BREAKDOWN
+    // =========================================================
+
+    private void BuildBreakdown()
+    {
+        Breakdown.Clear();
+
+
+        var groups =
+            Activities
+                .GroupBy(
+                    x => x.Type,
+                    StringComparer.OrdinalIgnoreCase
+                )
+                .OrderByDescending(
+                    x => x.Count()
+                );
+
+
+        foreach (var group in groups)
+        {
+            Breakdown.Add(
+                new BreakdownRow(
+                    group.Key,
+                    group.Count()
+                )
+            );
+        }
+    }
+
+
+    // =========================================================
+    // ALERTS / EVENTS
+    // =========================================================
+
+    private void BuildLatestEvents()
+    {
+        LatestEvents.Clear();
+
+
+        var events =
+            Activities
+                .Where(
+                    x =>
+                        Contains(
+                            x.Type,
+                            "alert"
+                        ) ||
+                        Contains(
+                            x.Type,
+                            "event"
+                        ) ||
+                        Contains(
+                            x.Type,
+                            "system"
+                        ) ||
+                        Contains(
+                            x.Type,
+                            "signal"
+                        )
+                )
+                .Take(5);
+
+
+        foreach (var activity in events)
+        {
+            var title =
+                !string.IsNullOrWhiteSpace(activity.Message)
+                    ? activity.Message
+                    : BuildEventTitle(activity);
+
+
+            LatestEvents.Add(
+                new EventRow(
+                    activity.Type,
+                    title,
+                    activity.Time
+                )
+            );
+        }
+    }
+
+
+    private static string BuildEventTitle(
+        ActivityRow activity)
+    {
+        if (activity.Symbol != "—" &&
+            activity.Action != "—")
+        {
+            return
+                $"{activity.Symbol} {activity.Action}";
+        }
+
+
+        if (activity.Symbol != "—")
+        {
+            return activity.Symbol;
+        }
+
+
+        return activity.Type;
+    }
+
+
+    // =========================================================
+    // TABS
+    // =========================================================
+
+    private void SelectTab(
+        string tab)
+    {
+        ActiveTab = tab;
+    }
+
+
+    private bool MatchesTab(
+        ActivityRow activity)
+    {
+        return ActiveTab switch
+        {
+            "Orders" =>
+                IsOrder(activity),
+
+            "Trades" =>
+                IsTrade(activity),
+
+            "Automations" =>
+                Contains(
+                    activity.Type,
+                    "automation"
+                ),
+
+            "Strategy Signals" =>
+                Contains(
+                    activity.Type,
+                    "signal"
+                ) ||
+                Contains(
+                    activity.Type,
+                    "strategy"
+                ),
+
+            "Alerts" =>
+                Contains(
+                    activity.Type,
+                    "alert"
+                ),
+
+            "System Events" =>
+                Contains(
+                    activity.Type,
+                    "system"
+                ) ||
+                Contains(
+                    activity.Type,
+                    "event"
+                ),
+
+            _ => true
+        };
+    }
+
+
+    private bool MatchesFilters(
+        ActivityRow activity)
+    {
+        if (SelectedType != "All" &&
+            !activity.Type.Equals(
+                SelectedType,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+
+        if (SelectedSymbol != "All" &&
+            !activity.Symbol.Equals(
+                SelectedSymbol,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+
+        if (SelectedStatus != "All" &&
+            !activity.Status.Equals(
+                SelectedStatus,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            var query =
+                SearchText.Trim();
+
+
+            var searchable =
+                string.Join(
+                    " ",
+                    activity.Time,
+                    activity.Type,
+                    activity.Symbol,
+                    activity.Action,
+                    activity.Status,
+                    activity.Strategy,
+                    activity.Message
+                );
+
+
+            if (!searchable.Contains(
+                    query,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+
+        return true;
+    }
+
+
+    private void ClearFilters()
+    {
+        SelectedType = "All";
+
+        SelectedSymbol = "All";
+
+        SelectedStatus = "All";
+
+        SearchText = string.Empty;
+    }
+
+
+    private string GetPanelTitle()
+    {
+        return ActiveTab == "All Activity"
+            ? "Recent Activity"
+            : ActiveTab;
+    }
+
+
+    // =========================================================
+    // ACTIVITY CLASSIFICATION
+    // =========================================================
+
+    private static bool IsOrder(
+        ActivityRow activity)
+    {
+        return Contains(
+            activity.Type,
+            "order"
+        );
+    }
+
+
+    private static bool IsTrade(
+        ActivityRow activity)
+    {
+        return
+            Contains(
+                activity.Type,
+                "trade"
+            ) ||
+            Contains(
+                activity.Type,
+                "execution"
+            ) ||
+            Contains(
+                activity.Type,
+                "fill"
+            );
+    }
+
+
+    private static bool IsExecuted(
+        ActivityRow activity)
+    {
+        return
+            Contains(
+                activity.Status,
+                "filled"
+            ) ||
+            Contains(
+                activity.Status,
+                "executed"
+            ) ||
+            Contains(
+                activity.Status,
+                "complete"
+            ) ||
+            Contains(
+                activity.Status,
+                "completed"
+            );
+    }
+
+
+    private static bool Contains(
+        string? value,
+        string text)
+    {
+        return
+            !string.IsNullOrWhiteSpace(value) &&
+            value.Contains(
+                text,
+                StringComparison.OrdinalIgnoreCase
+            );
+    }
+
+
+    // =========================================================
+    // JSON HELPERS
+    // =========================================================
+
+    private static bool TryGetArray(
+        JsonElement root,
+        out JsonElement array)
+    {
+        if (root.ValueKind ==
+            JsonValueKind.Array)
+        {
+            array = root;
+
+            return true;
+        }
+
+
+        if (root.ValueKind ==
+            JsonValueKind.Object)
+        {
+            var names =
+                new[]
+                {
+                    "activity",
+                    "activities",
+                    "events",
+                    "data",
+                    "items",
+                    "results",
+                    "history"
+                };
+
+
+            foreach (var name in names)
+            {
+                if (root.TryGetProperty(
+                        name,
+                        out var candidate) &&
+                    candidate.ValueKind ==
+                        JsonValueKind.Array)
+                {
+                    array = candidate;
+
+                    return true;
+                }
+            }
+        }
+
+
+        array = default;
+
+        return false;
+    }
+
+
+    private static string FirstText(
+        JsonElement root,
+        params string[] properties)
+    {
+        foreach (var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                JsonValueKind.Null)
+            {
+                continue;
+            }
+
+
+            var text =
+                value.ValueKind ==
+                JsonValueKind.String
+                    ? value.GetString()
+                    : value.ToString();
+
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+        }
+
+
+        return string.Empty;
+    }
+
+
+    private static double FirstNumber(
+        JsonElement root,
+        params string[] properties)
+    {
+        foreach (var property in properties)
+        {
+            if (!root.TryGetProperty(
+                    property,
+                    out var value))
+            {
+                continue;
+            }
+
+
+            if (value.ValueKind ==
+                    JsonValueKind.Number &&
+                value.TryGetDouble(
+                    out var number))
+            {
+                return number;
+            }
+
+
+            if (double.TryParse(
+                    value.ToString(),
+                    out number))
+            {
+                return number;
+            }
+        }
+
+
+        return double.NaN;
+    }
+
+
+    // =========================================================
+    // NORMALIZATION
+    // =========================================================
+
+    private static string NormalizeType(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "Event";
+        }
+
+
+        value =
+            value
+                .Replace("_", " ")
+                .Trim();
+
+
+        return System.Globalization.CultureInfo
+            .InvariantCulture
+            .TextInfo
+            .ToTitleCase(
+                value.ToLowerInvariant()
+            );
+    }
+
+
+    private static string NormalizeAction(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "—";
+        }
+
+
+        return value
+            .Trim()
+            .ToUpperInvariant();
+    }
+
+
+    private static string EmptyValue(
+        string value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "—"
+            : value;
+    }
+
+
+    // =========================================================
+    // TIME
+    // =========================================================
+
+    private static string FormatTimestamp(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "—";
+        }
+
+
+        if (DateTimeOffset.TryParse(
+                value,
+                out var timestamp))
+        {
+            return timestamp
+                .ToLocalTime()
+                .ToString(
+                    "MMM d, h:mm tt"
+                );
+        }
+
+
+        return value;
+    }
+
+
+    // =========================================================
+    // FORMATTING
+    // =========================================================
+
+    private static string FormatQuantity(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "#,##0.####"
+            );
+    }
+
+
+    private static string FormatPrice(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "$#,##0.00####"
+            );
+    }
+
+
+    private static string FormatSignedMoney(
+        double value)
+    {
+        return double.IsNaN(value)
+            ? "—"
+            : value.ToString(
+                "+$#,##0.00;-$#,##0.00;$0.00"
+            );
+    }
+
+
+    private static string FormatPercentAuto(
+        double value)
+    {
+        if (double.IsNaN(value))
+        {
+            return "—";
+        }
+
+
+        if (Math.Abs(value) <= 1)
+        {
+            value *= 100;
+        }
+
+
+        return
+            $"{value:+0.00;-0.00;0.00}%";
+    }
+
+
+    // =========================================================
+    // CSS HELPERS
+    // =========================================================
+
+    private static string GetActionClass(
+        string action)
+    {
+        if (action.Equals(
+            "SELL",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return "red";
+        }
+
+
+        if (action.Equals(
+            "BUY",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return "green";
+        }
+
+
+        return "";
+    }
+
+
+    private static string GetValueClass(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) ||
+            value == "—")
+        {
+            return "";
+        }
+
+
+        return value
+            .TrimStart()
+            .StartsWith("-")
+                ? "red"
+                : "green";
+    }
+
+
+    private static string GetStatusClass(
+        string status)
+    {
+        if (Contains(status, "filled") ||
+            Contains(status, "executed") ||
+            Contains(status, "completed"))
+        {
+            return "pill green";
+        }
+
+
+        if (Contains(status, "reject") ||
+            Contains(status, "failed") ||
+            Contains(status, "cancel"))
+        {
+            return "pill red";
+        }
+
+
+        return "pill blue";
+    }
+
+
+    private static string GetAlertClass(
+        string type)
+    {
+        if (Contains(
+            type,
+            "alert"))
+        {
+            return "high";
+        }
+
+
+        if (Contains(
+            type,
+            "system"))
+        {
+            return "medium";
+        }
+
+
+        return "";
+    }
+
+
+    private static string GetLegendClass(
+        int index)
+    {
+        return (index % 4) switch
+        {
+            0 => "c1",
+            1 => "c2",
+            2 => "c3",
+            _ => "c4"
+        };
+    }
+
+
+    // =========================================================
+    // MODELS
+    // =========================================================
+
+    private sealed class ActivityRow
+    {
+        public ActivityRow(
+            string time,
+            string type,
+            string symbol,
+            string action,
+            string quantity,
+            string price,
+            string status,
+            string strategy,
+            string pnl,
+            string message)
+        {
+            Time = time;
+
+            Type = type;
+
+            Symbol = symbol;
+
+            Action = action;
+
+            Quantity = quantity;
+
+            Price = price;
+
+            Status = status;
+
+            Strategy = strategy;
+
+            Pnl = pnl;
+
+            Message = message;
+
+
+            QuantityRaw =
+                double.TryParse(
+                    quantity.Replace(",", ""),
+                    out var qty)
+                        ? qty
+                        : double.NaN;
+        }
+
+
+        public string Time { get; }
+
+        public string Type { get; }
+
+        public string Symbol { get; }
+
+        public string Action { get; }
+
+        public string Quantity { get; }
+
+        public string Price { get; }
+
+        public string Status { get; }
+
+        public string Strategy { get; }
+
+        public string Pnl { get; }
+
+        public string Message { get; }
+
+        public double QuantityRaw { get; }
+    }
+
+
+    private sealed record BreakdownRow(
+        string Type,
+        int Count
+    );
+
+
+    private sealed record EventRow(
+        string Type,
+        string Title,
+        string Time
+    );
+}

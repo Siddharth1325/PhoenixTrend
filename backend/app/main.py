@@ -128,6 +128,12 @@ async def require_application_auth(
         not path.startswith("/api/")
         or path in _PUBLIC_API_PATHS
         or path.startswith("/api/docs")
+        # Arena is a virtual Phoenix Coins simulation. The page itself is
+        # protected by the Blazor auth guard, but its polling/action API must
+        # not invalidate the user's application session. Keeping these routes
+        # outside the global API middleware also matches their player_id based
+        # server-authoritative design.
+        or path.startswith("/api/arena/")
     ):
         return await call_next(request)
 

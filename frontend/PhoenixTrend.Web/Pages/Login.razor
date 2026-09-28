@@ -34,7 +34,7 @@
                         <label for="pt-email">Email Address</label>
                         <div class="pt-login-input-wrap">
                             <span class="pt-login-input-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><path d="M3 5.5h18v13H3z"/><path d="m4 7 8 6 8-6"/></svg>
+                                <i class="ph-duotone ph-envelope-simple"></i>
                             </span>
                             <InputText id="pt-email"
                                        @bind-Value="loginModel.Email"
@@ -49,7 +49,7 @@
                         <label for="pt-password">Password</label>
                         <div class="pt-login-input-wrap">
                             <span class="pt-login-input-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                                <i class="ph-duotone ph-lock-key"></i>
                             </span>
                             <InputText id="pt-password"
                                        @bind-Value="loginModel.Password"
@@ -63,11 +63,11 @@
                                     aria-label="Show or hide password">
                                 @if (showPassword)
                                 {
-                                    <svg viewBox="0 0 24 24"><path d="M3 12s3.2-5 9-5 9 5 9 5-3.2 5-9 5-9-5-9-5Z"/><circle cx="12" cy="12" r="2.4"/><path d="M4 4l16 16"/></svg>
+                                    <i class="ph-duotone ph-eye-slash"></i>
                                 }
                                 else
                                 {
-                                    <svg viewBox="0 0 24 24"><path d="M3 12s3.2-5 9-5 9 5 9 5-3.2 5-9 5-9-5-9-5Z"/><circle cx="12" cy="12" r="2.4"/></svg>
+                                    <i class="ph-duotone ph-eye"></i>
                                 }
                             </button>
                         </div>

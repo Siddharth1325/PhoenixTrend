@@ -2879,3 +2879,35 @@
         grid-template-columns: 1fr !important;
     }
 }
+
+
+/* ============================================================
+   CLEAR GLASS COMMAND CENTER — 2026-09-28
+   No frosted blur. Artwork stays crisp behind polished glass.
+   ============================================================ */
+.home-welcome-copy{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.008) 22%,rgba(2,8,15,.16) 64%,rgba(2,7,13,.22))!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 1px 0 0 rgba(255,150,35,.05),
+    inset -1px 0 0 rgba(31,151,255,.06),
+    0 12px 28px rgba(0,0,0,.12)!important;
+}
+.home-welcome h1{
+  font-size:clamp(28px,2.15vw,37px)!important;
+  letter-spacing:-1.15px!important;
+}
+.home-welcome h1 span{
+  background:linear-gradient(90deg,#ff9b22,#ffd066);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent!important;
+}
+.home-market-state,.home-refresh-button{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}

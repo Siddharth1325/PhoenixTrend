@@ -1,4 +1,4 @@
-/* PhoenixTrend sidebar logo: show complete lockup; black pixels visually disappear into sidebar artwork. */
+/* PhoenixTrend sidebar brand — source black is removed with a luminance mask. */
 .brand-lockup{
  position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;
  height:132px!important;padding:5px 10px 8px!important;overflow:visible!important;background:transparent!important;
@@ -7,18 +7,21 @@
 }
 .brand-lockup::before,.brand-lockup::after{content:none!important;display:none!important}
 .brand-lockup .sidebar-brand-watermark{
- display:block!important;position:static!important;width:auto!important;height:auto!important;
- max-width:188px!important;max-height:118px!important;object-fit:contain!important;object-position:center!important;
- margin:0 auto!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;
- clip-path:none!important;transform:none!important;filter:none!important;opacity:1!important;mix-blend-mode:lighten!important;isolation:auto!important
+ display:block!important;width:188px!important;height:118px!important;margin:0 auto!important;
+ background-image:url('/assets/phoenixtrend-logo.png')!important;background-repeat:no-repeat!important;
+ background-position:center!important;background-size:contain!important;
+ -webkit-mask-image:url('/assets/phoenixtrend-logo.png')!important;
+ mask-image:url('/assets/phoenixtrend-logo.png')!important;
+ -webkit-mask-repeat:no-repeat!important;mask-repeat:no-repeat!important;
+ -webkit-mask-position:center!important;mask-position:center!important;
+ -webkit-mask-size:contain!important;mask-size:contain!important;
+ mask-mode:luminance!important;background-color:transparent!important;
 }
 @media(max-width:1100px) and (min-width:701px){
  .brand-lockup{height:112px!important;padding:4px 8px 6px!important}
- .brand-lockup .sidebar-brand-watermark{max-width:168px!important;max-height:100px!important}
+ .brand-lockup .sidebar-brand-watermark{width:168px!important;height:100px!important}
 }
 @media(max-width:700px){
  .brand-lockup{height:104px!important;padding:4px 7px 6px!important}
- .brand-lockup .sidebar-brand-watermark{max-width:156px!important;max-height:92px!important}
+ .brand-lockup .sidebar-brand-watermark{width:156px!important;height:92px!important}
 }
-/* Keep the logo composited directly over the sidebar artwork so its black source background cannot render as a rectangle. */
-.sidebar-inner,.brand-lockup{isolation:auto!important}

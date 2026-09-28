@@ -1050,3 +1050,192 @@
         display: none;
     }
 }
+
+
+/* ============================================================
+   MOBILE LOGIN — PHONE / TABLET COMPATIBILITY
+   ============================================================ */
+@media (max-width: 900px) {
+  html, body, #app {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .pt-login-page {
+    width: 100vw !important;
+    min-width: 0 !important;
+    min-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .pt-login-bg {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background-position: 31% center !important;
+    background-size: cover !important;
+  }
+
+  .pt-login-shade {
+    background:
+      linear-gradient(180deg,rgba(2,4,9,.20),rgba(2,4,9,.48)),
+      linear-gradient(90deg,rgba(2,4,9,.12),rgba(2,4,9,.28)) !important;
+  }
+
+  .pt-login-shell {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100dvh !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .pt-login-art {
+    display: none !important;
+  }
+
+  .pt-login-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100dvh !important;
+    padding:
+      max(18px, env(safe-area-inset-top))
+      16px
+      max(22px, env(safe-area-inset-bottom)) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+  }
+
+  .pt-login-card {
+    width: 100% !important;
+    max-width: 520px !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 28px 22px !important;
+    border-radius: 18px !important;
+  }
+
+  .pt-login-card-header {
+    margin-bottom: 28px !important;
+  }
+
+  .pt-login-card-header h1 {
+    font-size: clamp(30px, 9vw, 40px) !important;
+    line-height: 1.06 !important;
+  }
+
+  .pt-login-card-header p {
+    margin-top: 9px !important;
+    font-size: 15px !important;
+  }
+
+  .pt-login-field {
+    margin-bottom: 20px !important;
+  }
+
+  .pt-login-field > label {
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+  }
+
+  .pt-login-input-wrap {
+    height: 56px !important;
+    border-radius: 10px !important;
+  }
+
+  .pt-login-input-icon {
+    width: 52px !important;
+    flex-basis: 52px !important;
+  }
+
+  .pt-login-input-icon svg,
+  .pt-login-password-toggle svg {
+    width: 23px !important;
+    height: 23px !important;
+  }
+
+  .pt-login-input {
+    height: 54px !important;
+    font-size: 16px !important;
+  }
+
+  .pt-login-password-toggle {
+    width: 52px !important;
+    height: 54px !important;
+    flex-basis: 52px !important;
+  }
+
+  .pt-login-options {
+    margin: 0 0 24px !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .pt-login-checkbox,
+  .pt-login-forgot {
+    font-size: 14px !important;
+  }
+
+  .pt-login-submit {
+    height: 58px !important;
+    font-size: 17px !important;
+  }
+
+  .pt-login-divider {
+    margin: 24px 0 20px !important;
+    gap: 10px !important;
+  }
+
+  .pt-login-divider small {
+    font-size: 13px !important;
+  }
+
+  .pt-login-social {
+    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .pt-login-social-button {
+    height: 50px !important;
+    padding: 0 8px !important;
+    gap: 7px !important;
+    font-size: 0 !important;
+  }
+
+  .pt-login-social-button img {
+    width: 23px !important;
+    height: 23px !important;
+  }
+
+  .pt-login-create {
+    margin-top: 24px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .pt-login-panel {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .pt-login-card {
+    padding: 24px 18px !important;
+  }
+
+  .pt-login-card-header h1 {
+    font-size: 31px !important;
+  }
+
+  .pt-login-options {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+}

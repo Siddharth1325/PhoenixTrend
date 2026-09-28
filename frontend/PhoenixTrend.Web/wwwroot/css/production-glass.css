@@ -154,3 +154,99 @@
 }
 .pt-login-input-wrap,.pt-login-social-button{background:rgba(5,20,34,.22)!important}
 .pt-shell *, .pt-login-page *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+/* v3 PAGE-BY-PAGE CLEAR GLASS ENFORCEMENT
+   Reviewed: Home, Markets, Discover, TradeDesk, Strategies, Automations,
+   Charts, Portfolio, Risk, Settings, Trady AI, Activity, Analytics,
+   Connect and shared terminal surfaces. No frosted blur. */
+:root{
+ --pt-clear-panel:rgba(5,20,35,.16);
+ --pt-clear-panel-2:rgba(7,27,45,.22);
+ --pt-clear-border:rgba(91,205,255,.50);
+ --pt-clear-orange:rgba(255,137,37,.22);
+ --pt-clear-blue:rgba(35,161,255,.22);
+}
+.pt-content{
+ background:
+ radial-gradient(700px 430px at 88% 8%,rgba(25,151,255,.18),transparent 68%),
+ radial-gradient(620px 420px at 7% 75%,rgba(255,116,26,.14),transparent 70%),
+ radial-gradient(620px 380px at 50% 45%,rgba(105,69,255,.075),transparent 72%)!important
+}
+/* HOME */
+.home-kpis>.metric-card,.home-market-card,.portfolio-chart,.home-empty-chart,
+.trading-system-list>button,.home-watchlist-table,.home-table-wrap,
+.home-grid>.pt-panel,.home-grid>.panel{
+ background:linear-gradient(135deg,rgba(36,151,255,.07),rgba(5,20,35,.13) 48%,rgba(255,128,30,.045))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* MARKETS */
+.ptm-page .ptm-index-card,.ptm-page .ptm-card,.ptm-page .ptm-asset-tabs,
+.ptm-page .ptm-chart,.ptm-page .ptm-chart-data-strip,.ptm-page .ptm-news-head,
+.ptm-page .ptm-news-viewport{
+ background:linear-gradient(135deg,rgba(31,157,255,.07),rgba(5,20,35,.14),rgba(255,132,32,.04))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* DISCOVER */
+.pt-discover .insight-card,.pt-discover .discover-tabs,.pt-discover .scanner-menu,
+.pt-discover .discover-panel,.pt-discover .scan-filterbar{
+ background:linear-gradient(135deg,rgba(42,169,255,.07),rgba(5,20,35,.14),rgba(153,82,255,.045))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* TRADE / PORTFOLIO / RISK / SETTINGS / AI / ACTIVITY / ANALYTICS */
+:is(.pt-trade,.pt-portfolio,.pt-risk,.pt-settings,.pt-ai,.pt-activity,.pt-analytics)
+ :is(.panel,.pt-panel,.metric-card,.tabbar,.ai-modebar,.filterbar,.symbol-strip button,
+ .indicator-strip,.hero-chart,.trading-chart,.ai-chart,.risk-chart,.security-list>div,
+ .quick-grid>div,.user-prompt,.ai-answer,.ai-input,.connect-message){
+ background:linear-gradient(135deg,rgba(34,160,255,.075),rgba(5,20,35,.13) 52%,rgba(255,131,30,.045))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* STRATEGIES */
+.pt-strategies :is(.strategy-tabs-shell,.strategy-summary-card,.strategy-library-panel,
+.strategy-inspector,.strategy-card){
+ background:linear-gradient(135deg,rgba(42,164,255,.07),rgba(5,20,35,.13),rgba(174,86,255,.045))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* AUTOMATIONS */
+:is(.auto-section-nav,.auto-panel,.auto-engine-command,.auto-engine-metrics article,
+.auto-asset-status-grid article,.auto-performance-grid article,.auto-side-card,.auto-hero-card){
+ background:linear-gradient(135deg,rgba(37,165,255,.075),rgba(5,20,35,.13),rgba(255,132,31,.045))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* CHARTS */
+.pt-charts :is(.ticker-card,.chart-shell,.chart-commandbar,.ohlc-strip,.chart-stage,
+.drawing-rail,.chart-area,.phoenix-main-chart,.indicator-pane,.chart-footer,.chart-level-card){
+ background:linear-gradient(135deg,rgba(35,161,255,.07),rgba(5,20,35,.13),rgba(255,129,28,.04))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* CONNECT */
+.pt-connect-card,.pt-connect-broker,.pt-connect-input-shell,.pt-connect-paper{
+ background:linear-gradient(135deg,rgba(36,162,255,.075),rgba(5,20,35,.14),rgba(255,129,29,.045))!important;
+ border-color:var(--pt-clear-border)!important
+}
+/* Shared / terminal layouts */
+:is(.trade-layout,.portfolio-layout,.risk-layout,.ai-layout,.activity-layout,.analytics-layout,.settings-layout)>*,
+.panel,.metric,.placeholder-grid>div{
+ background:linear-gradient(135deg,rgba(35,160,255,.065),rgba(5,20,35,.12),rgba(255,132,31,.04))!important;
+ border-color:rgba(91,205,255,.42)!important
+}
+/* Visible background lighting behind transparent cards */
+:is(.pt-trade,.pt-portfolio,.pt-risk,.pt-settings,.pt-ai,.pt-activity,.pt-analytics,
+.pt-strategies,.pt-discover,.ptm-page,.pt-charts,.pt-connect-page,.auto-page){
+ background:
+ radial-gradient(520px 340px at 90% 12%,rgba(29,156,255,.15),transparent 72%),
+ radial-gradient(520px 360px at 8% 72%,rgba(255,119,28,.12),transparent 72%),
+ radial-gradient(430px 300px at 50% 42%,rgba(123,73,255,.07),transparent 75%)!important
+}
+/* Light-catching glass edges without frosting. */
+:is(.panel,.pt-panel,.metric-card,.ptm-card,.insight-card,.strategy-card,.auto-panel,
+.chart-shell,.pt-connect-card,.home-market-card){
+ box-shadow:
+ inset 0 1px 0 rgba(255,255,255,.18),
+ inset 1px 0 0 rgba(71,190,255,.09),
+ 0 0 22px rgba(34,162,255,.09),
+ 0 0 38px rgba(255,126,29,.025)!important
+}
+/* Absolute rule: no blur/frosting anywhere in app panels. */
+.pt-shell *, .pt-login-page *, .pt-connect-page *{
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+}

@@ -5279,3 +5279,88 @@ img,svg,canvas,video{max-width:100%;height:auto}
   .pt-nav-item{flex-basis:54px!important;width:54px!important}
   .pt-nav-item .nav-icon{font-size:21px!important}
 }
+
+
+/* ============================================================
+   APPROVED SIDEBAR ASSETS — LOCKED 2026-09-28
+   Exact user-approved Newlogo.png + sidebar-background.png.
+   Shared MainLayout means this applies to every protected page.
+   ============================================================ */
+.pt-sidebar{
+  background:#000!important;
+}
+.pt-sidebar .sidebar-art{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  background-image:url("/assets/sidebar-background.png")!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:cover!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+}
+.pt-sidebar .sidebar-overlay{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.02) 0%,rgba(0,0,0,.08) 15%,rgba(0,0,0,.10) 82%,rgba(0,0,0,.03) 100%)!important;
+  pointer-events:none!important;
+}
+.pt-sidebar::before,.pt-sidebar::after{display:none!important}
+.brand-lockup{
+  height:142px!important;
+  flex:0 0 142px!important;
+  padding:4px 6px 10px!important;
+  justify-content:center!important;
+  border-bottom:1px solid rgba(255,255,255,.09)!important;
+}
+.brand-lockup .brand-logo,.brand-lockup img{
+  width:100%!important;
+  height:132px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  filter:none!important;
+}
+.pt-nav{margin-top:8px!important}
+.pt-nav-item{
+  min-height:48px!important;
+  height:48px!important;
+  border-radius:12px!important;
+}
+.pt-nav-item.active{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.015) 30%,transparent 52%),
+    linear-gradient(100deg,rgba(128,48,2,.48),rgba(0,0,0,.24) 48%,rgba(0,92,184,.52))!important;
+  border:1px solid rgba(255,155,22,.96)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 0 14px rgba(255,112,0,.17),
+    0 0 14px rgba(0,139,255,.14)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+/* Tablet: same approved artwork and logo, compact icon rail. */
+@media(max-width:1100px) and (min-width:701px){
+  .pt-sidebar .sidebar-art{
+    background-image:url("/assets/sidebar-background.png")!important;
+    background-position:center!important;
+    background-size:cover!important;
+  }
+  .brand-lockup{height:94px!important;flex-basis:94px!important;padding:2px!important}
+  .brand-lockup .brand-logo,.brand-lockup img{width:80px!important;height:88px!important}
+}
+
+/* Mobile: navigation becomes the bottom rail; artwork is intentionally hidden
+   because a full vertical sidebar cannot fit on a phone. */
+@media(max-width:700px){
+  .pt-sidebar .sidebar-art,.pt-sidebar .sidebar-overlay{display:none!important}
+  .pt-sidebar{
+    background:linear-gradient(180deg,rgba(6,14,24,.97),rgba(0,3,8,.99))!important;
+    border-top:1px solid rgba(255,151,22,.55)!important;
+    border-left:1px solid rgba(255,151,22,.32)!important;
+    border-right:1px solid rgba(24,151,255,.46)!important;
+  }
+}

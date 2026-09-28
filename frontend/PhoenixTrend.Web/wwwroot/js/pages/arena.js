@@ -353,6 +353,24 @@ async function api(path, options = {}) {
         }
     }
 
+    if (response.status === 401) {
+        // A missing/expired production session is an authentication state,
+        // not an Arena server outage. Clear the stale token and return the
+        // user to sign-in instead of painting the Arena as offline.
+        window.localStorage.removeItem("phoenixtrend.auth.token");
+
+        const returnUrl =
+            window.location.pathname +
+            window.location.search +
+            window.location.hash;
+
+        window.location.replace(
+            `/login?returnUrl=${encodeURIComponent(returnUrl)}`
+        );
+
+        throw new Error("Authentication required.");
+    }
+
     if (!response.ok) {
         let detail =
             body?.detail ||

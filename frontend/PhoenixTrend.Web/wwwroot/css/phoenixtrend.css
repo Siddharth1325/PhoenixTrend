@@ -5224,3 +5224,58 @@ table{max-width:100%}
    -webkit-backdrop-filter:none!important;
  }
 }
+
+
+/* ============================================================
+   APPROVED UI — DEVICE FRIENDLY FINAL RESPONSIVE PASS
+   Desktop visual remains unchanged; only layout adapts.
+   ============================================================ */
+*{box-sizing:border-box}
+html,body,#app,.pt-shell{width:100%;max-width:100%;overflow-x:hidden}
+.pt-main,.pt-content,main{min-width:0;max-width:100%}
+img,svg,canvas,video{max-width:100%;height:auto}
+.pt-main :is(.card,.panel,.widget,.surface,.tile,.stat-card,.metric-card,.kpi-card,.section-card,.content-card,.summary-card,.account-card,.engine-card,.portfolio-card,.risk-card,.market-card,.strategy-card,.automation-card,.hero-copy,.hero-panel,.toolbar,.table-wrap,.chart-card){min-width:0}
+
+@media (max-width:1100px){
+  :root{--sidebar:86px!important}
+  .pt-sidebar{width:86px!important}
+  .sidebar-inner{padding:10px 8px!important}
+  .brand-lockup{height:92px!important;flex-basis:92px!important;padding:2px!important}
+  .brand-lockup .brand-logo,.brand-lockup img{width:76px!important;height:84px!important;object-fit:contain!important}
+  .pt-nav-item{min-height:50px!important;padding:0!important;justify-content:center!important}
+  .pt-nav-item .nav-icon{width:44px!important;min-width:44px!important;font-size:23px!important}
+  .pt-nav-item .nav-label,.nav-active-arrow{display:none!important}
+  .pt-nav-item.active::before{left:-8px!important}
+  .pt-main{margin-left:86px!important;width:calc(100% - 86px)!important}
+  .pt-topbar{left:86px!important;width:calc(100% - 86px)!important}
+  .pt-main :is(.stats-grid,.kpi-grid,.metrics-grid,.cards-grid){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .pt-main :is(.dashboard-grid,.content-grid,.portfolio-grid,.risk-grid){grid-template-columns:1fr!important}
+}
+
+@media (max-width:700px){
+  .pt-shell{padding-bottom:72px!important}
+  .pt-sidebar{
+    position:fixed!important;top:auto!important;left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;height:68px!important;border-radius:16px 16px 0 0!important;z-index:1000!important;
+    background:linear-gradient(180deg,rgba(8,17,27,.96),rgba(1,7,13,.98))!important;
+    border:1px solid rgba(49,156,236,.34)!important;
+  }
+  .pt-sidebar::before,.pt-sidebar::after,.brand-lockup,.sidebar-overlay{display:none!important}
+  .sidebar-inner{height:100%!important;padding:5px 7px!important;display:block!important}
+  .pt-nav{height:100%!important;display:flex!important;align-items:center!important;gap:3px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}
+  .pt-nav::-webkit-scrollbar{display:none}
+  .pt-nav-item{flex:0 0 58px!important;width:58px!important;height:56px!important;min-height:56px!important;border-radius:13px!important;padding:0!important}
+  .pt-nav-item .nav-icon{width:44px!important;min-width:44px!important;font-size:22px!important}
+  .pt-nav-item .nav-label,.nav-active-arrow,.pt-nav-item.nav-settings::after{display:none!important}
+  .pt-nav-item.active::before{left:10px!important;right:10px!important;top:auto!important;bottom:-5px!important;width:auto!important;height:3px!important}
+  .pt-main{margin-left:0!important;width:100%!important;padding-left:0!important}
+  .pt-topbar{left:0!important;width:100%!important;min-width:0!important;padding:7px 10px!important}
+  .pt-main :is(.stats-grid,.kpi-grid,.metrics-grid,.cards-grid,.dashboard-grid,.content-grid,.portfolio-grid,.risk-grid){grid-template-columns:1fr!important}
+  .pt-main :is(.table-wrap,.data-table,.orders-table,.positions-table){overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .pt-main input,.pt-main select,.pt-main textarea,.pt-main button{max-width:100%}
+}
+
+@media (max-width:420px){
+  .pt-nav-item{flex-basis:54px!important;width:54px!important}
+  .pt-nav-item .nav-icon{font-size:21px!important}
+}

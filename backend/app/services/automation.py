@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from threading import RLock
@@ -1552,6 +1553,177 @@ class AutomationEngine:
                 and row.enabled
             )
 
+    @staticmethod
+    def _decode_section_configuration(
+        value: Any,
+    ) -> dict[str, Any]:
+        if isinstance(value, dict):
+            return dict(value)
+
+        if not value:
+            return {}
+
+        try:
+            decoded = json.loads(str(value))
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return {}
+
+        return decoded if isinstance(decoded, dict) else {}
+
+    def section_configuration(
+        self,
+        asset_class: str,
+    ) -> dict[str, Any]:
+        self._require_database_initialized()
+
+        asset = self._normalize_asset_class(
+            asset_class
+        )
+
+        if asset not in self.ASSET_SECTIONS:
+            raise ValueError(
+                f"Unsupported automation section: {asset_class}"
+            )
+
+        with SessionLocal() as session:
+            row = self._section_row(
+                session,
+                asset,
+            )
+
+            if row is None:
+                return {
+                    "asset_class": asset,
+                    "enabled": False,
+                    "configured": False,
+                    "max_position_value": None,
+                    "capital_allocation": None,
+                    "max_daily_loss": None,
+                    "max_open_positions": None,
+                    "allow_long": True,
+                    "allow_short": False,
+                }
+
+            metadata = self._decode_section_configuration(
+                row.configuration
+            )
+
+            return {
+                "asset_class": asset,
+                "enabled": bool(row.enabled),
+                "configured": bool(
+                    metadata.get("safety_configured")
+                ),
+                "max_position_value": row.max_position_value,
+                "capital_allocation": row.capital_allocation,
+                "max_daily_loss": row.max_daily_loss,
+                "max_open_positions": row.max_open_positions,
+                "allow_long": bool(row.allow_long),
+                "allow_short": bool(row.allow_short),
+            }
+
+    def update_section_safety(
+        self,
+        asset_class: str,
+        *,
+        enabled: bool,
+        max_position_value: float | None,
+        capital_allocation: float | None,
+        max_daily_loss: float | None,
+        max_open_positions: int | None,
+    ) -> dict[str, Any]:
+        self._require_database_initialized()
+
+        asset = self._normalize_asset_class(
+            asset_class
+        )
+
+        if asset not in self.ASSET_SECTIONS:
+            raise ValueError(
+                f"Unsupported automation section: {asset_class}"
+            )
+
+        with SessionLocal() as session:
+            row = self._section_row(
+                session,
+                asset,
+            )
+
+            if row is None:
+                row = AutomationAssetConfiguration(
+                    asset_class=asset,
+                )
+                session.add(row)
+
+            row.enabled = bool(enabled)
+            row.max_position_value = (
+                self._optional_positive(
+                    max_position_value,
+                    "max_position_value",
+                )
+                if max_position_value is not None
+                else None
+            )
+            row.capital_allocation = (
+                self._optional_positive(
+                    capital_allocation,
+                    "capital_allocation",
+                )
+                if capital_allocation is not None
+                else None
+            )
+            row.max_daily_loss = (
+                self._optional_positive(
+                    max_daily_loss,
+                    "max_daily_loss",
+                )
+                if max_daily_loss is not None
+                else None
+            )
+            row.max_open_positions = (
+                int(
+                    self._required_positive(
+                        max_open_positions,
+                        "max_open_positions",
+                    )
+                )
+                if max_open_positions is not None
+                else None
+            )
+
+            metadata = self._decode_section_configuration(
+                row.configuration
+            )
+            metadata["safety_configured"] = True
+            row.configuration = json.dumps(
+                metadata,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+            row.updated_at = datetime.now(
+                timezone.utc
+            )
+
+            session.commit()
+
+        self._audit_sync(
+            "AUTOMATION_SAFETY_UPDATED",
+            asset,
+            self.section_configuration(asset),
+        )
+
+        return self.section_configuration(
+            asset
+        )
+
+    def safety_configured(
+        self,
+    ) -> bool:
+        return any(
+            self.section_configuration(asset).get("configured")
+            for asset in self.ASSET_SECTIONS
+        )
+
     def set_section_enabled(
         self,
         asset_class: str,
@@ -1722,6 +1894,10 @@ class AutomationEngine:
                 )
             ]
 
+        configuration = self.section_configuration(
+            asset
+        )
+
         return {
             "asset_class": asset,
             "enabled": self.section_enabled(
@@ -1742,6 +1918,7 @@ class AutomationEngine:
                     item.id
                 )
             ),
+            "safety": configuration,
         }
 
     def section_list(

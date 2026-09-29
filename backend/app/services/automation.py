@@ -1658,34 +1658,28 @@ class AutomationEngine:
             row.enabled = bool(enabled)
             row.max_position_value = (
                 self._optional_positive(
-                    max_position_value,
-                    "max_position_value",
+                    max_position_value
                 )
                 if max_position_value is not None
                 else None
             )
             row.capital_allocation = (
                 self._optional_positive(
-                    capital_allocation,
-                    "capital_allocation",
+                    capital_allocation
                 )
                 if capital_allocation is not None
                 else None
             )
             row.max_daily_loss = (
                 self._optional_positive(
-                    max_daily_loss,
-                    "max_daily_loss",
+                    max_daily_loss
                 )
                 if max_daily_loss is not None
                 else None
             )
             row.max_open_positions = (
-                int(
-                    self._required_positive(
-                        max_open_positions,
-                        "max_open_positions",
-                    )
+                self._optional_positive_int(
+                    max_open_positions
                 )
                 if max_open_positions is not None
                 else None

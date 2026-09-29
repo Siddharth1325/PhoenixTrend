@@ -370,6 +370,39 @@ class AutomationUpdateRequest(BaseModel):
     allow_short: Optional[bool] = None
 
 
+class AutomationSafetyRequest(BaseModel):
+    max_position_value: Optional[float] = Field(
+        default=None,
+        gt=0,
+    )
+    capital_allocation: Optional[float] = Field(
+        default=None,
+        gt=0,
+    )
+    max_daily_loss: Optional[float] = Field(
+        default=None,
+        gt=0,
+    )
+    max_open_positions: Optional[int] = Field(
+        default=None,
+        gt=0,
+    )
+    allowed_asset_classes: list[str] = Field(
+        default_factory=list
+    )
+
+
+class RiskScenarioRequest(BaseModel):
+    shock_percent: float = Field(
+        ge=-95.0,
+        le=95.0,
+    )
+    label: str = Field(
+        default="Custom Scenario",
+        max_length=80,
+    )
+
+
 class StrategyConfigurationRequest(BaseModel):
     configuration: dict[str, Any] = Field(
         default_factory=dict
@@ -1947,25 +1980,39 @@ async def automation_engine_start():
             ),
         )
 
-    # One-button autopilot: when the user starts the master engine, arm every
-    # asset section the connected broker can actually execute. Unsupported
-    # asset classes remain disabled and are surfaced through capabilities.
+    # One-button autopilot. Before the user saves Automation Safety for the
+    # first time, preserve the convenient default of arming every broker-
+    # supported section. Once safety is configured, respect the user's saved
+    # allowed-asset list and never silently re-enable a section they disabled.
     capabilities = _automation_capabilities()
     auto_enabled_sections: list[str] = []
+    safety_configured = automation_engine.safety_configured()
 
     for asset_class, capability in capabilities.items():
-        if not bool(capability.get("supported")):
-            continue
-
         try:
             section = automation_engine.section_state(asset_class)
-
-            if not bool(section.get("enabled")):
-                automation_engine.set_section_enabled(asset_class, True)
-                auto_enabled_sections.append(asset_class)
-
         except ValueError:
             continue
+
+        supported = bool(capability.get("supported"))
+
+        if not supported:
+            if bool(section.get("enabled")):
+                automation_engine.set_section_enabled(
+                    asset_class,
+                    False,
+                )
+            continue
+
+        if (
+            not safety_configured
+            and not bool(section.get("enabled"))
+        ):
+            automation_engine.set_section_enabled(
+                asset_class,
+                True,
+            )
+            auto_enabled_sections.append(asset_class)
 
     result = await automation_engine.start_enabled_sections()
     result["asset_runtimes"] = await _start_enabled_asset_automations()
@@ -2083,6 +2130,167 @@ def automation_asset_activity():
 )
 def automation_capabilities():
     return _automation_capabilities()
+
+
+def _automation_safety_payload() -> dict[str, Any]:
+    sections = [
+        automation_engine.section_configuration(asset)
+        for asset in automation_engine.ASSET_SECTIONS
+    ]
+
+    configured = any(
+        bool(section.get("configured"))
+        for section in sections
+    )
+
+    configured_sections = [
+        section
+        for section in sections
+        if section.get("configured")
+    ]
+
+    source = (
+        configured_sections[0]
+        if configured_sections
+        else {}
+    )
+
+    return {
+        "configured": configured,
+        "max_position_value": (
+            source.get("max_position_value")
+            if configured
+            else settings.risk_max_position_value
+        ),
+        "capital_allocation": (
+            source.get("capital_allocation")
+            if configured
+            else None
+        ),
+        "max_daily_loss": (
+            source.get("max_daily_loss")
+            if configured
+            else settings.risk_max_daily_loss
+        ),
+        "max_open_positions": (
+            source.get("max_open_positions")
+            if configured
+            else settings.risk_max_positions
+        ),
+        "allowed_asset_classes": [
+            section["asset_class"]
+            for section in sections
+            if bool(section.get("enabled"))
+        ],
+        "sections": sections,
+        "capabilities": _automation_capabilities(),
+        "hard_limits": {
+            "max_position_value": settings.risk_max_position_value,
+            "max_daily_loss": settings.risk_max_daily_loss,
+            "max_weekly_loss": settings.risk_max_weekly_loss,
+            "max_positions": settings.risk_max_positions,
+        },
+    }
+
+
+@app.get(
+    "/api/automation/safety"
+)
+def automation_safety():
+    return _automation_safety_payload()
+
+
+@app.put(
+    "/api/automation/safety"
+)
+async def update_automation_safety(
+    req: AutomationSafetyRequest,
+):
+    allowed = {
+        automation_engine._normalize_asset_class(
+            value
+        )
+        for value in req.allowed_asset_classes
+        if str(value or "").strip()
+    }
+
+    unknown = (
+        allowed
+        - set(automation_engine.ASSET_SECTIONS)
+    )
+
+    if unknown:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Unknown automation asset classes: "
+                + ", ".join(sorted(unknown))
+            ),
+        )
+
+    capabilities = _automation_capabilities()
+
+    unsupported = [
+        asset
+        for asset in allowed
+        if not bool(
+            capabilities.get(
+                asset,
+                {}
+            ).get(
+                "supported"
+            )
+        )
+    ]
+
+    if unsupported:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Connected broker does not support: "
+                + ", ".join(sorted(unsupported))
+            ),
+        )
+
+    for asset in automation_engine.ASSET_SECTIONS:
+        automation_engine.update_section_safety(
+            asset,
+            enabled=(asset in allowed),
+            max_position_value=req.max_position_value,
+            capital_allocation=req.capital_allocation,
+            max_daily_loss=req.max_daily_loss,
+            max_open_positions=req.max_open_positions,
+        )
+
+    if automation_engine.engine_status().get(
+        "master_enabled"
+    ):
+        for asset in automation_engine.ASSET_SECTIONS:
+            runtime = get_asset_automation(asset)
+
+            if runtime is None:
+                continue
+
+            if asset in allowed:
+                if bool(
+                    capabilities.get(
+                        asset,
+                        {}
+                    ).get(
+                        "supported"
+                    )
+                ):
+                    try:
+                        await runtime.start()
+                    except Exception:
+                        pass
+            else:
+                try:
+                    await runtime.stop()
+                except Exception:
+                    pass
+
+    return _automation_safety_payload()
 
 
 @app.get(
@@ -2464,12 +2672,164 @@ def risk_status():
             "max_position_value": settings.risk_max_position_value,
             "max_positions": settings.risk_max_positions,
         },
+        "automation_safety": _automation_safety_payload(),
         "broker_connected": bool(
             alpaca_broker.status().get("connected")
         ),
         "execution": execution_service.status(),
         "automation": automation_engine.engine_status(),
     }
+
+
+def _risk_scenario_payload(
+    shock_percent: float,
+    label: str,
+) -> dict[str, Any]:
+    if not alpaca_broker.status().get(
+        "connected"
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Connect Alpaca first.",
+        )
+
+    metrics = _portfolio_metrics()
+    equity = metrics.get("equity")
+    portfolio_value = metrics.get(
+        "portfolio_value"
+    )
+    positions = metrics.get(
+        "positions"
+    ) or []
+
+    position_impacts: list[
+        dict[str, Any]
+    ] = []
+
+    total_impact = 0.0
+
+    for position in positions:
+        market_value = _finite_number(
+            position.get(
+                "market_value"
+            )
+        )
+
+        if market_value is None:
+            continue
+
+        side = str(
+            position.get("side")
+            or "long"
+        ).strip().lower()
+
+        direction = (
+            -1.0
+            if side in {
+                "short",
+                "sell",
+            }
+            else 1.0
+        )
+
+        impact = (
+            abs(market_value)
+            * float(shock_percent)
+            / 100.0
+            * direction
+        )
+
+        total_impact += impact
+
+        position_impacts.append(
+            {
+                "symbol": position.get(
+                    "symbol"
+                ),
+                "side": side,
+                "market_value": market_value,
+                "shock_percent": (
+                    shock_percent
+                ),
+                "estimated_pnl_impact": (
+                    impact
+                ),
+            }
+        )
+
+    projected_equity = (
+        float(equity) + total_impact
+        if equity is not None
+        else None
+    )
+
+    projected_drawdown = None
+
+    if (
+        equity is not None
+        and float(equity) > 0
+        and projected_equity is not None
+    ):
+        projected_drawdown = max(
+            0.0,
+            (
+                float(equity)
+                - projected_equity
+            )
+            / float(equity)
+            * 100.0,
+        )
+
+    return {
+        "label": label,
+        "shock_percent": shock_percent,
+        "current_equity": equity,
+        "portfolio_value": portfolio_value,
+        "estimated_pnl_impact": total_impact,
+        "projected_equity": projected_equity,
+        "projected_drawdown_percent": (
+            projected_drawdown
+        ),
+        "positions": position_impacts,
+        "method": (
+            "parallel percentage shock applied "
+            "to current broker position market values"
+        ),
+        "simulated": True,
+        "source": "current Alpaca positions",
+    }
+
+
+@app.get("/api/risk/stress-test")
+def risk_stress_test():
+    return {
+        "scenarios": [
+            _risk_scenario_payload(
+                shock,
+                f"{abs(int(shock))}% Market Drop",
+            )
+            for shock in (
+                -2.0,
+                -5.0,
+                -10.0,
+                -20.0,
+            )
+        ],
+        "note": (
+            "Deterministic stress estimates based on "
+            "current broker positions; not a forecast."
+        ),
+    }
+
+
+@app.post("/api/risk/scenario")
+def risk_scenario(
+    req: RiskScenarioRequest,
+):
+    return _risk_scenario_payload(
+        req.shock_percent,
+        req.label.strip() or "Custom Scenario",
+    )
 
 
 # ============================================================

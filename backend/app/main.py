@@ -2447,6 +2447,32 @@ def execution_status():
 
 
 # ============================================================
+# RISK STATUS
+# ============================================================
+
+@app.get("/api/risk/status")
+def risk_status():
+    """
+    Read-only risk configuration and runtime health for trusted PhoenixTrend
+    clients. This endpoint exposes limits, never broker credentials.
+    """
+    return {
+        "state": "ONLINE",
+        "limits": {
+            "max_daily_loss": settings.risk_max_daily_loss,
+            "max_weekly_loss": settings.risk_max_weekly_loss,
+            "max_position_value": settings.risk_max_position_value,
+            "max_positions": settings.risk_max_positions,
+        },
+        "broker_connected": bool(
+            alpaca_broker.status().get("connected")
+        ),
+        "execution": execution_service.status(),
+        "automation": automation_engine.engine_status(),
+    }
+
+
+# ============================================================
 # MANUAL ENGINE
 # ============================================================
 

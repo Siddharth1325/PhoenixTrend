@@ -267,6 +267,11 @@ class DecisionEngine:
         evaluations: list[dict[str, Any]] = []
 
         for name in strategy_management_service.all_names():
+            if not strategy_management_service.enabled_for(
+                name
+            ):
+                continue
+
             try:
                 strategy = strategy_management_service.create_instance(name)
 

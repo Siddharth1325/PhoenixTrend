@@ -1006,38 +1006,9 @@ def strategies():
             row
         )
 
-    for custom in (
-        strategy_management_service
-        .custom_list()
-    ):
-        row = dict(
-            custom
-        )
-
-        name = str(
-            row.get(
-                "name"
-            )
-            or row.get(
-                "strategy"
-            )
-            or ""
-        ).strip()
-
-        row[
-            "performance"
-        ] = (
-            analytics_service.strategy(
-                name
-            )
-            if name
-            else None
-        )
-
-        output.append(
-            row
-        )
-
+    # StrategyPicker.catalog() already contains both the 39 registered
+    # strategies and persisted custom variants. Do not append custom rows a
+    # second time or mobile clients will see duplicates.
     return output
 
 

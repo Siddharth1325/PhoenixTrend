@@ -310,6 +310,7 @@ class Instrument(
         "venue",
         "underlying",
         "expiration",
+        "strategy",
         mode="before",
     )
     @classmethod
@@ -1770,6 +1771,15 @@ class ManualOrderRequest(
 
     stop_price: float | None = None
 
+    # Optional manual-analysis context. This never bypasses user confirmation;
+    # it is carried into the TradeIntent for audit/risk visibility.
+    strategy: str | None = None
+
+    # Optional protective prices evaluated by the shared RiskEngine.
+    stop: float | None = None
+
+    target: float | None = None
+
     reduce_only: bool = False
 
     # --------------------------------------------------------
@@ -1832,6 +1842,8 @@ class ManualOrderRequest(
     @field_validator(
         "limit_price",
         "stop_price",
+        "stop",
+        "target",
         "strike",
         "multiplier",
         mode="before",

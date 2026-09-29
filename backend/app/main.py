@@ -56,6 +56,7 @@ from .services.market import market_service
 from .services.market_safety import market_safety_service
 from .services.news import news_service
 from .services.positions import position_engine
+from .services.risk import risk_engine
 from .services.strategy_management import strategy_management_service
 
 
@@ -2807,6 +2808,177 @@ def risk_scenario(
 # MANUAL ENGINE
 # ============================================================
 
+def _manual_trade_intent(
+    req: ManualOrderRequest,
+    reference_price: float,
+) -> TradeIntent:
+    return TradeIntent(
+        intent_id=(
+            "ti_"
+            + uuid.uuid4().hex[:12]
+        ),
+        symbol=req.symbol.upper(),
+        side=(
+            Side.BUY
+            if req.side == "buy"
+            else Side.SELL
+        ),
+        qty=req.qty,
+        reference_price=float(
+            reference_price
+        ),
+        strategy=(
+            req.strategy
+            or "MANUAL"
+        ),
+        execution_mode=(
+            ExecutionMode.MANUAL
+        ),
+        stop=req.stop,
+        target=req.target,
+        reduce_only=req.reduce_only,
+        order_type=req.order_type,
+        time_in_force=req.time_in_force,
+        limit_price=req.limit_price,
+        stop_price=req.stop_price,
+    )
+
+
+@app.post(
+    "/api/manual/risk-preview"
+)
+def manual_risk_preview(
+    req: ManualOrderRequest,
+):
+    if not (
+        alpaca_broker
+        .status()
+        .get(
+            "connected"
+        )
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Connect Alpaca first.",
+        )
+
+    market = market_service.quote(
+        req.symbol
+    )
+
+    reference_price = float(
+        market["price"]
+    )
+
+    intent = _manual_trade_intent(
+        req,
+        reference_price,
+    )
+
+    account = account_state()
+
+    decision = risk_engine.evaluate(
+        intent,
+        account,
+        False,
+    )
+
+    notional = (
+        float(req.qty)
+        * reference_price
+    )
+
+    stop_loss_amount = None
+    reward_amount = None
+    risk_reward_ratio = None
+
+    if req.stop is not None:
+        stop_loss_amount = (
+            abs(
+                reference_price
+                - float(req.stop)
+            )
+            * float(req.qty)
+        )
+
+    if req.target is not None:
+        reward_amount = (
+            abs(
+                float(req.target)
+                - reference_price
+            )
+            * float(req.qty)
+        )
+
+    if (
+        stop_loss_amount is not None
+        and stop_loss_amount > 0
+        and reward_amount is not None
+    ):
+        risk_reward_ratio = (
+            reward_amount
+            / stop_loss_amount
+        )
+
+    gross_exposure = (
+        float(account.gross_exposure)
+        if account.gross_exposure is not None
+        else None
+    )
+
+    projected_exposure = (
+        gross_exposure + notional
+        if gross_exposure is not None
+        else None
+    )
+
+    return {
+        "state": (
+            "APPROVED"
+            if decision.approved
+            else "REJECTED"
+        ),
+        "risk": decision.model_dump(
+            mode="json"
+        ),
+        "symbol": req.symbol.upper(),
+        "side": req.side,
+        "strategy": (
+            req.strategy
+            or "MANUAL"
+        ),
+        "reference_price": reference_price,
+        "quantity": req.qty,
+        "notional": notional,
+        "stop": req.stop,
+        "target": req.target,
+        "estimated_loss_at_stop": (
+            stop_loss_amount
+        ),
+        "estimated_reward_at_target": (
+            reward_amount
+        ),
+        "risk_reward_ratio": (
+            risk_reward_ratio
+        ),
+        "buying_power": (
+            account.buying_power
+        ),
+        "open_positions": (
+            account.open_positions
+        ),
+        "gross_exposure": (
+            gross_exposure
+        ),
+        "projected_gross_exposure": (
+            projected_exposure
+        ),
+        "daily_pnl": (
+            account.daily_pnl
+        ),
+    }
+
+
 @app.post(
     "/api/manual/analyze"
 )
@@ -2859,37 +3031,13 @@ async def manual_order(
         req.symbol
     )
 
-    intent = TradeIntent(
-        intent_id=(
-            "ti_"
-            + uuid.uuid4().hex[:12]
-        ),
-        symbol=req.symbol.upper(),
-        side=(
-            Side.BUY
-            if req.side == "buy"
-            else Side.SELL
-        ),
-        qty=req.qty,
-        reference_price=float(
+    intent = _manual_trade_intent(
+        req,
+        float(
             market[
                 "price"
             ]
         ),
-        strategy=(
-            req.strategy
-            or "MANUAL"
-        ),
-        execution_mode=(
-            ExecutionMode.MANUAL
-        ),
-        stop=req.stop,
-        target=req.target,
-        reduce_only=req.reduce_only,
-        order_type=req.order_type,
-        time_in_force=req.time_in_force,
-        limit_price=req.limit_price,
-        stop_price=req.stop_price,
     )
 
     return await execution_service.process(

@@ -1947,10 +1947,35 @@ async def automation_engine_start():
             ),
         )
 
+    # One-button autopilot: when the user starts the master engine, arm every
+    # asset section the connected broker can actually execute. Unsupported
+    # asset classes remain disabled and are surfaced through capabilities.
+    capabilities = _automation_capabilities()
+    auto_enabled_sections: list[str] = []
+
+    for asset_class, capability in capabilities.items():
+        if not bool(capability.get("supported")):
+            continue
+
+        try:
+            section = automation_engine.section_state(asset_class)
+
+            if not bool(section.get("enabled")):
+                automation_engine.set_section_enabled(asset_class, True)
+                auto_enabled_sections.append(asset_class)
+
+        except ValueError:
+            continue
+
     result = await automation_engine.start_enabled_sections()
     result["asset_runtimes"] = await _start_enabled_asset_automations()
     result["sections"] = automation_sections()
-    result["running_asset_sections"] = sum(1 for section in result["sections"] if int(section.get("running_automations") or 0) > 0)
+    result["auto_enabled_sections"] = auto_enabled_sections
+    result["running_asset_sections"] = sum(
+        1
+        for section in result["sections"]
+        if int(section.get("running_automations") or 0) > 0
+    )
     return result
 
 

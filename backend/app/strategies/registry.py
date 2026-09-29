@@ -251,6 +251,178 @@ class StrategyRegistry:
     # Backward-compatible alias.
     get = create
 
+    @staticmethod
+    def _category_for(
+        name: str,
+    ) -> str:
+        value = name.lower()
+
+        if any(
+            token in value
+            for token in (
+                "mean reversion",
+                "reversion",
+                "reversal",
+            )
+        ):
+            return "Mean Reversion"
+
+        if any(
+            token in value
+            for token in (
+                "breakout",
+                "orb",
+                "gap",
+                "price channel",
+                "donchian",
+            )
+        ):
+            return "Breakout"
+
+        if any(
+            token in value
+            for token in (
+                "momentum",
+                "roc",
+            )
+        ):
+            return "Momentum"
+
+        if any(
+            token in value
+            for token in (
+                "swing",
+                "pullback",
+                "pivot",
+            )
+        ):
+            return "Swing"
+
+        if any(
+            token in value
+            for token in (
+                "trend",
+                "supertrend",
+                "crossover",
+                "adx",
+                "parabolic",
+                "ichimoku cloud",
+            )
+        ):
+            return "Trend Following"
+
+        if any(
+            token in value
+            for token in (
+                "relative strength",
+                "regime",
+                "multi factor",
+                "confluence",
+            )
+        ):
+            return "Adaptive"
+
+        if "vwap" in value:
+            return "Scalping"
+
+        return "Systematic"
+
+    @staticmethod
+    def _timeframe_for(
+        name: str,
+    ) -> str:
+        value = name.lower()
+
+        if any(
+            token in value
+            for token in (
+                "orb",
+                "opening range",
+                "gap",
+                "vwap",
+            )
+        ):
+            return "Intraday"
+
+        if any(
+            token in value
+            for token in (
+                "swing",
+                "relative strength rotation",
+            )
+        ):
+            return "Swing"
+
+        return "Adaptive"
+
+    @staticmethod
+    def _indicator_names(
+        name: str,
+        configurable: dict,
+    ) -> list[str]:
+        source = (
+            name
+            + " "
+            + " ".join(
+                configurable.keys()
+            )
+        ).lower()
+
+        checks = (
+            ("EMA", ("ema",)),
+            ("VWAP", ("vwap",)),
+            ("RSI", ("rsi",)),
+            ("MACD", ("macd",)),
+            ("ATR", ("atr",)),
+            ("ADX", ("adx",)),
+            ("Bollinger Bands", ("bollinger",)),
+            ("Keltner Channel", ("keltner",)),
+            ("Ichimoku", ("ichimoku",)),
+            ("Stochastic", ("stochastic",)),
+            ("CCI", ("cci",)),
+            ("Williams %R", ("williams",)),
+            ("ROC", ("roc",)),
+            ("Supertrend", ("supertrend",)),
+            ("Parabolic SAR", ("parabolic", "sar")),
+            ("Volume", ("volume",)),
+            ("Price Structure", ("breakout", "channel", "pivot", "range")),
+        )
+
+        output: list[str] = []
+
+        for label, tokens in checks:
+            if any(
+                token in source
+                for token in tokens
+            ):
+                output.append(label)
+
+        return output[:8]
+
+    @staticmethod
+    def _summary_for(
+        strategy: Strategy,
+    ) -> str:
+        raw = (
+            strategy.__class__.__doc__
+            or ""
+        )
+
+        lines = [
+            line.strip()
+            for line in raw.splitlines()
+            if line.strip()
+        ]
+
+        if not lines:
+            return (
+                f"{strategy.name} systematic "
+                "PhoenixTrend strategy."
+            )
+
+        return " ".join(
+            lines[:2]
+        )
 
     def describe(
         self,
@@ -281,6 +453,23 @@ class StrategyRegistry:
             "name": canonical,
             "class": strategy.__class__.__name__,
             "module": strategy.__class__.__module__,
+            "summary": self._summary_for(
+                strategy
+            ),
+            "category": self._category_for(
+                canonical
+            ),
+            "timeframe": self._timeframe_for(
+                canonical
+            ),
+            "markets": [
+                "Broker-supported assets"
+            ],
+            "indicators": self._indicator_names(
+                canonical,
+                configurable,
+            ),
+            "risk_model": "Shared RiskEngine",
             "editing_supported": bool(configurable),
             "configuration_editable": bool(configurable),
             "default_configuration": configurable,

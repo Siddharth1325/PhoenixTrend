@@ -228,22 +228,42 @@ class StrategyPicker:
 
         custom = management.custom_get(canonical_name)
         if custom is not None:
-            return {**custom, "description": custom, "engine_support": ["manual", "automatic"], "registered": True}
+            return {
+                **custom,
+                "description": custom.get("summary")
+                or (
+                    f"Custom strategy based on "
+                    f"{custom.get('base_strategy')}"
+                ),
+                "engine_support": [
+                    "manual",
+                    "automatic",
+                ],
+                "registered": True,
+            }
 
         strategy = self.pick(
             canonical_name
         )
 
-        description = (
-            strategy.describe()
+        registry_description = (
+            self._registry.describe(
+                canonical_name
+            )
         )
 
         return {
+            **registry_description,
             "name": strategy.name,
-            "class": (
-                strategy.__class__.__name__
+            "description": (
+                registry_description.get(
+                    "summary"
+                )
+                or (
+                    f"{strategy.name} systematic "
+                    "PhoenixTrend strategy."
+                )
             ),
-            "description": description,
             "engine_support": [
                 "manual",
                 "automatic",

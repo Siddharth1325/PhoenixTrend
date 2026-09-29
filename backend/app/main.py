@@ -2519,10 +2519,16 @@ async def manual_order(
                 "price"
             ]
         ),
-        strategy="MANUAL",
+        strategy=(
+            req.strategy
+            or "MANUAL"
+        ),
         execution_mode=(
             ExecutionMode.MANUAL
         ),
+        stop=req.stop,
+        target=req.target,
+        reduce_only=req.reduce_only,
         order_type=req.order_type,
         time_in_force=req.time_in_force,
         limit_price=req.limit_price,

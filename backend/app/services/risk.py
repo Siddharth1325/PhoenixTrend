@@ -47,6 +47,87 @@ class RiskEngine:
     MIN_RISK_REWARD = 1.0
 
     # ============================================================
+    # AUTOMATION SAFETY OVERRIDES
+    # ============================================================
+
+    @staticmethod
+    def _strictest_positive(
+        *values: Any,
+    ) -> float | None:
+        parsed: list[float] = []
+
+        for value in values:
+            if value is None:
+                continue
+
+            try:
+                number = float(value)
+            except (TypeError, ValueError):
+                continue
+
+            if isfinite(number) and number > 0:
+                parsed.append(number)
+
+        return min(parsed) if parsed else None
+
+    @staticmethod
+    def _strictest_positive_int(
+        *values: Any,
+    ) -> int | None:
+        parsed: list[int] = []
+
+        for value in values:
+            if value is None:
+                continue
+
+            try:
+                number = int(value)
+            except (TypeError, ValueError):
+                continue
+
+            if number > 0:
+                parsed.append(number)
+
+        return min(parsed) if parsed else None
+
+    @staticmethod
+    def _automation_safety_limits(
+        asset_type: AssetType,
+    ) -> dict[str, Any]:
+        sections = {
+            AssetType.EQUITY: "stocks",
+            AssetType.ETF: "etfs",
+            AssetType.OPTION: "options",
+            AssetType.CRYPTO: "crypto",
+            AssetType.FOREX: "forex",
+            AssetType.BOND: "bonds",
+        }
+
+        section = sections.get(asset_type)
+
+        if section is None:
+            return {}
+
+        try:
+            from .automation import automation_engine
+
+            configuration = (
+                automation_engine
+                .section_configuration(
+                    section
+                )
+            )
+        except Exception:
+            return {}
+
+        if not configuration.get(
+            "configured"
+        ):
+            return {}
+
+        return configuration
+
+    # ============================================================
     # PUBLIC EVALUATION
     # ============================================================
 
@@ -182,13 +263,31 @@ class RiskEngine:
                 "Trade intent contains an unsupported or unknown asset type"
             )
 
+        automation_limits: dict[str, Any] = {}
+
+        if (
+            execution_mode
+            == ExecutionMode.AUTOMATIC
+            and asset_type is not None
+        ):
+            automation_limits = (
+                self._automation_safety_limits(
+                    asset_type
+                )
+            )
+
         # ========================================================
-        # GLOBAL POSITION LIMIT
+        # GLOBAL / AUTOMATION POSITION LIMIT
         # ========================================================
 
         global_max_position_value = (
-            self._positive_setting(
-                "risk_max_position_value"
+            self._strictest_positive(
+                self._positive_setting(
+                    "risk_max_position_value"
+                ),
+                automation_limits.get(
+                    "max_position_value"
+                ),
             )
         )
 
@@ -247,8 +346,13 @@ class RiskEngine:
         )
 
         max_positions = (
-            self._positive_int_setting(
-                "risk_max_positions"
+            self._strictest_positive_int(
+                self._positive_int_setting(
+                    "risk_max_positions"
+                ),
+                automation_limits.get(
+                    "max_open_positions"
+                ),
             )
         )
 
@@ -267,8 +371,13 @@ class RiskEngine:
         # ========================================================
 
         max_daily_loss = (
-            self._positive_setting(
-                "risk_max_daily_loss"
+            self._strictest_positive(
+                self._positive_setting(
+                    "risk_max_daily_loss"
+                ),
+                automation_limits.get(
+                    "max_daily_loss"
+                ),
             )
         )
 
@@ -329,8 +438,13 @@ class RiskEngine:
         # ========================================================
 
         max_gross_exposure = (
-            self._positive_setting(
-                "risk_max_gross_exposure"
+            self._strictest_positive(
+                self._positive_setting(
+                    "risk_max_gross_exposure"
+                ),
+                automation_limits.get(
+                    "capital_allocation"
+                ),
             )
         )
 

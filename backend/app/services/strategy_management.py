@@ -466,6 +466,30 @@ class StrategyManagementService:
             "module": "phoenixtrend.custom",
             "base_strategy": row.base_strategy,
             "custom": True,
+            "summary": (
+                f"Custom strategy based on "
+                f"{row.base_strategy}."
+            ),
+            "category": base.get(
+                "category",
+                "Custom",
+            ),
+            "timeframe": base.get(
+                "timeframe",
+                "Adaptive",
+            ),
+            "markets": base.get(
+                "markets",
+                ["Broker-supported assets"],
+            ),
+            "indicators": base.get(
+                "indicators",
+                [],
+            ),
+            "risk_model": base.get(
+                "risk_model",
+                "Shared RiskEngine",
+            ),
             "enabled": bool(row.enabled),
             "configuration": self._decode_configuration(row.configuration),
             "default_configuration": base.get("default_configuration", {}),
